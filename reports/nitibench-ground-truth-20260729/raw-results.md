@@ -118,7 +118,7 @@ of the raw input news articles.
 <details>
 <summary><code>ccl_derivatives_penalty</code> — raw output capture and short text excerpt</summary>
 
-![ccl_derivatives_penalty](../captures/nitibench_rag_ground_truth_20260729/ccl_derivatives_penalty.png)
+![ccl_derivatives_penalty](captures/ccl_derivatives_penalty.png)
 
 > ผู้ใดประกอบกิจการในลักษณะเป็นศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าโดยไม่ได้รับใบอนุญาต ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาทตลอดเวลาที่ยังฝ่าฝืน [1]
 
@@ -126,7 +126,7 @@ of the raw input news articles.
 <details>
 <summary><code>ccl_guardian_consent</code> — raw output capture and short text excerpt</summary>
 
-![ccl_guardian_consent](../captures/nitibench_rag_ground_truth_20260729/ccl_guardian_consent.png)
+![ccl_guardian_consent](captures/ccl_guardian_consent.png)
 
 > ไม่ ผู้อยู่ในปกครองได้ยินยอมในการกระทำของผู้ปกครองจะทำให้ผู้ปกครองหลุดพ้นจากความรับผิดไม่ได้ ตามประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 1598/5 การที่ผู้อยู่ในปกครองได้ยินยอมด้วยนั้นหาคุ้มผู้ปกครองให้พ้นจากความรับผิดไม่
 
@@ -134,7 +134,7 @@ of the raw input news articles.
 <details>
 <summary><code>ccl_broker_authority</code> — raw output capture and short text excerpt</summary>
 
-![ccl_broker_authority](../captures/nitibench_rag_ground_truth_20260729/ccl_broker_authority.png)
+![ccl_broker_authority](captures/ccl_broker_authority.png)
 
 > ไม่มีอำนาจรับชำระหนี้ไว้ [1]
 
@@ -142,7 +142,7 @@ of the raw input news articles.
 <details>
 <summary><code>ccl_excessive_interest</code> — raw output capture and short text excerpt</summary>
 
-![ccl_excessive_interest](../captures/nitibench_rag_ground_truth_20260729/ccl_excessive_interest.png)
+![ccl_excessive_interest](captures/ccl_excessive_interest.png)
 
 > สัญญากู้ยืมเงินที่คิดดอกเบี้ยเกินอัตราที่กฎหมายกำหนดไม่ตกเป็นโมฆะทั้งหมด แต่มีผลบังคับได้เฉพาะดอกเบี้ยในอัตราที่กฎหมายกำหนดตามประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 654 ซึ่งกำหนดให้คิดดอกเบี้ยได้ไม่เกินร้อยละสิบห้าต่อปี ส่วนดอกเบี้ยที่เกินอัตราดังกล่าวเป็นโมฆะตามมาตรา 654 และมาตรา 7 ซึ่งกำหนดอัตราดอกเบี้ยสูงสุดไว้ที่ร้อยละเจ็ดครึ่งต่อปี หากไม่มีการกำหนดอัตราดอกเบี้ยโดยนิติกรรมหรือบทกฎหมายอันชัดแจ้ง จึงต้องใช้อัตราร้อยละเจ็ดครึ่งต่อปีตามมาตรา 7 ดังนั้น สัญญาไม่ตกเป็นโมฆะ แต่ดอกเบี้ยที่เกินอัตราที่กฎหมายกำหนดไม่มีผลบังคับ
 
@@ -150,7 +150,7 @@ of the raw input news articles.
 <details>
 <summary><code>gt02_open_book_echo</code> — raw output capture and short text excerpt</summary>
 
-![gt02_open_book_echo](../captures/nitibench_rag_ground_truth_20260729/gt02_open_book_echo.png)
+![gt02_open_book_echo](captures/gt02_open_book_echo.png)
 
 > คดีความผิดตามมาตรา 302/1 พระราชบัญญัติหลักทรัพย์และตลาดหลักทรัพย์ พ.ศ. 2535 มีสถานะคดีอยู่ในระหว่างการดำเนินคดี เนื่องจากมีการนำส่งแบบ 59 และแบบ 246-2 ที่ไม่ตรงกับความจริง ตามที่ข่าวระบุ [1]
 
@@ -158,7 +158,7 @@ of the raw input news articles.
 <details>
 <summary><code>gt01_open_book_selection</code> — raw output capture and short text excerpt</summary>
 
-![gt01_open_book_selection](../captures/nitibench_rag_ground_truth_20260729/gt01_open_book_selection.png)
+![gt01_open_book_selection](captures/gt01_open_book_selection.png)
 
 > มาตรา 14(1) และมาตรา 326 [5][6] ผู้สร้างโพสต์หลอกลวงประชาชนเข้าข่ายมาตรา 14(1) ตามหลักฐาน [6] ส่วนผู้ส่งต่อโดยรู้ว่าเป็นเท็จเข้าข่ายมาตรา 326 ตามหลักฐาน [5] แม้ไม่มีข้อเท็จจริงว่าเป็นการหมิ่นประมาทบุคคลเฉพาะ แต่การกระทำทั้งสองกรณีเป็นความผิดฐานเผยแพร่ข้อมูลที่เข้าข่ายความผิดหรือหมิ่นประมาทตามกฎหมายที่เกี่ยวข้อง
 
@@ -166,7 +166,7 @@ of the raw input news articles.
 <details>
 <summary><code>gt08_closed_book</code> — raw output capture and short text excerpt</summary>
 
-![gt08_closed_book](../captures/nitibench_rag_ground_truth_20260729/gt08_closed_book.png)
+![gt08_closed_book](captures/gt08_closed_book.png)
 
 > ข้อกล่าวหา: คนต่างด้าวมีพฤติการณ์เป็นภัยต่อสังคมหรือความมั่นคง และมีข้อมูลหมายจับต่างประเทศ ข้อจำกัดของข้อมูล: - ข้อมูลหมายจับต่างประเทศไม่สามารถนำมาใช้เป็นเหตุผลในการออกหมายจับในประเทศไทยได้โดยตรง เนื่องจากหมายจับเป็นเอกสารทางกฎหมายของประเทศต้นทาง และไทยไม่มีอำนาจบังคับใช้หมายจับต่างประเทศโดยลำพัง - การดำเนินการต้องอาศัยกระบวนการทางกฎหมายระหว่างประเทศ เช่น การร้องขอความช่วยเหลือจากประเทศต้นทาง หรือการปฏิบัติตามอนุสัญญาระหว่างประเทศว่าด้วยการส่งผู้ร้ายข้ามแดน (Extradition Treaty) กฎหมายและมาตราที่เกี่ยวข้อง: 1. **ประมวลกฎหมายวิธีพิจารณาความอาญา มาตรา 74** - กำหนดให้พนักงานสอบสวนมีอำนาจสอบสวนคดีอาญา และหากมีข้อมูลหมายจับต่างประเทศที่เกี่ยวข้อง
 
@@ -174,7 +174,7 @@ of the raw input news articles.
 <details>
 <summary><code>gt10_legal_essay</code> — raw output capture and short text excerpt</summary>
 
-![gt10_legal_essay](../captures/nitibench_rag_ground_truth_20260729/gt10_legal_essay.png)
+![gt10_legal_essay](captures/gt10_legal_essay.png)
 
 > บันทึกเหตุเวชระเบียนรั่วไหล **ข้อเท็จจริง** - ระบบฐานข้อมูลผู้ป่วยของโรงพยาบาลได้รับการโจมตีทางไซเบอร์ทำให้เวชระเบียนส่วนบุคคลของผู้ป่วยบางรายถูกส่งออกนอกระบบโดยไม่ได้รับอนุญาต **ข้อความที่หลักฐานสนับสนุน** - ตามข่าวระบุ กฎหมายกำหนดให้ข้อมูลสุขภาพเป็นข้อมูลส่วนบุคคลประเภทอ่อนไหวตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 มาตรา 26 **ประเด็นที่หลักฐานยังไม่บอก** - ยังไม่มีข้อมูลชัดเจนว่าเหตุการณ์ดังกล่าวเกิดจากความประมาทของโรงพยาบาลหรือการโจมตีจากภายนอก - ยังไม่มีข้อมูลว่ามีการแจ้งเตือนหรือจัดการเหตุการณ์ตามขั้นตอนที่กำหนดไว้ในกฎหมายหรือไม่ **อ้างอิง** - พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 มาตรา 26 (ข่าวระบุ)
 
