@@ -2254,3 +2254,4 @@ Claude ให้สถานะ `approve_with_changes` โดยกำหนด�
 - [Three-profile full outputs](reports/OPENTHAI_THREE_GENERATION_PROFILES_FULL_OUTPUT_20260729.md)
 - [Dummy-news context-to-law evaluation](reports/DUMMY_NEWS_CONTEXT_TO_LAW_USECASE_20260729.md)
 - [SEC false-report: Open-book vs Closed-book vs Legal essay](reports/SEC_BITKUB_FALSE_REPORT_USECASE_20260729.md)
+- [NitiBench retrieval + extracted-ground-truth RAG benchmark](reports/NITIBENCH_RAG_GROUND_TRUTH_BENCHMARK_20260729.md)
