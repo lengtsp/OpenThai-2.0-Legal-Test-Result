@@ -69,5 +69,3 @@ Each answer was reviewed against the selected page/chunk evidence.
 ## Audit recommendation
 
 Use Qwen3.6-27B for this NCSA page-grounded RAG lane when strict citation compliance is a hard requirement. Retain the citation contract and add a retrieval-quality gate for CII scoping and enterprise-wide risk-priority conclusions; a small, unbalanced evidence packet must not be represented as conclusive.
-
-See `../captures/` for a visual capture of every scenario.

@@ -1,13 +1,13 @@
 {
   "id": "openthai-legal-audit-12k-balanced",
-  "name": "OpenThai Legal Audit 12K (Balanced)",
+  "name": "OpenThai Legal RAG Citation (iApp Recommended)",
   "base_model_id": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
   "params": {
+    "system": "You are OpenThaiGPT-Legal, an expert assistant on Thai law. You are given a legal question and the exact statutory sections needed to answer it. Reason step by step in English, then give the final answer in Thai. Cite ONLY sections present in the provided context, using each section's exact law_name and bare section number (e.g. 132, 77/1). Before finalizing, verify each deadline's actor, required action, trigger date, and legal effect against the exact text. Never transfer a time window for exercising a data-subject right into a deadline imposed on an institution. If the provided text does not set a deadline, explicitly say so. Do not invent subsection numbers. Include only citations directly used in the answer. Output the final answer as JSON: {\"answer\": \"<Thai answer>\", \"citations\": [{\"law\": \"<law_name>\", \"section\": \"<bare id>\"}]}.",
     "temperature": 0,
     "top_p": 1,
-    "max_tokens": 3072,
+    "max_tokens": 2048,
     "min_tokens": 0,
-    "repetition_penalty": 1.05,
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "chat_template_kwargs": {
@@ -16,7 +16,7 @@
     "function_calling": "default"
   },
   "meta": {
-    "description": "Validated 12k-context preset for Thai legal and IT internal-audit RAG with deterministic decoding and thinking disabled.",
+    "description": "iApp-trained JSON citation contract: user-injected Provided context, deterministic decoding, and thinking disabled.",
     "capabilities": {
       "vision": false,
       "file_upload": true,
@@ -30,7 +30,10 @@
         "name": "OpenThai Legal"
       },
       {
-        "name": "12K Balanced"
+        "name": "iApp Recommended"
+      },
+      {
+        "name": "JSON Citation"
       }
     ]
   },

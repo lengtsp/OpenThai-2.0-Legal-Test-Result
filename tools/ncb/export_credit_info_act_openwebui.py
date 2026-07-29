@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Export the persisted statute as one Open WebUI-ready Markdown file per section."""
+"""Export one clean iApp-compatible Open WebUI text file per active section."""
 
 from __future__ import annotations
 
 import os
 import re
+import json
+from hashlib import sha256
 from pathlib import Path
 
 import psycopg2
 
 
-ROOT = Path(__file__).resolve().parent
-OUT = ROOT / "data/credit_info_act/openwebui_knowledge"
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "data/credit_info_act/openwebui_knowledge_v2"
 SOURCE = "https://www.creditinfocommittee.or.th/api/file/pdf/law_act/Credit%20Info%20Act%20update%201-6.pdf"
 LAW = "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)"
 
@@ -33,28 +35,53 @@ def main() -> None:
             GROUP BY metadata->>'section_id', clause_anchor, root_topic, page_start, page_end
             ORDER BY page_start, clause_anchor""", (run_id,))
         rows = cur.fetchall()
-    index = ["# Open WebUI Knowledge upload manifest", "", f"- Ingest run: `{run_id}`", f"- Law: {LAW}", f"- Files: {len(rows)} (one legal section per file)", "", "| File | Section | Pages | Topic |", "|---|---|---:|---|"]
+    index = [
+        "# Open WebUI Knowledge upload manifest — iApp-compatible v2",
+        "",
+        f"- Ingest run: `{run_id}`",
+        f"- Law: {LAW}",
+        f"- Files: {len(rows)} (one complete legal section per file)",
+        "- Prompt body: clean `<law law_name=\"...\" section=\"...\">` scaffold",
+        "- Provenance: stored in `manifest.json` and upload metadata, not repeated in model context",
+        "",
+        "| File | Section | Pages | Topic |",
+        "|---|---|---:|---|",
+    ]
+    manifest = {
+        "schema_version": 2,
+        "ingest_run_id": run_id,
+        "law_name": LAW,
+        "source_url": SOURCE,
+        "files": [],
+    }
     for section, anchor, topic, first_page, last_page, content in rows:
         safe = re.sub(r"[^0-9A-Za-z/_-]+", "_", section).replace("/", "-")
-        filename = f"credit-info-act-section-{safe}.md"
-        markdown = f"""---
-law_name: \"{LAW}\"
-section: \"{section}\"
-source_url: \"{SOURCE}\"
-page_start: {first_page}
-page_end: {last_page}
-structural_topic: \"{topic}\"
----
-
-# {anchor}
-
-{content.strip()}
-
-Source: {SOURCE} (PDF pp. {first_page}-{last_page})
-"""
-        (OUT / filename).write_text(markdown, encoding="utf-8")
+        filename = f"credit-info-act-section-{safe}.txt"
+        prompt_text = (
+            f'<law law_name="{LAW}" section="{section}">\n'
+            f"{content.strip()}\n"
+            "</law>\n"
+        )
+        (OUT / filename).write_text(prompt_text, encoding="utf-8")
+        manifest["files"].append(
+            {
+                "filename": filename,
+                "law_name": LAW,
+                "section": section,
+                "section_heading": anchor,
+                "topic": topic,
+                "page_start": first_page,
+                "page_end": last_page,
+                "source_url": SOURCE,
+                "content_sha256": sha256(prompt_text.encode()).hexdigest(),
+            }
+        )
         index.append(f"| `{filename}` | {anchor} | {first_page}-{last_page} | {topic} |")
     (OUT / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
+    (OUT / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     print(f"{len(rows)} files exported to {OUT}")
 
 

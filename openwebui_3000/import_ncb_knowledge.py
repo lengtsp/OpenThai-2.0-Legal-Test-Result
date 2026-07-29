@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import section-level NCB Act Markdown files into a local Open WebUI KB.
+"""Import clean section-level NCB Act text files into a local Open WebUI KB.
 
 The script targets the no-auth, loopback-only lab configuration in this
 directory. It authenticates through Open WebUI's normal session endpoint,
@@ -18,10 +18,10 @@ from pathlib import Path
 import requests
 
 
-DEFAULT_NAME = "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (รวมแก้ไข 1-6)"
+DEFAULT_NAME = "พ.ร.บ. ข้อมูลเครดิต — iApp structural v2"
 DEFAULT_DESCRIPTION = (
-    "Structural chunks: หนึ่งมาตราต่อไฟล์ พร้อมเลขหน้าและแหล่งที่มา "
-    "สำหรับทดสอบ NCB, compliance และ internal audit"
+    "iApp-compatible structural chunks: หนึ่งมาตราต่อไฟล์ใน <law> scaffold "
+    "พร้อม page-anchored provenance สำหรับ NCB, compliance และ internal audit"
 )
 
 
@@ -130,6 +130,7 @@ def upload_processed(
     session: requests.Session,
     base_url: str,
     files: list[Path],
+    metadata_by_name: dict[str, dict],
 ) -> list[dict]:
     uploaded: list[dict] = []
     for index, path in enumerate(files, start=1):
@@ -137,6 +138,7 @@ def upload_processed(
             "source": "Credit Info Act update 1-6.pdf",
             "structural_chunk": True,
             "original_filename": path.name,
+            **metadata_by_name.get(path.name, {}),
         }
         for attempt in range(2):
             try:
@@ -146,7 +148,7 @@ def upload_processed(
                         "POST",
                         f"{base_url}/api/v1/files/",
                         params={"process": "true", "process_in_background": "false"},
-                        files={"file": (path.name, handle, "text/markdown")},
+                        files={"file": (path.name, handle, "text/plain")},
                         data={"metadata": json.dumps(metadata, ensure_ascii=False)},
                     )
                 break
@@ -185,17 +187,32 @@ def main() -> int:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        default=Path("data/credit_info_act/openwebui_knowledge"),
+        default=Path("data/credit_info_act/openwebui_knowledge_v2"),
     )
     parser.add_argument("--name", default=DEFAULT_NAME)
     parser.add_argument("--description", default=DEFAULT_DESCRIPTION)
     args = parser.parse_args()
 
-    files = sorted(
-        path for path in args.input_dir.glob("*.md") if path.name != "README.md"
-    )
+    files = sorted(args.input_dir.glob("credit-info-act-section-*.txt"))
     if not files:
-        parser.error(f"no Markdown files found under {args.input_dir}")
+        parser.error(f"no section text files found under {args.input_dir}")
+    manifest_path = args.input_dir / "manifest.json"
+    if not manifest_path.is_file():
+        parser.error(f"missing manifest: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    metadata_by_name = {
+        item["filename"]: {
+            "law_name": item["law_name"],
+            "section": item["section"],
+            "section_heading": item["section_heading"],
+            "structural_topic": item["topic"],
+            "page_start": item["page_start"],
+            "page_end": item["page_end"],
+            "source_url": item["source_url"],
+            "content_sha256": item["content_sha256"],
+        }
+        for item in manifest["files"]
+    }
 
     session = requests.Session()
     user = signin(session, args.base_url.rstrip("/"))
@@ -226,6 +243,7 @@ def main() -> int:
             session,
             args.base_url.rstrip("/"),
             to_upload,
+            metadata_by_name,
         )
         batch_add(
             session,

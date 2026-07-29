@@ -201,7 +201,7 @@ User question
   → Qwen embedding candidate top 10
   → union + deduplicate by (law_name, section_id)
   → multilingual reranker
-  → retain 1–3 complete sections
+  → retain the smallest complete evidence set; never drop an explicitly requested section
   → OpenThai JSON citation answer
   → citation/evidence validator
 ```

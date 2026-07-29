@@ -16,7 +16,7 @@ import requests
 from import_ncb_knowledge import DEFAULT_NAME, api, signin
 
 
-MODEL = "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b"
+MODEL = "openthai-legal-audit-12k-balanced"
 MAX_OUTPUT_TOKENS = 2048
 SCENARIOS = [
     {
@@ -67,7 +67,7 @@ def section_ids(result: dict) -> list[str]:
     values: list[str] = []
     for metadata in (result.get("metadatas") or [[]])[0]:
         filename = metadata.get("source") or metadata.get("name") or ""
-        match = re.search(r"section-(\d+(?:-\d+)?)\.md$", filename)
+        match = re.search(r"section-(\d+(?:-\d+)?)\.(?:md|txt)$", filename)
         if match:
             values.append(match.group(1).replace("-", "/"))
             continue
@@ -121,8 +121,8 @@ def main() -> int:
             json={
                 "collection_names": [kb["id"]],
                 "query": scenario["question"],
-                "k": 8,
-                "k_reranker": 3,
+                "k": 12,
+                "k_reranker": 8,
                 "r": 0.0,
                 "hybrid": True,
                 "hybrid_bm25_weight": 0.65,

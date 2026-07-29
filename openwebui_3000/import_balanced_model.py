@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import and refresh the validated OpenThai Legal 12k model preset."""
+"""Import and refresh the iApp-recommended OpenThai JSON citation preset."""
 
 from __future__ import annotations
 

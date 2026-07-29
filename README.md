@@ -10,7 +10,11 @@ No model weights, API tokens, database credentials, or chat-session contents are
 
 ## NCB structural RAG benchmark and Open WebUI
 
-The official consolidated Credit Information Act PDF was parsed by legal structure rather than fixed windows. The current-law Open WebUI package contains 73 active sections with PDF page anchors; amendment-history appendices are retained separately so duplicate amendment section numbers cannot overwrite the consolidated law.
+The official consolidated Credit Information Act PDF was parsed by legal
+structure rather than fixed windows. The current v2 Open WebUI package contains
+73 active sections, one complete `มาตรา` per clean `<law>` file. PDF page
+anchors and source hashes stay in metadata; amendment-history appendices and
+superscript note markers are excluded from effective model context.
 
 Thirteen NCB scenarios were tested across access logging, consent, loan brokers, correction/dispute, adverse decisions, definitions, licensing, data lifecycle, member reporting, confidentiality, credit models, penalties, and unlawful disclosure.
 
@@ -20,9 +24,13 @@ Thirteen NCB scenarios were tested across access logging, consent, loan brokers,
 | Dense Qwen embedding top-4 — original five | 5 | 40.0% precision / 66.7% recall |
 | Dense Qwen embedding top-4 — extended eight | 8 | 51.0% precision / 81.2% recall |
 
-The result shows that OpenThai performs strongly when supplied the correct complete sections. Production retrieval should combine BM25 and Qwen embeddings, deduplicate by legal section, rerank, and inject only the best 1–3 complete sections.
+The result shows that OpenThai performs strongly when supplied the correct complete sections. Production retrieval should combine BM25 and Qwen embeddings, deduplicate by legal section, rerank, and inject the smallest complete evidence set while retaining every section explicitly requested by the user.
 
-Start the hardened local Open WebUI profile at `127.0.0.1:3000` with [the supplied Compose file](openwebui_3000/docker-compose.yml). It connects OpenThai at port `3033`, Qwen3-Embedding-4B at port `8082`, uses hybrid retrieval, enriches section metadata, and reranks candidate sections.
+Start the hardened local Open WebUI profile at `127.0.0.1:3000` with [the
+supplied Compose file](openwebui_3000/docker-compose.yml). It connects OpenThai
+at port `3033`, Qwen3-Embedding-4B at port `8082`, retrieves 12 hybrid
+candidates, reranks to 8, and keeps the model context free of repeated YAML,
+filenames, and source URLs.
 
 The final live Open WebUI run used an 8,192-token vLLM context, a 2,048-token
 answer cap, and `enable_thinking=false`. All five audit answers completed with
@@ -40,15 +48,14 @@ answers still invented deadlines, notification duties, sample sizes, and legal
 effects. The 12k context solves capacity; it does not replace claim validation
 or human legal review.
 
-A controlled six-profile parameter sweep then held the prompt and exact
-evidence constant. The deployed balanced preset uses `temperature=0`,
-`top_p=1`, `repetition_penalty=1.05`, `max_tokens=3072`, and
-`enable_thinking=false`. It stopped naturally at 2,675 tokens and produced the
-same answer byte-for-byte through direct vLLM and Open WebUI routes. In
-contrast, forcing `min_tokens=4096` hit the 5,120-token cap, repeated content,
-shifted heavily into English, and reduced the Codex judge score to 1/5.
-Decoding parameters improve output control, not legal correctness; claim-level
-validation and human review remain required.
+The current default is now the documented iApp JSON citation path:
+`temperature=0`, `top_p=1`, `max_tokens=2048`, thinking off, the trained
+OpenThaiGPT-Legal system contract, and user-injected `Provided context` with
+`<law law_name="..." section="...">`. A live access-log test returned valid
+JSON, cited only section 17, and correctly stated the two-year minimum. An
+adverse-decision test still transferred a 30-day right-exercise window into a
+bank deadline, so parameter/chunk alignment does not replace claim-level
+validation or human legal review.
 
 Key resources:
 
@@ -60,7 +67,7 @@ Key resources:
 - [OpenThai 12,288/4,096 long-context benchmark](openthai_12k_long_context_20260729/report.md)
 - [OpenThai 12k controlled parameter sweep](openthai_parameter_sweep_12k_20260729/report.md)
 - [`$extract-structural-legal-chunks` reusable skill](skills/extract-structural-legal-chunks/SKILL.md)
-- [73 section-level Open WebUI files](data/credit_info_act/openwebui_knowledge/README.md)
+- [73 clean iApp-compatible section files](data/credit_info_act/openwebui_knowledge_v2/README.md)
 
 ## NCSA page-grounded RAG benchmark — OpenThai2.0 vs Qwen3.6-27B
 
@@ -73,70 +80,6 @@ This evaluation has two layers against a 629-page NCSA cyber-security compendium
 | Controlled Codex concept coverage | 25/26 | **26/26** | Both grounded; Qwen more consistent |
 
 The comparison is an operational RAG replay rather than a pure model-quality study: OpenThai used vLLM and Qwen used llama.cpp with a Q8 GGUF build. Model loading is excluded from latency metrics. The controlled result is the primary comparison; see [the controlled report](reports/NCSA_CONTROLLED_FIXED_EVIDENCE_BENCHMARK.md). The earlier retrieval-inclusive result is retained in [the original NCSA report](reports/NCSA_OPENTHAI_VS_QWEN36_27B_BENCHMARK.md).
-
-### Scenario captures
-
-Each capture is produced from the saved test outputs; it shows the Thai question, retrieved page/chunk evidence, model latency, citation state, Qwen answer excerpt, and Codex judge note.
-
-<details>
-<summary>Scenario 1 — CII scope</summary>
-
-![Scenario 1 — CII scope](captures/scenario-01-cii-scope.png)
-</details>
-
-<details>
-<summary>Scenario 2 — Governance</summary>
-
-![Scenario 2 — Governance](captures/scenario-02-governance.png)
-</details>
-
-<details>
-<summary>Scenario 3 — Risk assessment</summary>
-
-![Scenario 3 — Risk assessment](captures/scenario-03-risk-assessment.png)
-</details>
-
-<details>
-<summary>Scenario 4 — Monitoring</summary>
-
-![Scenario 4 — Monitoring](captures/scenario-04-monitoring.png)
-</details>
-
-<details>
-<summary>Scenario 5 — Incident response</summary>
-
-![Scenario 5 — Incident response](captures/scenario-05-incident-response.png)
-</details>
-
-<details>
-<summary>Scenario 6 — Incident reporting</summary>
-
-![Scenario 6 — Incident reporting](captures/scenario-06-incident-reporting.png)
-</details>
-
-<details>
-<summary>Scenario 7 — Cloud and third party</summary>
-
-![Scenario 7 — Cloud and third party](captures/scenario-07-cloud-and-third-party.png)
-</details>
-
-<details>
-<summary>Scenario 8 — Configuration</summary>
-
-![Scenario 8 — Configuration](captures/scenario-08-configuration.png)
-</details>
-
-<details>
-<summary>Scenario 9 — Awareness</summary>
-
-![Scenario 9 — Awareness](captures/scenario-09-awareness.png)
-</details>
-
-<details>
-<summary>Scenario 10 — Risk-proportional conclusion</summary>
-
-![Scenario 10 — Risk-proportional conclusion](captures/scenario-10-risk-proportional-conclusion.png)
-</details>
 
 ## Contents
 
@@ -151,9 +94,7 @@ Each capture is produced from the saved test outputs; it shows the Thai question
 - `reports/NCB_OPENTHAI_EXTENDED_RAG_BENCHMARK.md` — eight additional NCB scenarios
 - `openwebui_3000/` — Open WebUI v0.9.5 profile for OpenThai + Qwen embeddings
 - `skills/extract-structural-legal-chunks/` — reusable validated Codex skill and extractor
-- `data/credit_info_act/openwebui_knowledge/` — current-law section files ready for Knowledge upload
-- `captures/` — 10 rendered scenario captures generated from saved benchmark JSON
-- `tools/generate_scenario_captures.js` — reproducible capture renderer
+- `data/credit_info_act/openwebui_knowledge_v2/` — clean current-law `<law>` section files ready for Knowledge upload
 
 ## Run locally
 

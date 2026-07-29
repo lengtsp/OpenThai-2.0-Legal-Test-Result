@@ -13,7 +13,12 @@ The one extra chunk is a section whose source text is longer than the configured
 
 ## Open WebUI Knowledge-base package
 
-The ready-to-upload package is [`data/credit_info_act/openwebui_knowledge`](../data/credit_info_act/openwebui_knowledge/README.md): 73 Markdown files, one current consolidated legal section per file. Historical amendment appendices are retained in PostgreSQL but excluded from the Knowledge upload so an amendment's transitional section cannot overwrite the consolidated law. Each upload file has `law_name`, bare `section`, original PDF pages, source URL, and structural topic as front matter.
+The original ready-to-upload package is
+[`data/credit_info_act/openwebui_knowledge`](../data/credit_info_act/openwebui_knowledge/README.md):
+73 Markdown files, one current consolidated legal section per file. Historical
+amendment appendices are retained in PostgreSQL but excluded from the Knowledge
+upload so an amendment's transitional section cannot overwrite a current
+section with the same number. The current v2 package is described below.
 
 Use this sequence in an Open WebUI instance:
 
@@ -192,6 +197,60 @@ The full responses, SHA-256 comparisons, diagnostics, and judge notes are in
 The deployed custom model is **OpenThai Legal Audit 12K (Balanced)**, model id
 `openthai-legal-audit-12k-balanced`.
 
+## Current iApp-aligned v2 configuration
+
+The parameter-sweep profile above is retained as historical benchmark evidence.
+The currently deployed Open WebUI profile now prioritizes the model's
+documented RL-trained citation path:
+
+```json
+{
+  "temperature": 0,
+  "top_p": 1,
+  "max_tokens": 2048,
+  "min_tokens": 0,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "chat_template_kwargs": {"enable_thinking": false}
+}
+```
+
+The custom model system prompt uses iApp's OpenThaiGPT-Legal JSON citation
+contract. Retrieved evidence is injected on the user side as:
+
+```text
+Provided context:
+<law law_name="..." section="...">
+มาตรา ... [complete effective section text]
+</law>
+
+Question (ตอบเป็นภาษาไทย):
+...
+```
+
+The NCB v2 Knowledge Base contains 73 active-law text files. Each file is one
+complete section; section 3 is the longest at about 5,050 characters and remains
+unsplit under `CHUNK_SIZE=8000`. Amendment-note superscripts are removed using
+PDF span font/layout evidence. Page anchors, source URL, topic, and content hash
+are upload metadata rather than repeated prompt text.
+
+Retrieval uses Qwen3-Embedding-4B plus BM25 weight `0.65`, 12 candidates, and
+BAAI/bge-reranker-v2-m3 top 8. The wider candidate/rerank depth was required for
+an explicit sections 25–28 query to retain all four requested sections.
+
+Two no-override Open WebUI checks were run against the deployed preset and v2
+Knowledge Base:
+
+| Scenario | Prompt | Output | Finish | JSON | Time | Finding |
+|---|---:|---:|---|---|---:|---|
+| Access-log retention | 6,275 | 170 | stop | valid | 33.97s | Correct two-year minimum; cited section 17 only |
+| Adverse-decision deadline | 5,656 | 323 | stop | valid | 24.09s | Citations narrowed to 28/26, but the model still incorrectly assigned a 30-day bank-notification deadline |
+
+The adverse-decision failure persisted after adding an actor/action/trigger/
+deadline guardrail. It is therefore treated as a model-synthesis defect and
+must be rejected by a claim-level validator; clean chunks and documented
+decoding parameters alone are not a sufficient legal quality gate.
+
 ## Practical production configuration
 
 Do not use dense top-4 directly for this corpus. The controlled result supports this retrieval pipeline instead:
@@ -201,7 +260,7 @@ query
   → Thai lexical/BM25 top 10 + Qwen embedding top 10
   → union and deduplicate by (law_name, section)
   → rerank the candidates
-  → inject only the best 1–3 complete sections
+  → inject the smallest complete evidence set; retain every explicitly requested section
   → OpenThai JSON answer + citation validator
 ```
 

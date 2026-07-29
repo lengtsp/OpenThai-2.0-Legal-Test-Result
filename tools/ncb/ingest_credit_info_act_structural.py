@@ -18,7 +18,7 @@ import psycopg2
 from psycopg2.extras import Json, execute_values
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 PDF_DEFAULT = ROOT / "data/credit_info_act/credit_info_act_update_1_6.pdf"
 SOURCE_URL = "https://www.creditinfocommittee.or.th/api/file/pdf/law_act/Credit%20Info%20Act%20update%201-6.pdf"
 SOURCE_NAME = "Credit Info Act update 1-6.pdf"
@@ -96,21 +96,38 @@ def page_body_lines(page: fitz.Page) -> list[str]:
         key=lambda block: (block["bbox"][1], block["bbox"][0]),
     )
     for block in blocks:
-        block_lines = [
+        raw_block_lines = [
             normalise("".join(span["text"] for span in line["spans"]))
             for line in block["lines"]
         ]
-        block_text = normalise(" ".join(block_lines))
+        raw_block_text = normalise(" ".join(raw_block_lines))
         is_bottom_note = (
             block["bbox"][1] >= page.rect.height * 0.70
-            and re.match(r"^[๐-๙0-9]+\s+", block_text)
+            and re.match(r"^[๐-๙0-9]+\s+", raw_block_text)
             and (
-                re.match(r"^[๐-๙0-9]+\s+(มาตรา|หมวด|ราชกิจจานุเบกษา)", block_text)
-                or "แก้ไขเพิ่มเติมโดยพระราชบัญญัติ" in block_text
+                re.match(
+                    r"^[๐-๙0-9]+\s+(มาตรา|หมวด|ราชกิจจานุเบกษา)",
+                    raw_block_text,
+                )
+                or "แก้ไขเพิ่มเติมโดยพระราชบัญญัติ" in raw_block_text
             )
         )
         if is_bottom_note:
             continue
+        block_lines = []
+        for line in block["lines"]:
+            # Amendment-note markers are separate 9 pt digit-only superscript
+            # spans in this PDF. Exclude the marker from effective law text;
+            # retain normal-size Thai item numbers, deadlines, and amounts.
+            spans = [
+                span
+                for span in line["spans"]
+                if not (
+                    span["size"] <= 9.5
+                    and re.fullmatch(r"[๐-๙0-9]+", span["text"].strip())
+                )
+            ]
+            block_lines.append(normalise("".join(span["text"] for span in spans)))
         result.extend(line for line in block_lines if line)
     return result
 
@@ -279,10 +296,9 @@ def embeddings(texts: list[str], endpoint: str, model: str) -> list[list[float]]
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf", type=Path, default=PDF_DEFAULT)
-    # The iApp legal-RAG guide recommends one มาตรา per chunk.  This statute's
-    # longest section fits below 4,000 characters, so no legal section needs to
-    # be split merely to satisfy a generic fixed-size chunker.
-    parser.add_argument("--max-chars", type=int, default=4000)
+    # The iApp legal-RAG guide recommends one มาตรา per chunk. Section 3 is
+    # roughly 5.1k characters, so 8k preserves every active section intact.
+    parser.add_argument("--max-chars", type=int, default=8000)
     parser.add_argument("--embedding-endpoint", default="http://127.0.0.1:8082/v1/embeddings")
     parser.add_argument("--embedding-model", default="Qwen3-Embedding-4B")
     parser.add_argument("--out", type=Path, default=ROOT / "data/credit_info_act/structural_manifest.json")
