@@ -10,15 +10,15 @@ No model weights, API tokens, database credentials, or chat-session contents are
 
 ## NCSA page-grounded RAG benchmark — OpenThai2.0 vs Qwen3.6-27B
 
-This evaluation replays the same 10 Thai IT-internal-audit scenarios against a 629-page NCSA cyber-security compendium. Both models received the same fixed prompt, the same top-3 BM25 evidence packet, and the same 1,497 PyMuPDF recursive chunks. Codex reviewed each answer against its selected source chunks.
+This evaluation has two layers against a 629-page NCSA cyber-security compendium. The original 10-scenario run uses BM25-retrieved chunks; the newer **controlled 7-scenario rerun** locks the exact evidence chunks per question, so retrieval quality cannot obscure synthesis/citation quality. Codex reviewed each answer against its supplied source chunks.
 
 | Metric | OpenThai2.0 Legal | Qwen3.6-27B | Outcome |
 |---|---:|---:|---|
-| Mean model-request latency | 23.96 s | **21.77 s** | Qwen faster by **9.1%** |
-| Strict `[p.x c.y]` citation syntax | 5/10 | **10/10** | Qwen stronger |
-| Codex evidence-grounded judge score | 7.85/10 | **9.20/10** | Qwen stronger |
+| Controlled mean model-request latency | 21.60 s | **19.33 s** | Qwen faster by **10.5%** |
+| Controlled strict `[p.x c.y]` citation syntax | 4/7 | **7/7** | Qwen stronger |
+| Controlled Codex concept coverage | 25/26 | **26/26** | Both grounded; Qwen more consistent |
 
-The comparison is an operational RAG replay rather than a pure model-quality study: OpenThai used vLLM and Qwen used llama.cpp with a Q8 GGUF build. Model loading is excluded from the latency metrics. The detailed method, per-scenario results, limitations, and judge rubric are in [the NCSA benchmark report](reports/NCSA_OPENTHAI_VS_QWEN36_27B_BENCHMARK.md).
+The comparison is an operational RAG replay rather than a pure model-quality study: OpenThai used vLLM and Qwen used llama.cpp with a Q8 GGUF build. Model loading is excluded from latency metrics. The controlled result is the primary comparison; see [the controlled report](reports/NCSA_CONTROLLED_FIXED_EVIDENCE_BENCHMARK.md). The earlier retrieval-inclusive result is retained in [the original NCSA report](reports/NCSA_OPENTHAI_VS_QWEN36_27B_BENCHMARK.md).
 
 ### Scenario captures
 
@@ -92,6 +92,7 @@ Each capture is produced from the saved test outputs; it shows the Thai question
 - `reports/INFERENCE_RAG_TEST_REPORT.md` — initial model/inference measurements
 - `reports/RAG_WEBUI_8083.md` — architecture and API notes
 - `reports/NCSA_OPENTHAI_VS_QWEN36_27B_BENCHMARK.md` — NCSA recursive-chunk replay, latency comparison, and Codex judge rubric
+- `reports/NCSA_CONTROLLED_FIXED_EVIDENCE_BENCHMARK.md` — primary controlled rerun with locked evidence per scenario
 - `captures/` — 10 rendered scenario captures generated from saved benchmark JSON
 - `tools/generate_scenario_captures.js` — reproducible capture renderer
 
