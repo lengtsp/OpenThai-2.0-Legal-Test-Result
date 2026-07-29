@@ -16,6 +16,13 @@ Repository นี้เก็บผลทดสอบอิสระของ
 
 ## ภาพรวมผล
 
+- **ผลล่าสุดของ advanced hybrid RAG**: NitiBench retrieval 115 คำถามได้
+  hit rate 92.17% ที่ `k=20`; open-book echo citation ถูก 9/9 แต่
+  advanced selection จาก 10 candidates ถูกครบทั้ง recall/precision 5/9
+  แสดงว่า selection หลัง retrieval ยังเป็นจุดเสี่ยง
+- **NCB focused RAG หลัง optimize**: candidate recall 100%, OpenThai
+  reranker recall 91.03% และชุด focused generation 5 scenarios อ้างมาตรา
+  ครบและไม่เกินหลักฐาน 5/5
 - **RAG สำคัญกว่าการพึ่ง Closed-book**: เมื่อมีตัวบทที่ถูกต้อง โมเดลตอบตาม evidence ได้ดีขึ้น; เมื่อไม่มี context อาจอ้างมาตราผิดหรือไม่ครบ
 - **Chunk ต้องแบ่งตามมาตรา**: `law_name` + `section` และข้อความของมาตราเป็นรูปแบบที่ตรงกับคำแนะนำผู้พัฒนาและเอื้อต่อการตรวจ citation
 - **Selection เป็นจุดเสี่ยง**: มีหลักฐานหลายมาตราที่คล้ายกันแล้วโมเดลยังเลือกเกิน/ตกหล่นได้ จึงต้องมี retriever ที่ดี, output validator และ human review
@@ -28,6 +35,7 @@ Repository นี้เก็บผลทดสอบอิสระของ
 
 | รายงาน | สรุป |
 |---|---|
+| [Advanced hybrid RAG + Codex judge](reports/advanced-hybrid-rag-20260729/) | BM25/FTS5/Dense/Hybrid, OpenThai rerank, Qdrant/Chroma/Milvus, NitiBench 115 retrieval questions, generation ทุก mode และ failure analysis |
 | [NCB structural chunks: NitiBench format, OpenThai vs Qwen](reports/ncb-nitibench-qwen-comparison-20260729/) | 6 หมวดคำถามข้อมูลเครดิต × Echo/Selection/RAG, ผล 36 คำตอบ, ตรวจ format ก่อน/หลัง และ Codex judgement ที่ตรวจย้อนกลับได้ |
 | [NitiBench + Ground Truth RAG](reports/nitibench-ground-truth-20260729/) | สรุปเข้าใจง่าย, ตรวจความสอดคล้องกับ model card/คู่มือ RAG/API, ผล retrieval และ 4 modes |
 | [Three generation profiles](reports/OPENTHAI_THREE_GENERATION_PROFILES_FULL_OUTPUT_20260729.md) | ผลเต็มของ Legal essay และ General chat หลาย profile |
