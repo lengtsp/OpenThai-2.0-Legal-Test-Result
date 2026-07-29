@@ -35,6 +35,7 @@ Repository นี้เก็บผลทดสอบอิสระของ
 
 | รายงาน | สรุป |
 |---|---|
+| [OpenThai vs Qwen3.6-27B controlled comparison](reports/qwen27-controlled-comparison-20260729/) | ใช้ evidence packet เดียวกันเทียบ Echo, Selection, NCB, Closed-book, Essay และ legal chat; แยก JSON failure, citation และ legal substance |
 | [Advanced hybrid RAG + Codex judge](reports/advanced-hybrid-rag-20260729/) | BM25/FTS5/Dense/Hybrid, OpenThai rerank, Qdrant/Chroma/Milvus, NitiBench 115 retrieval questions, generation ทุก mode และ failure analysis |
 | [NCB structural chunks: NitiBench format, OpenThai vs Qwen](reports/ncb-nitibench-qwen-comparison-20260729/) | 6 หมวดคำถามข้อมูลเครดิต × Echo/Selection/RAG, ผล 36 คำตอบ, ตรวจ format ก่อน/หลัง และ Codex judgement ที่ตรวจย้อนกลับได้ |
 | [NitiBench + Ground Truth RAG](reports/nitibench-ground-truth-20260729/) | สรุปเข้าใจง่าย, ตรวจความสอดคล้องกับ model card/คู่มือ RAG/API, ผล retrieval และ 4 modes |
