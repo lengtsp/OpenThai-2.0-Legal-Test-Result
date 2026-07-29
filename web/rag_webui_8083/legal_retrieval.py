@@ -16,6 +16,7 @@ from __future__ import annotations
 import math
 import re
 import sqlite3
+import threading
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -152,7 +153,8 @@ class SQLiteFTS5Index:
 
     def __init__(self, records: list[dict[str, Any]], path: str | Path = ":memory:") -> None:
         self.records = {record_id(record): record for record in records}
-        self.connection = sqlite3.connect(str(path))
+        self.lock = threading.RLock()
+        self.connection = sqlite3.connect(str(path), check_same_thread=False)
         self.connection.execute(
             "CREATE VIRTUAL TABLE IF NOT EXISTS legal_fts USING fts5(id UNINDEXED, body, tokenize='trigram')"
         )
@@ -178,11 +180,12 @@ class SQLiteFTS5Index:
         expression = self._query(query)
         if not expression:
             return []
-        rows = self.connection.execute(
-            "SELECT id, bm25(legal_fts, 0.0, 1.0) AS rank "
-            "FROM legal_fts WHERE legal_fts MATCH ? ORDER BY rank LIMIT ?",
-            (expression, max(1, top_k)),
-        ).fetchall()
+        with self.lock:
+            rows = self.connection.execute(
+                "SELECT id, bm25(legal_fts, 0.0, 1.0) AS rank "
+                "FROM legal_fts WHERE legal_fts MATCH ? ORDER BY rank LIMIT ?",
+                (expression, max(1, top_k)),
+            ).fetchall()
         return [
             SearchHit(self.records[row_id], -float(rank), fts_score=-float(rank), source=self.name)
             for row_id, rank in rows

@@ -1,6 +1,6 @@
-# OpenThai Legal RAG Workbench
+# Legal RAG Workbench
 
-เว็บ local สำหรับทดสอบ OpenThai 2.0 Legal ผ่าน vLLM พร้อม:
+เว็บ local สำหรับทดสอบ OpenThai 2.0 Legal หรือ OpenAI-compatible model อื่น พร้อม:
 
 - Citation RAG, Closed-book, Legal essay, Legal essay thinking และ General legal chat
 - Dense + BM25 + SQLite FTS5 hybrid candidate generation
@@ -18,14 +18,17 @@ pip install -r requirements.txt
 psql -h 127.0.0.1 -p 5432 -d opengpt -f schema.sql
 ```
 
-เริ่ม OpenThai vLLM ที่ `127.0.0.1:3033` และ OpenAI-compatible embedding
-service ที่ `127.0.0.1:8082` ก่อน
+เริ่ม LLM และ OpenAI-compatible embedding service ก่อน แล้วระบุ endpoint
+ผ่าน environment variables:
 
 ```bash
 export OPENGPT_DB_USER='your_user'
 export OPENGPT_DB_PASSWORD='your_password'
 export RAG_CORPUS_PATH='/absolute/path/to/structural_legal_chunks.json'
 export RAG_VECTOR_BACKEND='memory'
+export RAG_LLM_URL='http://127.0.0.1:3033/v1/chat/completions'
+export RAG_LLM_MODELS_URL='http://127.0.0.1:3033/v1/models'
+export RAG_LLM_MODEL='iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b'
 python server.py
 ```
 

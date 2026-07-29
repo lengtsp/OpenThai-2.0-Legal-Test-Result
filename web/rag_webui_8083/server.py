@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""OpenThai Legal RAG workbench, backed by a local vLLM OpenAI-compatible API.
+"""Legal RAG workbench, backed by a local OpenAI-compatible API.
 
 The service deliberately keeps the corpus lightweight and inspectable: every
 retrieved item has a source title and section, and the exact chunk that was
@@ -12,6 +12,7 @@ import json
 import math
 import os
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -52,6 +53,7 @@ ANSWER_EVIDENCE_K = max(2, min(int(os.getenv("RAG_ANSWER_EVIDENCE_K", "6")), 6))
 RETRIEVAL_PROFILE = os.getenv("RAG_RETRIEVAL_PROFILE", "legal_advanced").strip()
 VECTOR_BACKEND = os.getenv("RAG_VECTOR_BACKEND", "memory").strip().lower()
 _RETRIEVER_CACHE: dict[str, Any] = {}
+_RETRIEVER_LOCK = threading.RLock()
 
 
 def _db_connection():
@@ -204,6 +206,15 @@ def _retriever() -> LegalHybridRetriever:
     cached = _RETRIEVER_CACHE.get(signature)
     if cached:
         return cached
+    with _RETRIEVER_LOCK:
+        cached = _RETRIEVER_CACHE.get(signature)
+        if cached:
+            return cached
+        return _build_retriever(signature)
+
+
+def _build_retriever(signature: str) -> LegalHybridRetriever:
+    """Create one backend instance while the caller holds the init lock."""
     records = _read_corpus()
     if VECTOR_BACKEND == "qdrant":
         dense = QdrantDenseBackend(
@@ -539,7 +550,8 @@ def _rerank_with_openthai(query: str, candidates: list[dict[str, Any]], top_k: i
         # evidence set.
         if not selected:
             raise ValueError("reranker returned no valid candidate IDs")
-        return selected, {"status": "openthai_json", "candidate_count": len(candidates), "rerank_ms": round((time.perf_counter() - started) * 1000, 1), "rerank_usage": raw.get("usage", {}), "linked_penalty_added": linked_penalty_added}
+        reranker_status = "openthai_json" if "openthai" in MODEL_NAME.lower() else "model_json"
+        return selected, {"status": reranker_status, "candidate_count": len(candidates), "rerank_ms": round((time.perf_counter() - started) * 1000, 1), "rerank_usage": raw.get("usage", {}), "linked_penalty_added": linked_penalty_added}
     except Exception as exc:
         return candidates[:final_k], {"status": "hybrid_fallback", "candidate_count": len(candidates), "rerank_ms": round((time.perf_counter() - started) * 1000, 1), "detail": str(exc)[:240]}
 
@@ -831,8 +843,13 @@ def ask_vllm(
         # Exact quickstart contract from the released model card. Live tests
         # showed that constrained JSON decoding changes section selection, so
         # JSON validity is checked after generation instead.
+        assistant_identity = (
+            "You are OpenThaiGPT-Legal, an expert assistant on Thai law"
+            if "openthai" in MODEL_NAME.lower()
+            else "You are an expert assistant on Thai law"
+        )
         system = (
-            "You are OpenThaiGPT-Legal, an expert assistant on Thai law. You are given a legal "
+            f"{assistant_identity}. You are given a legal "
             "question and the exact statutory sections needed to answer it. Reason step by step in "
             "English, then give the final answer in Thai. Cite ONLY sections present in the provided "
             "context, using each section's exact law_name and bare section number (e.g. 132, 77/1). "
@@ -963,6 +980,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "ok": True,
                     "vllm": "ready",
                     "postgres": "ready",
+                    "model": MODEL_NAME,
                     "models": [item.get("id") for item in models.get("data", [])],
                     "corpus_count": len(_read_corpus()),
                     "retrieval_profile": RETRIEVAL_PROFILE,
@@ -1111,5 +1129,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = ThreadingHTTPServer(("0.0.0.0", 8083), Handler)
-    print("OpenThai Legal RAG workbench: http://0.0.0.0:8083")
+    print(f"Legal RAG Lab ({MODEL_NAME}): http://0.0.0.0:8083")
     server.serve_forever()
