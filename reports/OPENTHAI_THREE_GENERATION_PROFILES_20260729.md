@@ -1,7 +1,7 @@
 # OpenThai 2.0 Legal — Three Generation Profiles
 
-วันที่ทดสอบ: 29 กรกฎาคม 2026  
-สถานะ: ผลทดสอบอิสระที่เผยแพร่โดยไม่รวม raw answers หรือ scenario captures
+วันที่ทดสอบ: 29 กรกฎาคม 2026
+สถานะ: ผลทดสอบอิสระ พร้อม actual model answers และ result captures
 
 ## 1. Model provenance
 
@@ -160,6 +160,7 @@ sensitivity run ที่ 3,072 tokens แยกต่างหาก
    `top_p=1`, `max_tokens=2048`, Thinking Off พร้อม focused statutory
    context หนึ่งมาตราต่อหนึ่ง chunk แล้วตรวจ citations ก่อนเรียบเรียง essay
 
-Raw API answers และ scenario captures ไม่ได้เผยแพร่ใน repository เพื่อให้
-เอกสารนี้เน้น protocol, settings, aggregate measurements และ failure analysis
-ตามขอบเขตที่กำหนด
+คำตอบจริงและ result captures ของทั้ง 15 responses อยู่ใน
+[Three-profile full outputs](OPENTHAI_THREE_GENERATION_PROFILES_FULL_OUTPUT_20260729.md)
+ส่วนไฟล์ API response ภายในที่มี metadata ซ้ำและรายละเอียด serving
+ไม่ได้เผยแพร่
