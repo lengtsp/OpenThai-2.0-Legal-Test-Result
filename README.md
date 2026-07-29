@@ -32,6 +32,14 @@ prompt-plus-answer was 5,015 tokens. Mean retrieval/chat times were
 macro recall, so answer truncation is fixed while multi-section retrieval
 remains the primary improvement target.
 
+The additional long-context run expanded vLLM to 12,288 tokens and reserved
+4,096 output tokens. Four exact-evidence audit scenarios used 5,815–9,698 total
+tokens and all returned `finish_reason=stop`. Citation precision/recall reached
+89.7%/96.4%, but substantive Codex judging averaged only 2.38/5 because the
+answers still invented deadlines, notification duties, sample sizes, and legal
+effects. The 12k context solves capacity; it does not replace claim validation
+or human legal review.
+
 Key resources:
 
 - [Structural chunk tutorial](reports/STRUCTURAL_CHUNK_NCB_TUTORIAL.md)
@@ -39,6 +47,7 @@ Key resources:
 - [Open WebUI and RAG test report](reports/CREDIT_INFO_ACT_NCB_OPENWEBUI_RAG_TEST.md)
 - [Live Open WebUI 8,192/2,048 benchmark](openwebui_ncb_live_test_8192_2048_20260729/report.md)
 - [1,024-token truncation control](openwebui_ncb_live_test_8192_20260729/report.md)
+- [OpenThai 12,288/4,096 long-context benchmark](openthai_12k_long_context_20260729/report.md)
 - [`$extract-structural-legal-chunks` reusable skill](skills/extract-structural-legal-chunks/SKILL.md)
 - [73 section-level Open WebUI files](data/credit_info_act/openwebui_knowledge/README.md)
 

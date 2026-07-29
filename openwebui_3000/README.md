@@ -64,12 +64,12 @@ The deployment intentionally uses:
   closed-book conclusions and asks for exact section plus Open WebUI source
   markers.
 
-OpenThai is served with an 8,192-token context in this test environment. The
-live benchmark reserves up to 2,048 tokens for a broader audit answer and
-passes `enable_thinking=false` so the answer budget is not consumed by hidden
-reasoning. Do not
-increase reranked top-k or output length without rechecking total prompt-token
-usage and GPU KV-cache capacity.
+OpenThai is currently served with a 12,288-token context in this test
+environment. The normal Open WebUI benchmark reserves up to 2,048 output
+tokens. The separate long-context exact-evidence benchmark reserves 4,096
+tokens and passes `enable_thinking=false`, so the answer budget is not consumed
+by hidden reasoning. Do not increase reranked top-k or output length without
+rechecking total prompt-token usage and GPU KV-cache capacity.
 
 The first start downloads the multilingual reranker (about 2.27 GB), so the
 health endpoint remains unavailable until that one-time download completes.

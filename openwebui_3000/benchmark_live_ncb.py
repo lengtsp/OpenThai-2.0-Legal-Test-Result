@@ -85,6 +85,15 @@ def find_kb(session: requests.Session, base_url: str, name: str) -> dict:
     raise RuntimeError(f"Knowledge Base not found: {name}")
 
 
+def model_context_tokens(session: requests.Session, base_url: str) -> int | None:
+    result = api(session, "GET", f"{base_url}/api/models")
+    for item in result.get("data", []):
+        if item.get("id") == MODEL:
+            value = item.get("max_model_len")
+            return int(value) if value else None
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:3000")
@@ -100,6 +109,7 @@ def main() -> int:
     session = requests.Session()
     signin(session, base_url)
     kb = find_kb(session, base_url, args.knowledge_name)
+    context_tokens = model_context_tokens(session, base_url)
     records = []
 
     for scenario in SCENARIOS:
@@ -186,6 +196,7 @@ def main() -> int:
         "knowledge_id": kb["id"],
         "knowledge_name": kb["name"],
         "model": MODEL,
+        "context_tokens": context_tokens,
         "scenarios": records,
     }
     (args.output_dir / "results.json").write_text(
@@ -202,7 +213,9 @@ def main() -> int:
         "",
         f"- Knowledge Base: `{kb['name']}` (`{kb['id']}`)",
         f"- Model: `{MODEL}`",
-        "- vLLM context: 8,192 tokens; requested maximum answer: "
+        f"- vLLM context: "
+        f"{f'{context_tokens:,}' if context_tokens is not None else 'unknown'} tokens; "
+        "requested maximum answer: "
         f"{MAX_OUTPUT_TOKENS:,} tokens",
         "- Generation: temperature 0, model thinking disabled",
         "- Retrieval: hybrid BM25 0.65 + Qwen3-Embedding-4B, top 8, "

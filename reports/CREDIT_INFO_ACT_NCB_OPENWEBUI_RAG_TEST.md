@@ -29,12 +29,14 @@ The Open WebUI live-service verification and Knowledge import result are recorde
 
 The test follows the iApp guide: temperature `0`, thinking disabled, and its JSON citation contract. It tells the model to cite only the supplied context by exact law name and bare section number.
 
-The live vLLM service uses an 8,192-token context window. The final benchmark
-reserves up to 2,048 output tokens and passes `enable_thinking=false`; this is
-intentionally separate from context size.
+The original live Open WebUI run used an 8,192-token context window and a
+2,048-token answer cap. The service was subsequently expanded to 12,288 tokens
+for a long-context benchmark with a 4,096-token answer cap. Both pass
+`enable_thinking=false`; output budget remains intentionally separate from
+context size.
 Increasing context allows a larger retrieved evidence packet plus chat history,
 whereas increasing `max_tokens` allows a longer answer. The sum of prompt and
-generated tokens must remain within the 8,192-token limit. FlashAttention 2
+generated tokens must remain within the configured context limit. FlashAttention 2
 remains enabled for attention; only the FlashInfer top-k/top-p sampler is
 disabled because its JIT cache path in the original virtual environment
 contained spaces. vLLM falls back to its native sampler for that operation.
@@ -116,6 +118,34 @@ Full final answers and machine-readable evidence are in
 [`openwebui_ncb_live_test_8192_2048_20260729/report.md`](../openwebui_ncb_live_test_8192_2048_20260729/report.md)
 and `results.json` beside it. The deliberately constrained 1,024-token run is
 retained in `openwebui_ncb_live_test_8192_20260729` as truncation evidence.
+
+## Long-context test: 12,288 context / 4,096 output
+
+The 12k test bypassed retrieval and injected exact structural sections so it
+could isolate long-context synthesis from retrieval quality. Two evidence
+packets required 9,113 and 9,698 actual prompt-plus-output tokens and therefore
+could not have run with the same 4,096-token output reserve under the previous
+8,192-token service.
+
+| Scenario | Prompt | Output | Total | Finish | Citation P/R | Codex judge | Time |
+|---|---:|---:|---:|---|---:|---:|---:|
+| Integrated member IT audit | 5,915 | 3,783 | 9,698 | stop | 100%/100% | 2.0/5 | 130.35s |
+| Loan broker / credit model | 5,023 | 4,090 | 9,113 | stop | 86%/86% | 2.5/5 | 133.52s |
+| Unlawful disclosure incident | 3,999 | 1,816 | 5,815 | stop | 86%/100% | 2.0/5 | 57.00s |
+| Criteria-first guardrail | 6,009 | 1,835 | 7,844 | stop | 88%/100% | 3.0/5 | 58.65s |
+
+The expanded context solved capacity but not legal reliability. The answers
+still introduced unsupported remediation deadlines, regulator-notification
+duties, sample sizes, and legal effects. One answer ended mid-word even though
+the API returned `finish_reason=stop`. A criteria-first prompt improved
+coverage and concision, but still invented unlabeled sample values and due
+dates. Citation-number metrics were high (`89.7%` precision / `96.4%` recall)
+while substantive Codex judging averaged only `2.38/5`; this gap is why
+citation matching alone is not a sufficient production quality gate.
+
+Full answers, deterministic citation measurements, and judge findings are in
+[`openthai_12k_long_context_20260729/report.md`](../openthai_12k_long_context_20260729/report.md)
+with machine-readable `results.json` beside it.
 
 ## Practical production configuration
 
