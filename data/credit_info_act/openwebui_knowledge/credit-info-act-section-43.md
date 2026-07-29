@@ -1,0 +1,14 @@
+---
+law_name: "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)"
+section: "43"
+source_url: "https://www.creditinfocommittee.or.th/api/file/pdf/law_act/Credit%20Info%20Act%20update%201-6.pdf"
+page_start: 17
+page_end: 17
+structural_topic: "หมวด ๘ บทกำหนดโทษ"
+---
+
+# มาตรา ๔๓
+
+มาตรา ๔๓ ผู้ใดฝ่าฝืนมาตรา ๙ มาตรา ๑๔ หรือมาตรา ๑๕ ต้องระวางโทษจำคุก ตั้งแต่ห้าปีถึงสิบปี หรือปรับไม่เกินห้าแสนบาท หรือทั้งจำทั้งปรับ
+
+Source: https://www.creditinfocommittee.or.th/api/file/pdf/law_act/Credit%20Info%20Act%20update%201-6.pdf (PDF pp. 17-17)

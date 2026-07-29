@@ -1,0 +1,71 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.9.5
+    container_name: openthai-openwebui
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      WEBUI_NAME: "OpenThai Legal RAG Lab"
+      WEBUI_AUTH: "False"
+      ENABLE_SIGNUP: "False"
+      ENABLE_PERSISTENT_CONFIG: "False"
+      ENABLE_OLLAMA_API: "False"
+      ENABLE_OPENAI_API: "True"
+      OPENAI_API_BASE_URL: "http://host.docker.internal:3033/v1"
+      OPENAI_API_KEY: "local-not-required"
+      RAG_EMBEDDING_ENGINE: "openai"
+      RAG_OPENAI_API_BASE_URL: "http://host.docker.internal:8082/v1"
+      RAG_OPENAI_API_KEY: "local-not-required"
+      RAG_EMBEDDING_MODEL: "Qwen3-Embedding-4B"
+      RAG_EMBEDDING_BATCH_SIZE: "16"
+      ENABLE_ASYNC_EMBEDDING: "False"
+      ENABLE_RAG_HYBRID_SEARCH: "True"
+      ENABLE_RAG_HYBRID_SEARCH_ENRICHED_TEXTS: "True"
+      RAG_HYBRID_BM25_WEIGHT: "0.65"
+      RAG_TOP_K: "8"
+      RAG_RERANKING_MODEL: "BAAI/bge-reranker-v2-m3"
+      RAG_TOP_K_RERANKER: "3"
+      RAG_RELEVANCE_THRESHOLD: "0.0"
+      ENABLE_RETRIEVAL_QUERY_GENERATION: "False"
+      RAG_SYSTEM_CONTEXT: "False"
+      RAG_TEMPLATE: |-
+        You are OpenThaiGPT-Legal, an expert assistant on Thai law. The user
+        question and retrieved statutory sections are provided below.
+
+        Rules:
+        - Answer in Thai and distinguish legal requirement, audit evidence, and
+          any evidence gap.
+        - Use ONLY the supplied context for legal conclusions. If the context is
+          insufficient, say so instead of answering from memory.
+        - Cite the exact law name and bare section number found in the context.
+        - Add Open WebUI's inline source marker [id] only for the source that
+          directly supports that statement.
+        - Do not cite a section merely because it was retrieved.
+
+        <context>
+        {{CONTEXT}}
+        </context>
+
+        User question:
+        {{QUERY}}
+      ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER: "False"
+      RAG_TEXT_SPLITTER: "character"
+      CHUNK_SIZE: "4000"
+      CHUNK_OVERLAP: "0"
+      RAG_FILE_MAX_COUNT: "100"
+      RAG_EMBEDDING_CONCURRENT_REQUESTS: "1"
+    volumes:
+      - openthai-openwebui-data:/app/backend/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 10m
+
+volumes:
+  openthai-openwebui-data:
+    name: openthai-openwebui-data
