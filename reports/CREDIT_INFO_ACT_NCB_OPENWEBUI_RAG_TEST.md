@@ -13,7 +13,7 @@ The one extra chunk is a section whose source text is longer than the configured
 
 ## Open WebUI Knowledge-base package
 
-The ready-to-upload package is [`data/credit_info_act/openwebui_knowledge`](../data/credit_info_act/openwebui_knowledge/README.md): 73 Markdown files, one current consolidated legal section per file. Historical amendment appendices are retained in PostgreSQL but excluded from the Knowledge upload so an amendment's transitional section cannot overwrite a current section with the same number. Each upload file has `law_name`, bare `section`, original PDF pages, source URL, and structural topic as front matter.
+The ready-to-upload package is [`data/credit_info_act/openwebui_knowledge`](../data/credit_info_act/openwebui_knowledge/README.md): 73 Markdown files, one current consolidated legal section per file. Historical amendment appendices are retained in PostgreSQL but excluded from the Knowledge upload so an amendment's transitional section cannot overwrite the consolidated law. Each upload file has `law_name`, bare `section`, original PDF pages, source URL, and structural topic as front matter.
 
 Use this sequence in an Open WebUI instance:
 
@@ -68,9 +68,8 @@ All timings are request-to-response only; model loading and embedding time are e
 | Open-book selection: exact sections plus 39/41/62 distractors | 13.01s | 100% | 70.0% | 86.7% | The model sometimes cites supplied but irrelevant distractors; selection must be improved before generation. |
 | Dense retrieval: Qwen embedding top-4 | 14.88s | 100% | 40.0% | 66.7% | Retrieval included relevant sections often, but also close legal neighbours and missed sections in multi-section scenarios. |
 
-Full request/response evidence is in the
-[baseline benchmark report](NCB_OPENTHAI_BASELINE_RAG_BENCHMARK.md) and
-machine-readable data in `../results/ncb/openthai_baseline/results.json`.
+The baseline request/response evidence is summarized in
+[`NCB_OPENTHAI_BASELINE_RAG_BENCHMARK.md`](NCB_OPENTHAI_BASELINE_RAG_BENCHMARK.md).
 
 ## Extended eight-scenario result
 
@@ -84,8 +83,7 @@ Eight additional scenarios cover definitions, licensing, prohibited data/locatio
 The extended result reinforces the same conclusion: structural preparation
 solves generation when the correct evidence is selected, while dense retrieval
 alone still needs hybrid lexical retrieval and reranking. Full evidence is in
-the [extended benchmark report](NCB_OPENTHAI_EXTENDED_RAG_BENCHMARK.md) and
-machine-readable data in `../results/ncb/openthai_extended/results.json`.
+[`NCB_OPENTHAI_EXTENDED_RAG_BENCHMARK.md`](NCB_OPENTHAI_EXTENDED_RAG_BENCHMARK.md).
 
 ## Live Open WebUI test: 8,192 context / 2,048 output
 
@@ -146,6 +144,53 @@ citation matching alone is not a sufficient production quality gate.
 Full answers, deterministic citation measurements, and judge findings are in
 [`openthai_12k_long_context_20260729/report.md`](../openthai_12k_long_context_20260729/report.md)
 with machine-readable `results.json` beside it.
+
+## Parameter sweep and deployed balanced profile
+
+A controlled follow-up kept the exact same `integrated-criteria-first-guardrail`
+prompt and structural NCB evidence packet while changing decoding parameters.
+Thinking was disabled in every profile.
+
+| Profile | Key difference | Output | Finish | Citation P/R | Codex judge | Time |
+|---|---|---:|---|---:|---:|---:|
+| Greedy default | `temperature=0`, cap 4,096 | 1,835 | stop | 88%/100% | 2.75/5 | 56.78s |
+| Greedy + repetition control | `repetition_penalty=1.05`, cap 4,096 | 2,675 | stop | 88%/100% | 3.00/5 | 92.22s |
+| Low-temperature nucleus | `temperature=0.15`, `top_p=0.9` | 2,253 | stop | 88%/100% | 2.75/5 | 76.85s |
+| Recommended balanced | `repetition_penalty=1.05`, cap 3,072 | 2,675 | stop | 88%/100% | 3.00/5 | 94.04s |
+| Forced long completion | `min_tokens=4096`, cap 5,120 | 5,120 | length | 88%/100% | 1.00/5 | 181.07s |
+| Open WebUI balanced preset | deployed custom-model defaults | 2,675 | stop | 88%/100% | 3.00/5 | 96.03s |
+
+The recommended direct request, its 4,096-cap control, and the Open WebUI
+custom-model route produced byte-identical answers. The model stopped naturally
+at 2,675 tokens, so the smaller cap did not truncate the response.
+
+Use:
+
+```json
+{
+  "temperature": 0,
+  "top_p": 1,
+  "repetition_penalty": 1.05,
+  "max_tokens": 3072,
+  "min_tokens": 0,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "chat_template_kwargs": {"enable_thinking": false}
+}
+```
+
+Do not use `min_tokens=4096`: it forced the model to the length cap, caused
+repetition and a major Thai-to-English shift, and reduced substantive quality.
+Low-temperature sampling also did not improve citation or legal accuracy.
+Parameter tuning improves output control but does not cure unsupported legal
+claims; the recommended answer still invented sample sizes and historical due
+dates and overstated some 30-day duties. Exact-section retrieval, claim-level
+validation, and human legal review therefore remain mandatory.
+
+The full responses, SHA-256 comparisons, diagnostics, and judge notes are in
+[`openthai_parameter_sweep_12k_20260729/report.md`](../openthai_parameter_sweep_12k_20260729/report.md).
+The deployed custom model is **OpenThai Legal Audit 12K (Balanced)**, model id
+`openthai-legal-audit-12k-balanced`.
 
 ## Practical production configuration
 

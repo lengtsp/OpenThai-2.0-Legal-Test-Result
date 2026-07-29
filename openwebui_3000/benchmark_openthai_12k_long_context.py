@@ -105,6 +105,23 @@ def load_packet(knowledge_dir: Path, sections: list[str]) -> str:
     return "\n\n---\n\n".join(blocks)
 
 
+def build_messages(knowledge_dir: Path, scenario: dict) -> list[dict]:
+    context = load_packet(knowledge_dir, scenario["sections"])
+    system = (
+        "คุณคือ OpenThaiGPT-Legal ทำหน้าที่ช่วย IT Internal Audit ของธนาคารไทย "
+        "ให้ใช้เฉพาะเอกสารกฎหมายใน <context> เท่านั้น แยกข้อกฎหมาย หลักฐานตรวจสอบ "
+        "วิธีทดสอบ control ความเสี่ยง evidence gap และข้อเสนอแนะให้ชัดเจน "
+        "อ้างชื่อกฎหมายและเลขมาตราแบบตัวเลขอารบิกทุกประเด็น "
+        "หากเอกสารไม่รองรับข้อสรุปใดให้ระบุว่าเป็น evidence gap "
+        "ตอบภาษาไทยแบบละเอียดและใช้งานเป็น audit workpaper ได้ทันที\n\n"
+        f"<context>\n{context}\n</context>"
+    )
+    return [
+        {"role": "system", "content": system},
+        {"role": "user", "content": scenario["question"]},
+    ]
+
+
 def get_model_max_len(session: requests.Session, base_url: str) -> int:
     response = session.get(f"{base_url}/v1/models", timeout=30)
     response.raise_for_status()
@@ -120,31 +137,22 @@ def run_scenario(
     knowledge_dir: Path,
     scenario: dict,
     max_output_tokens: int,
+    sampling_overrides: dict | None = None,
 ) -> dict:
-    context = load_packet(knowledge_dir, scenario["sections"])
-    system = (
-        "คุณคือ OpenThaiGPT-Legal ทำหน้าที่ช่วย IT Internal Audit ของธนาคารไทย "
-        "ให้ใช้เฉพาะเอกสารกฎหมายใน <context> เท่านั้น แยกข้อกฎหมาย หลักฐานตรวจสอบ "
-        "วิธีทดสอบ control ความเสี่ยง evidence gap และข้อเสนอแนะให้ชัดเจน "
-        "อ้างชื่อกฎหมายและเลขมาตราแบบตัวเลขอารบิกทุกประเด็น "
-        "หากเอกสารไม่รองรับข้อสรุปใดให้ระบุว่าเป็น evidence gap "
-        "ตอบภาษาไทยแบบละเอียดและใช้งานเป็น audit workpaper ได้ทันที\n\n"
-        f"<context>\n{context}\n</context>"
-    )
     started = time.perf_counter()
+    payload = {
+        "model": MODEL,
+        "messages": build_messages(knowledge_dir, scenario),
+        "temperature": 0,
+        "top_p": 1,
+        "max_tokens": max_output_tokens,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
+    if sampling_overrides:
+        payload.update(sampling_overrides)
     response = session.post(
         f"{base_url}/v1/chat/completions",
-        json={
-            "model": MODEL,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": scenario["question"]},
-            ],
-            "temperature": 0,
-            "top_p": 1,
-            "max_tokens": max_output_tokens,
-            "chat_template_kwargs": {"enable_thinking": False},
-        },
+        json=payload,
         timeout=1_800,
     )
     elapsed = time.perf_counter() - started

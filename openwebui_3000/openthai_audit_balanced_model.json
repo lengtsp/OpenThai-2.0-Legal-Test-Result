@@ -1,0 +1,39 @@
+{
+  "id": "openthai-legal-audit-12k-balanced",
+  "name": "OpenThai Legal Audit 12K (Balanced)",
+  "base_model_id": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+  "params": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_tokens": 3072,
+    "min_tokens": 0,
+    "repetition_penalty": 1.05,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "function_calling": "default"
+  },
+  "meta": {
+    "description": "Validated 12k-context preset for Thai legal and IT internal-audit RAG with deterministic decoding and thinking disabled.",
+    "capabilities": {
+      "vision": false,
+      "file_upload": true,
+      "web_search": false,
+      "image_generation": false,
+      "code_interpreter": false,
+      "citations": true
+    },
+    "tags": [
+      {
+        "name": "OpenThai Legal"
+      },
+      {
+        "name": "12K Balanced"
+      }
+    ]
+  },
+  "access_control": null,
+  "is_active": true
+}

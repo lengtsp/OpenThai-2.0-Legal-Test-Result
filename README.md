@@ -40,6 +40,16 @@ answers still invented deadlines, notification duties, sample sizes, and legal
 effects. The 12k context solves capacity; it does not replace claim validation
 or human legal review.
 
+A controlled six-profile parameter sweep then held the prompt and exact
+evidence constant. The deployed balanced preset uses `temperature=0`,
+`top_p=1`, `repetition_penalty=1.05`, `max_tokens=3072`, and
+`enable_thinking=false`. It stopped naturally at 2,675 tokens and produced the
+same answer byte-for-byte through direct vLLM and Open WebUI routes. In
+contrast, forcing `min_tokens=4096` hit the 5,120-token cap, repeated content,
+shifted heavily into English, and reduced the Codex judge score to 1/5.
+Decoding parameters improve output control, not legal correctness; claim-level
+validation and human review remain required.
+
 Key resources:
 
 - [Structural chunk tutorial](reports/STRUCTURAL_CHUNK_NCB_TUTORIAL.md)
@@ -48,6 +58,7 @@ Key resources:
 - [Live Open WebUI 8,192/2,048 benchmark](openwebui_ncb_live_test_8192_2048_20260729/report.md)
 - [1,024-token truncation control](openwebui_ncb_live_test_8192_20260729/report.md)
 - [OpenThai 12,288/4,096 long-context benchmark](openthai_12k_long_context_20260729/report.md)
+- [OpenThai 12k controlled parameter sweep](openthai_parameter_sweep_12k_20260729/report.md)
 - [`$extract-structural-legal-chunks` reusable skill](skills/extract-structural-legal-chunks/SKILL.md)
 - [73 section-level Open WebUI files](data/credit_info_act/openwebui_knowledge/README.md)
 

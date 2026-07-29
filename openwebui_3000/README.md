@@ -66,10 +66,48 @@ The deployment intentionally uses:
 
 OpenThai is currently served with a 12,288-token context in this test
 environment. The normal Open WebUI benchmark reserves up to 2,048 output
-tokens. The separate long-context exact-evidence benchmark reserves 4,096
-tokens and passes `enable_thinking=false`, so the answer budget is not consumed
-by hidden reasoning. Do not increase reranked top-k or output length without
-rechecking total prompt-token usage and GPU KV-cache capacity.
+tokens. The initial long-context exact-evidence benchmark reserved 4,096
+tokens; the subsequent controlled parameter sweep found that a 3,072-token cap
+preserved the complete best answer while reducing runaway-output risk. Both
+pass `enable_thinking=false`, so the answer budget is not consumed by hidden
+reasoning. Do not increase reranked top-k or output length without rechecking
+total prompt-token usage and GPU KV-cache capacity.
+
+## Balanced parameter preset
+
+The tested production-oriented decoding profile is:
+
+```json
+{
+  "temperature": 0,
+  "top_p": 1,
+  "repetition_penalty": 1.05,
+  "max_tokens": 3072,
+  "min_tokens": 0,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}
+```
+
+Import the supplied custom model into Open WebUI:
+
+```bash
+python3 openwebui_3000/import_balanced_model.py
+```
+
+Then select **OpenThai Legal Audit 12K (Balanced)** in the model picker. The
+importer also refreshes the model registry so the preset is immediately
+available to chat routes.
+
+Do not set a large positive `min_tokens`. In the controlled test,
+`min_tokens=4096` forced a 5,120-token response, ended with
+`finish_reason=length`, repeated source URLs, and shifted heavily into English.
+The complete parameter comparison, timings, full responses, and Codex judge
+findings are in
+[`../openthai_parameter_sweep_12k_20260729/report.md`](../openthai_parameter_sweep_12k_20260729/report.md).
 
 The first start downloads the multilingual reranker (about 2.27 GB), so the
 health endpoint remains unavailable until that one-time download completes.
