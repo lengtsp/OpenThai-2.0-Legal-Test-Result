@@ -1,4 +1,0 @@
-interface:
-  display_name: "Extract Structural Legal Chunks"
-  short_description: "Page-anchored legal PDF chunking and QA"
-  default_prompt: "Use $extract-structural-legal-chunks to turn this regulatory PDF into page-anchored structural chunks and validate retrieval quality."
