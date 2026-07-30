@@ -1,975 +1,107 @@
-# ทดสอบ OpenThai 2.0 Legal — Three-mode benchmark
+# ผลทดสอบ OpenThai 2.0 Legal (อิสระ ไม่เกี่ยวข้องกับผู้พัฒนา)
 
-Repository นี้บันทึกผลทดสอบอิสระของ
-[`OpenThai 2.0 Legal`](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b)
-ซึ่งพัฒนาโดย iApp Technology บนฐาน NVIDIA Nemotron-3-Nano-30B-A3B
-และรันแบบ self-hosted ผ่าน vLLM ผู้จัดทำ repository เป็นผู้ทดสอบ
-ไม่ใช่ผู้พัฒนา ผู้แทน หรือผู้รับรองโมเดล
+**วันที่ทดสอบ:** 30 กรกฎาคม 2026
+**ผู้จัดทำ:** ผู้ทดสอบอิสระ ไม่ใช่ผู้พัฒนาโมเดล ไม่มีความเกี่ยวข้องกับ iApp Technology หรือทีม OpenThai ผลทั้งหมดมาจากการรันจริงบนเครื่อง local ผ่าน vLLM **ไม่ใช่คำรับรองคุณภาพโมเดลและไม่ใช่คำปรึกษาทางกฎหมาย**
 
-โมเดลนี้ออกแบบมาสำหรับความรู้กฎหมายไทยและการอ้างอิงระดับมาตรา
-โดย model card รองรับทั้ง Open-book/RAG, Closed-book และ Legal essay
-ส่วนชุดข้อมูล
-[`VISAI-AI/NitiBench`](https://huggingface.co/datasets/VISAI-AI/nitibench)
-ออกแบบเพื่อประเมินระบบตอบคำถามกฎหมายไทย เช่น RAG และ LCLM
-พร้อมคำถาม คำตอบ และตัวบทกฎหมายที่ใช้อ้างอิง
+## 1. ทำไมต้องทดสอบซ้ำเอง
 
-> ผลทั้งหมดเป็นการประเมินระบบช่วยค้นและตอบ ไม่ใช่คำแนะนำหรือ
-> คำวินิจฉัยทางกฎหมาย ก่อนใช้งานจริงต้องตรวจตัวบทฉบับปัจจุบัน
-> ข้อเท็จจริง และคำตอบโดยผู้เชี่ยวชาญ
+[OpenThai 2.0 Legal](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b) เผยแพร่ตัวเลข benchmark ของตัวเองไว้ใน model card (เช่น citation F1, holding, coverage, fluency) แต่ตัวเลขเหล่านั้นเป็น**ตัวเลขที่ผู้พัฒนารายงานเอง** repo นี้จึงทำการทดสอบซ้ำอย่างอิสระ ด้วยชุดคำถามและ pipeline ของผู้ทดสอบเอง เพื่อดูว่าโมเดลทำงานได้จริงแค่ไหนเมื่อถูกใช้แบบที่ผู้ใช้งานทั่วไปจะเจอ
 
-## ขอบเขตการทดสอบ
+## 2. ขอบเขตการทดสอบ
 
-ทดสอบ 3 modes รวม **12 unique scenarios** และมี raw TXT **17 ไฟล์**
-เพราะ RAG 5 ข้อถูกรันกับ retrieval backend สองแบบ
+ทดสอบ 3 ความสามารถหลักตามที่ model card ระบุว่ารองรับ รวม 12 คำถาม:
 
-| Mode | Unique scenarios | Backend runs | TXT files | สถานะการประเมิน |
-|---|---:|---:|---:|---|
-| Citation RAG | 5 | PostgreSQL + Milvus | 10 | ประเมินกับ NitiBench ground truth |
-| Legal essay | 2 | Retrieval-free 1 รอบ | 2 | เปรียบเทียบกับ test reference; รอผู้เชี่ยวชาญยืนยัน |
-| Closed-book | 5 | Retrieval-free 1 รอบ | 5 | ตรวจรูปแบบ/มาตราเบื้องต้น; รอผู้เชี่ยวชาญยืนยัน |
-| **รวม** | **12** | — | **17** | — |
-
-- [RAG ผ่าน PostgreSQL 5 ไฟล์](results/rag-postgresql-vs-milvus-20260730/postgresql/)
-- [RAG ผ่าน Milvus 5 ไฟล์](results/rag-postgresql-vs-milvus-20260730/milvus/)
-- [Legal essay 2 ไฟล์](results/three-mode-raw-20260730/legal_essay/)
-- [Closed-book 5 ไฟล์](results/three-mode-raw-20260730/closed_book/)
-
-## สิ่งที่ model card รองรับ
-
-Model card แยกงานที่เกี่ยวข้องกับการทดสอบนี้ไว้ชัดเจน:
-
-| Mode | สิ่งที่ทดสอบ | Evidence ใน prompt |
-|---|---|---|
-| Open-book echo | ใช้เอกสารที่เกี่ยวข้องทั้งหมด | มีเฉพาะมาตราที่ถูก |
-| Open-book selection | เลือกมาตราที่ใช้จริงและตัด near-miss | มีทั้งมาตราที่เกี่ยวข้องและ distractors |
-| Closed-book | ความจำกฎหมายจาก model weights | ไม่มีตัวบท |
-| Legal essay | การเขียนวิเคราะห์ยาว การอ้างมาตรา holding coverage และ fluency | โจทย์คดี |
-
-RAG ใน repository นี้ใกล้กับ **Open-book selection** เพราะ retriever ส่ง
-candidate 20 รายการให้ OpenThai เลือก evidence ก่อนตอบ
-
-## Requirements และสภาพแวดล้อม
-
-| Component | ค่าที่ใช้ |
-|---|---|
-| Generator | OpenThai 2.0 Legal ผ่าน vLLM/OpenAI-compatible API |
-| Served context window | 32,768 tokens รวม prompt + completion |
-| Embedding | Qwen3-Embedding-4B GGUF Q4 |
-| Embedding dimensions | 2,560 |
-| Primary vector store | PostgreSQL + pgvector |
-| Backend ที่นำมาเปรียบเทียบ | Milvus Standalone |
-| RAG candidate count | `top_k=20` |
-| Corpus | VISAI-AI/NitiBench |
-
-OpenThai vLLM ถูก unload หลังจบการทดสอบแล้ว ผลที่เผยแพร่เป็น artifacts
-จาก inference ที่รันเสร็จสมบูรณ์ ไม่ได้สร้างขึ้นใหม่ภายหลัง
-
-## การเตรียม NitiBench ใน PostgreSQL
-
-NitiBench มี fields หลัก:
-
-- `question`
-- `answer`
-- `relevant_laws`
-- `reference_answer`
-- `reference_laws`
-
-การสร้าง passage embedding **ไม่รวม `answer` หรือ `reference_answer`**
-โดยนำข้อมูลกฎหมายมาสร้าง `embedding_text` ดังนี้:
-
-```text
-กฎหมาย: {law_name}
-มาตรา: {section_num}
-ข้อความบทบัญญัติ:
-{section_body_without_repeated_heading}
-```
-
-ตัวอย่างจริง:
-
-```text
-กฎหมาย: ประมวลกฎหมายแพ่งและพาณิชย์
-มาตรา: 1096
-ข้อความบทบัญญัติ:
-อันว่าบริษัทจำกัดนั้น คือบริษัทประเภทซึ่งตั้งขึ้นด้วยแบ่งทุนเป็นหุ้น
-มีมูลค่าเท่า ๆ กัน โดยผู้ถือหุ้นต่างรับผิดจำกัดเพียงไม่เกินจำนวนเงิน
-ที่ตนยังส่งใช้ไม่ครบมูลค่าของหุ้นที่ตนถือ
-```
-
-Schema ที่ใช้:
-
-| Table | จำนวน | หน้าที่ |
+| โหมด | จำนวนข้อ | ทดสอบอะไร |
 |---|---:|---|
-| `benchmark_cases` | 3,779 | คำถาม คำตอบ และ source payload |
-| `benchmark_case_laws` | 7,008 | ความสัมพันธ์ case → relevant/reference law |
-| `legal_chunks` | 3,934 | หนึ่งบทบัญญัติต่อหนึ่ง record พร้อม metadata/FTS |
-| `legal_chunk_embeddings` | 3,934 | passage embedding profile `qwen3-legal-v2` |
-| `benchmark_query_embeddings` | 3,779 | query embedding สำหรับ benchmark |
-
-Embedding แยกจาก legal chunk ด้วย `chunk_id` เพื่อให้สร้าง embedding profile
-ใหม่ได้โดยไม่แก้ข้อความกฎหมาย และเก็บ `embedding_text`/`input_hash`
-สำหรับตรวจสอบย้อนหลัง
-
-## Hybrid RAG
-
-### PostgreSQL
-
-```text
-Question
-  ├─ Dense: Qwen3-Embedding-4B + pgvector/halfvec cosine
-  └─ Sparse: PostgreSQL tsvector + pg_trgm
-          ↓
-      Application RRF k=60
-          ↓
-        top_k=20
-          ↓
-  OpenThai evidence selection/rerank
-          ↓
-  Focused statutory context
-          ↓
-  OpenThai citation answer
-```
-
-### Milvus
-
-```text
-Question
-  ├─ Dense: Qwen3-Embedding-4B + Milvus cosine
-  └─ Sparse: Milvus BM25 บน Thai 3/4-character n-grams
-          ↓
-      Milvus native RRF k=80
-          ↓
-        top_k=20
-          ↓
-  OpenThai evidence selection/rerank
-          ↓
-  Focused statutory context
-          ↓
-  OpenThai citation answer
-```
-
-Milvus collection `nitibench_legal_v2_rrf` มี 3,934 records พร้อม
-`dense_vector`, `sparse_thai`, `law_name`, `section_num` และ `content`
-
-Runtime ที่ใช้คือ Milvus Server `v2.6.20` และ PyMilvus `2.6.14`
-
-### BM25 กำหนดไว้อย่างไร
-
-ข้อควรแยกให้ชัดก่อน:
-
-- **PostgreSQL pipeline รอบนี้ไม่ได้ใช้ BM25 โดยตรง** แต่ใช้
-  `tsvector/ts_rank_cd` ร่วมกับ `pg_trgm`
-- **Milvus pipeline ใช้ native BM25** ผ่าน field `sparse_thai`
-- มีการสร้าง `sparse_raw` จาก standard analyzer ไว้ทดลองด้วย
-  แต่ final inference ที่รายงานเลือก `sparse_thai`
-
-#### 1. ข้อความต้นทาง
-
-BM25 ไม่ได้ใช้ dense `embedding_text` แต่ใช้ `legal_chunks.content`
-ซึ่งมีชื่อกฎหมาย เลขมาตรา และข้อความตัวบท เช่น:
-
-```text
-ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 565
-การเช่าถือสวนนั้น ท่านให้สันนิษฐานไว้ก่อนว่าเช่ากันปีหนึ่ง
-การเช่านาก็ให้สันนิษฐานไว้ก่อนว่าเช่ากันตลอดฤดูทำนาปีหนึ่ง
-```
-
-ทั้ง document และ query ถูกส่งผ่านฟังก์ชัน `thai_lexical_text()`
-แบบเดียวกันก่อนเข้า BM25
-
-#### 2. Thai lexical preprocessing
-
-ขั้นตอนที่ใช้จริง:
-
-1. แปลงเลขไทย `๐-๙` เป็นเลขอารบิก `0-9`
-2. แปลงภาษาอังกฤษเป็น lowercase
-3. แยก lexical units ด้วย pattern `[ก-๙a-z0-9/.-]+`
-4. เก็บ lexical unit เดิม เช่น `มาตรา`, `565`, `การเช่าถือสวน`
-5. สร้าง character n-grams ขนาด 3 และ 4 ตัวอักษร
-6. สร้าง n-grams เพิ่มจากข้อความที่ตัดช่องว่าง/เครื่องหมายออกทั้งสาย
-   เพื่อช่วยจับคำไทยที่ไม่มีตัวแบ่งคำชัดเจน
-7. ตัด token ซ้ำภายในข้อความหนึ่ง record
-8. รวม token ด้วยช่องว่างเพื่อให้ Milvus `whitespace` tokenizer อ่านได้
-
-โค้ดหลัก:
-
-```python
-def thai_lexical_text(value: str) -> str:
-    normalized = value.translate(
-        str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
-    ).lower()
-    lexical_units = re.findall(r"[ก-๙a-z0-9/.-]+", normalized)
-    tokens = []
-    seen = set()
-
-    def add(token):
-        token = token.strip()
-        if token and token not in seen:
-            seen.add(token)
-            tokens.append(token)
-
-    for unit in lexical_units:
-        add(unit)
-        compact = re.sub(r"[^ก-๙a-z0-9/]+", "", unit)
-        for width in (3, 4):
-            if len(compact) < width:
-                add(compact)
-                continue
-            for index in range(max(0, len(compact) - width + 1)):
-                add(compact[index:index + width])
-
-    whole = re.sub(r"[^ก-๙a-z0-9/]+", "", normalized)
-    for width in (3, 4):
-        for index in range(max(0, len(whole) - width + 1)):
-            add(whole[index:index + width])
-
-    return " ".join(tokens)
-```
-
-<details>
-<summary>กดเพื่อดูตัวอย่างการแปลงคำถามเป็น BM25 tokens</summary>
-
-คำถาม:
-
-```text
-การเช่าถือสวนมีระยะเวลากี่ปี
-```
-
-ได้ 52 unique tokens ตัวอย่างเช่น:
-
-```text
-การเช่าถือสวนมีระยะเวลากี่ปี
-การ ารเ รเช เช่ ช่า ่าถ าถื ถือ ือส อสว สวน วนม นมี
-มีร ีระ ระย ะยะ ยะเ ะเว เวล วลา ลาก ากี กี่ ี่ป ่ปี
-การเ ารเช รเช่ เช่า ช่าถ ่าถื าถือ ถือส ือสว อสวน
-สวนม วนมี นมีร มีระ ีระย ระยะ ะยะเ ยะเว ะเวล
-เวลา วลาก ลากี ากี่ กี่ป ี่ปี
-```
-
-ตัวบทมาตรา 565 ตัวอย่างข้างต้นได้ 223 unique tokens
-จึงมี token ร่วมกับ query ทั้งระดับข้อความเดิมและ 3/4-grams
-
-</details>
-
-#### 3. Milvus schema และ BM25 function
-
-`lexical_text` ใช้ whitespace analyzer ส่วน `sparse_thai`
-เป็น sparse vector ที่ Milvus สร้างจาก BM25:
-
-```python
-schema.add_field(
-    field_name="lexical_text",
-    datatype=DataType.VARCHAR,
-    max_length=65535,
-    enable_analyzer=True,
-    analyzer_params={"tokenizer": "whitespace"},
-)
-
-schema.add_field(
-    field_name="sparse_thai",
-    datatype=DataType.SPARSE_FLOAT_VECTOR,
-)
-
-schema.add_function(
-    Function(
-        name="thai_ngram_bm25",
-        input_field_names=["lexical_text"],
-        output_field_names=["sparse_thai"],
-        function_type=FunctionType.BM25,
-    )
-)
-
-indexes.add_index(
-    field_name="sparse_thai",
-    index_type="SPARSE_INVERTED_INDEX",
-    metric_type="BM25",
-)
-```
-
-Milvus เป็นผู้คำนวณองค์ประกอบของ BM25 เช่น document frequency,
-inverse document frequency, document length normalization และ
-term-frequency saturation จาก collection
-
-โค้ดรอบนี้ส่ง `params={}` ตอน search จึง **ไม่ได้ pin ค่า `k1` และ `b`
-เอง** แต่ใช้ค่า default ของ Milvus version ที่ติดตั้ง หากต้องการ
-reproducibility ข้าม version ควรบันทึก Milvus version และกำหนด
-BM25 parameters ให้ชัดเจนเมื่อ API/version รองรับ
-
-#### 4. BM25 query
-
-Query ถูกแปลงด้วย `thai_lexical_text()` แล้วค้น field `sparse_thai`
-จำนวน 20 รายการ:
-
-```python
-sparse_query = thai_lexical_text(question)
-
-sparse_request = AnnSearchRequest(
-    data=[sparse_query],
-    anns_field="sparse_thai",
-    param={"metric_type": "BM25", "params": {}},
-    limit=20,
-)
-```
-
-BM25 ให้คะแนนสูงกับมาตราที่มี token สำคัญตรงกับ query โดย token ที่พบ
-ในเอกสารจำนวนน้อยจะมีน้ำหนัก IDF สูงกว่า token ทั่วไป เช่นเลขมาตรา
-ชื่อกฎหมาย หรือวลีเฉพาะ ส่วน document-length normalization ช่วยไม่ให้
-มาตรายาวได้เปรียบจากจำนวนคำเพียงอย่างเดียว
-
-#### 5. รวม BM25 กับ dense retrieval
-
-Dense และ BM25 ดึงอย่างละ 20 candidates แล้วรวมด้วย Milvus native RRF
-แบบน้ำหนักเท่ากัน:
-
-```python
-dense_request = AnnSearchRequest(
-    data=[query_vector],
-    anns_field="dense_vector",
-    param={"metric_type": "COSINE", "params": {"ef": 100}},
-    limit=20,
-)
-
-result = client.hybrid_search(
-    collection_name="nitibench_legal_v2_rrf",
-    reqs=[dense_request, sparse_request],
-    ranker=RRFRanker(80),
-    limit=20,
-)
-```
-
-แนวคิดคะแนน RRF:
-
-```text
-RRF(document) =
-    1 / (80 + dense_rank)
-  + 1 / (80 + bm25_rank)
-```
-
-RRF ใช้ลำดับแทนการนำ cosine score กับ BM25 score มาบวกตรง ๆ
-จึงไม่ต้อง normalize score ที่มีคนละ scale เอกสารที่ติดอันดับดี
-ทั้ง dense และ BM25 จะถูกดันขึ้นด้านบน
-
-#### 6. ข้อจำกัดของ BM25 implementation รอบนี้
-
-- การตัด token ซ้ำด้วย `seen` ทำให้ term frequency ภายใน document
-  ส่วนใหญ่ใกล้ลักษณะ binary presence; BM25 จึงพึ่ง IDF/rank มากขึ้น
-- 3/4-grams เพิ่ม recall สำหรับภาษาไทย แต่เพิ่ม index size และอาจสร้าง
-  partial matches ที่ไม่เกี่ยวข้อง
-- การสร้าง n-grams จากข้อความที่ลบช่องว่างทั้งสายอาจสร้าง token
-  ข้ามขอบเขตคำ
-- `params={}` ไม่ pin `k1/b`
-- ใช้ full section content สูงสุด 65,000 UTF-8 bytes; มาตราที่ยาวมาก
-  อาจถูก truncate ก่อนเข้า Milvus
-- เลขมาตราเดียวกันมีได้ในหลายกฎหมาย จึงต้องเก็บ `law_name`
-  และให้ dense/RRF ช่วยแยกบริบท
-- BM25 ไม่เข้าใจความหมายทางกฎหมายหรือ actor/scope
-  จึงยังต้องใช้ dense retrieval และ OpenThai evidence selection
-
-#### PostgreSQL sparse score ที่ใช้เปรียบเทียบ
-
-ฝั่ง PostgreSQL ใช้คะแนน:
-
-```text
-sparse_score =
-    2.0 * ts_rank_cd(search_tsv, plainto_tsquery('simple', question))
-  + max(
-        similarity(content, question),
-        word_similarity(question, content),
-        similarity(law_name || ' ' || section_num, question)
-    )
-```
-
-จากนั้นนำ dense rank และ sparse rank มารวมด้วย application-side
-RRF `k=60` ดังนั้นตาราง PostgreSQL vs Milvus เป็นการเทียบ tuned pipelines
-ไม่ใช่การเทียบ BM25 implementation เดียวกันบน database สองตัว
-
-การเปรียบเทียบนี้เป็นการเทียบ **pipeline ที่ปรับให้เหมาะกับแต่ละ backend**
-ไม่ใช่การควบคุม sparse index และ RRF ให้เหมือนกันทุกประการ
-
-## Generation settings
-
-ค่าที่แนะนำใน model card:
-
-| Use case | temperature | top_p | max_tokens | thinking |
-|---|---:|---:|---:|---|
-| Citation answering — RAG/Closed-book | 0.0 | 1.0 | 2,048 | off |
-| Legal essay drafting | 0.7 | 0.9 | 4,096 | on หรือ off |
-| Legal essay with thinking | 0.7 | 0.9 | 6,144 | on |
-| General chat | 0.7 | 0.9 | 2,048 | off |
-
-ค่าที่ใช้จริง:
-
-| Mode/Stage | temperature | top_p | max_tokens | thinking | seed |
-|---|---:|---:|---:|---|---:|
-| RAG retrieval rerank | 0.0 | 1.0 | 2,048 | off | 42 |
-| RAG final citation answer | 0.0 | 1.0 | 2,048 | off | 42 |
-| Closed-book | 0.0 | 1.0 | 2,048 | off | 42 |
-| Legal essay | 0.7 | 0.9 | 4,096 | off | 42 |
-
-Model card ระบุว่า `max_tokens` เป็น per-request setting ไม่ใช่ model limit
-และแนะนำ context window 32,768 เนื่องจาก prompt กฎหมาย/ภาษีอาจยาว
-การเปลี่ยน generation parameters ทำที่ request ได้ ไม่ต้อง restart vLLM
-
-## ผลเปรียบเทียบภาพรวม
-
-| Mode | จำนวน | ผลเชิงระบบ | เวลาเฉลี่ย | Tokens รวม | ข้อสรุป |
-|---|---:|---|---:|---:|---|
-| RAG/PostgreSQL | 5 | expected section rank 1 และ citation ถูก 5/5 | 9.156s | 39,164 | ผ่านชุดตัวอย่าง |
-| RAG/Milvus | 5 | expected section rank 1 และ citation ถูก 5/5 | 7.280s | 30,189 | ผ่านชุดตัวอย่าง |
-| Legal essay | 2 | ตอบจบ 2/2; keyword checklist เฉลี่ย 40% | 30.816s | 2,803 | holding ขัด test reference ทั้ง 2 ข้อ; รอผู้เชี่ยวชาญ |
-| Closed-book | 5 | valid JSON 5/5; expected-section macro recall 50% | 5.881s | 3,035 | ตรวจเบื้องต้นเท่านั้น; รอผู้เชี่ยวชาญ |
-
-ตัวเลข Legal essay และ Closed-book ไม่ใช่คะแนนรับรองความถูกต้องทางกฎหมาย
-เพราะ test references ไม่ได้ผ่าน legal-expert adjudication ในรอบนี้
-
-# Mode 1 — Citation RAG
-
-## การเลือกคำถาม
-
-ใช้คำถามจาก NitiBench ต้นฉบับ 5 ข้อ และตรึงคำถามชุดเดียวกันสำหรับ
-PostgreSQL/Milvus paired comparison
-
-คำขอเดิมใช้คำว่า “สุ่ม 5 ข้อ” แต่ runner ที่เก็บ artifact ใช้ fixed list
-โดยไม่มี random seed สำหรับขั้น sampling ดังนั้นรายงานนี้ไม่อ้างว่าเป็น
-auditable random sample
-
-Expected `relevant_laws` ใช้ให้คะแนนหลังตอบเท่านั้น ไม่ส่งเข้า embedding,
-retrieval, reranker หรือ final answer ล่วงหน้า
-
-## ผล PostgreSQL เทียบ Milvus
-
-| Metric | PostgreSQL | Milvus |
-|---|---:|---:|
-| Expected section อยู่ rank 1 | 5/5 | 5/5 |
-| Candidate recall@20 | 100% | 100% |
-| Rerank recall | 100% | 100% |
-| Citation recall | 100% | 100% |
-| Citation precision | 100% | 100% |
-| Exact citation set | 5/5 | 5/5 |
-| Valid final JSON | 5/5 | 5/5 |
-| คำตอบเหมือนกันระหว่าง backend | 5/5 | 5/5 |
-| Backend search เฉลี่ย | 1.386s | 0.013s |
-| Retrieval รวม embedding เฉลี่ย | 1.630s | 0.057s |
-| End-to-end เฉลี่ย | 9.156s | 7.280s |
-| LLM tokens รวม | 39,164 | 30,189 |
-
-Milvus เร็วกว่าใน retrieval pipeline ที่บันทึกไว้ประมาณ 28.6 เท่า
-และ end-to-end ลดลงประมาณ 20.5% แต่เป็นคนละรอบเวลา/cache
-ไม่ใช่ stress หรือ concurrency benchmark
-
-### RAG 1 — ศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าไม่มีใบอนุญาต
-
-<details>
-<summary>กดเพื่อดูคำถาม, selected context และคำตอบ</summary>
-
-**คำถาม**
-
-> ถ้ามีคนประกอบกิจการในลักษณะเป็นศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้า
-> โดยไม่ได้รับใบอนุญาตต้องระวางโทษอย่างไร
-
-**Selected context**
-
-```xml
-<law law_name="พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546" section="132">
-ผู้ใดประกอบกิจการในลักษณะเป็นศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้า
-โดยไม่ได้รับใบอนุญาตหรือไม่ได้จดทะเบียนตามมาตรา 54
-ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท
-หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาท
-ตลอดเวลาที่ยังฝ่าฝืน
-</law>
-```
-
-**คำตอบจาก OpenThai**
-
-```json
-{
-  "answer": "ผู้ใดประกอบกิจการในลักษณะเป็นศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าโดยไม่ได้รับใบอนุญาตหรือไม่ได้จดทะเบียน ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาทตลอดเวลาที่ยังฝ่าฝืน",
-  "citations": [
-    {
-      "law": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
-      "section": "132"
-    }
-  ]
-}
-```
-
-**Artifacts:** [PostgreSQL](results/rag-postgresql-vs-milvus-20260730/postgresql/rag-01-99fb5f5a.txt) · [Milvus](results/rag-postgresql-vs-milvus-20260730/milvus/rag-01-99fb5f5a.txt)
-
-</details>
-
-### RAG 2 — การเช่าถือสวน
-
-<details>
-<summary>กดเพื่อดูคำถามและคำตอบ</summary>
-
-**คำถาม**
-
-> การเช่าถือสวนมีระยะเวลากี่ปี
-
-**Expected/selected law:** ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 565
-
-```json
-{
-  "answer": "การเช่าถือสวนมีระยะเวลากันปีหนึ่ง",
-  "citations": [
-    {
-      "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
-      "section": "565"
-    }
-  ]
-}
-```
-
-**Artifacts:** [PostgreSQL](results/rag-postgresql-vs-milvus-20260730/postgresql/rag-02-f781c322.txt) · [Milvus](results/rag-postgresql-vs-milvus-20260730/milvus/rag-02-f781c322.txt)
-
-</details>
-
-### RAG 3 — ผู้เยาว์เป็นบุตรบุญธรรมหลายคนพร้อมกัน
-
-<details>
-<summary>กดเพื่อดูคำถามและคำตอบ</summary>
-
-**คำถาม**
-
-> ผู้เยาว์สามารถเป็นบุตรบุญธรรมของคนหลายคนในเวลาเดียวกันได้หรือไม่
-
-**Expected/selected law:** ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 1598/26
-
-```json
-{
-  "answer": "ผู้เยาว์ไม่สามารถเป็นบุตรบุญธรรมของคนหลายคนในเวลาเดียวกันได้ เว้นแต่เป็นบุตรบุญธรรมของคู่สมรสของผู้รับบุตรบุญธรรม",
-  "citations": [
-    {
-      "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
-      "section": "1598/26"
-    }
-  ]
-}
-```
-
-รอบ Milvus แรก reranker เลือก `C01` ถูกต้องแต่ JSON ขาดวงเล็บปิด
-ระบบจึงใช้ generic syntax recovery ซึ่งยอมรับเฉพาะ ID ที่ model
-เขียนไว้ใน `selected_ids` และมีอยู่จริงใน candidate set
-ไม่มีการ hardcode เลขมาตราหรือ ground truth
-
-**Artifacts:** [PostgreSQL](results/rag-postgresql-vs-milvus-20260730/postgresql/rag-03-0db37f05.txt) · [Milvus](results/rag-postgresql-vs-milvus-20260730/milvus/rag-03-0db37f05.txt)
-
-</details>
-
-### RAG 4 — สัญญาบัญชีเดินสะพัด
-
-<details>
-<summary>กดเพื่อดูคำถามและคำตอบ</summary>
-
-**คำถาม**
-
-> สัญญาบัญชีเดินสะพัดคืออะไร
-
-**Expected/selected law:** ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 856
-
-```json
-{
-  "answer": "สัญญาบัญชีเดินสะพัด คือ สัญญาซึ่งบุคคลสองคนตกลงกันว่าสืบแต่นั้นไป หรือในชั่วเวลากำหนดอันใดอันหนึ่ง ให้ตัดทอนบัญชีหนี้ทั้งหมดหรือแต่บางส่วนอันเกิดขึ้นแต่กิจการในระหว่างเขาทั้งสองนั้นหักกลบลบกัน และคงชำระแต่ส่วนที่เป็นจำนวนคงเหลือโดยดุลภาค",
-  "citations": [
-    {
-      "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
-      "section": "856"
-    }
-  ]
-}
-```
-
-**Artifacts:** [PostgreSQL](results/rag-postgresql-vs-milvus-20260730/postgresql/rag-04-a488029b.txt) · [Milvus](results/rag-postgresql-vs-milvus-20260730/milvus/rag-04-a488029b.txt)
+| Citation answering — RAG | 5 | ให้ retrieval หากฎหมายจริง แล้วโมเดลอ้างมาตราที่ถูกต้อง |
+| Legal essay drafting | 2 | เขียนบทวิเคราะห์กฎหมายจากข้อเท็จจริง ไม่มีเอกสารอ้างอิง |
+| Citation answering — closed-book | 5 | ตอบจากความจำในตัวโมเดล ไม่มี context ให้เลย |
 
-</details>
+**เหตุผลที่แยก 3 โหมดนี้ทดสอบแยกกัน:** งานแต่ละแบบต้องการความสามารถคนละด้าน (ความจำ vs. การอ่านหลักฐาน vs. การเขียนเชิงวิเคราะห์) การเอาคะแนนมารวมกันจะบิดเบือนภาพรวม เช่น โมเดลอาจเก่งเรื่องอ้างอิงเมื่อมีหลักฐานให้ แต่จำเลขมาตราผิดเมื่อไม่มีหลักฐาน ถ้ารวมคะแนนจะไม่เห็นจุดอ่อนนี้
 
-### RAG 5 — ความรับผิดของผู้ถือหุ้นบริษัทจำกัด
+นอกจากนี้ยังทดสอบ **retrieval แยกต่างหากอีก 200 คำถาม** (ก่อนส่งเข้าโมเดล) เพื่อตรวจว่าระบบค้นหาหลักฐานเองแม่นแค่ไหน เพราะ **ถ้าค้นหลักฐานผิด ต่อให้โมเดลเก่งแค่ไหนก็ตอบถูกไม่ได้** — จึงต้องแยกวัด "ความผิดพลาดจากการค้นหา" ออกจาก "ความผิดพลาดจากการตอบ" ให้ชัดเจน
 
-<details>
-<summary>กดเพื่อดูคำถามและคำตอบ</summary>
-
-**คำถาม**
-
-> ผู้ถือหุ้นในบริษัทจำกัด รับผิดในหุ้นอย่างไร
-
-**Expected/selected law:** ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 1096
-
-```json
-{
-  "answer": "ผู้ถือหุ้นในบริษัทจำกัดรับผิดจำกัดเพียงไม่เกินจำนวนเงินที่ตนยังส่งใช้ไม่ครบมูลค่าของหุ้นที่ตนถือ",
-  "citations": [
-    {
-      "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
-      "section": "1096"
-    }
-  ]
-}
-```
-
-**Artifacts:** [PostgreSQL](results/rag-postgresql-vs-milvus-20260730/postgresql/rag-05-c9f3cc21.txt) · [Milvus](results/rag-postgresql-vs-milvus-20260730/milvus/rag-05-c9f3cc21.txt)
+## 3. การตั้งค่าและเหตุผลเบื้องหลังแต่ละค่า
 
-</details>
+| หัวข้อ | ค่าที่ใช้ | เหตุผล |
+|---|---|---|
+| Generation model | `iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b` ผ่าน vLLM 0.25.1 | ใช้ตัว weight ที่เผยแพร่จริง ไม่ใช่ quantized build เพื่อวัดผลจากโมเดลตัวเต็ม |
+| Served context | 32,768 token (รวม prompt+completion) | ตรงตามค่าที่ model card แนะนำ เพื่อให้ผลเทียบกับตัวเลขที่ผู้พัฒนาประกาศได้ ไม่ใช่ค่าที่ผู้ทดสอบเลือกเอง |
+| Citation answering (RAG/closed-book): `temperature=0.0, top_p=1.0` | ตายตัว ไม่สุ่ม | งานอ้างอิงมาตรากฎหมายต้องการ**คำตอบเดิมทุกครั้ง**ที่ถามซ้ำ การสุ่ม (temperature สูง) จะทำให้เลขมาตราที่อ้างเปลี่ยนไปมาโดยไม่มีเหตุผล ซึ่งยอมรับไม่ได้กับงานกฎหมาย |
+| Legal essay: `temperature=0.7, top_p=0.9` | เปิดความหลากหลาย | งานเขียนบทวิเคราะห์ต้องการความลื่นไหลและมุมมองที่เป็นธรรมชาติ ไม่ใช่คำตอบตายตัวแบบ citation จึงใช้ค่าที่โมเดลแนะนำสำหรับ "drafting" โดยเฉพาะ |
+| `thinking = off` ทุกโหมด | ปิด | (1) เป็นค่าที่ model card ใช้ตอนทำ benchmark ตัวเลขที่เผยแพร่เอง จึงต้องใช้ค่าเดียวกันเพื่อเทียบกันได้ตรง ๆ (2) เมื่อเปิด thinking พบว่ากระบวนการคิดภาษาอังกฤษหลุดออกมาปนกับคำตอบจริง กลายเป็นปัญหาเรื่อง format/privacy ถ้านำไปแสดงในหน้า UI ตรง ๆ |
+| `max_tokens = 2,048` (citation) / `4,096` (essay) | ตามตารางแนะนำใน model card | model card เตือนว่า**ห้ามตั้งต่ำกว่า 1,536 สำหรับงาน citation** เพราะถ้า JSON ถูกตัดกลางคัน จะเสีย array `citations` ทั้งชุด กลายเป็นคะแนน 0 ทั้งข้อทั้งที่คำตอบถูกเกือบหมด — 2,048 จึงเป็นค่าปลอดภัยที่มีระยะห่างพอสมควรจากขีดอันตรายนั้น |
+| หน่วย retrieval = 1 มาตรา ต่อ 1 chunk (ไม่ตัดตามจำนวนตัวอักษร) | คงมาตราให้ครบ | กฎหมายมีเงื่อนไข ข้อยกเว้น และการอ้างอิงข้ามมาตราอยู่ในมาตราเดียวกัน ถ้าตัด chunk ตามจำนวนตัวอักษรแบบตายตัว อาจตัดเงื่อนไขสำคัญขาดออกจากเนื้อหาหลัก ทำให้โมเดลอ้างถูกมาตราแต่เข้าใจเนื้อหาไม่ครบ |
+| ไม่นำ `answer`/`reference_answer` ของ NitiBench เข้า index ที่ใช้ embed | ตัดออกทั้งหมด | ป้องกัน**data leakage** — ถ้าเฉลยเผลอหลุดเข้าไปอยู่ใน passage ที่ใช้ค้นหา ผลจะดีเกินจริงเพราะโมเดล "เห็นเฉลย" ทางอ้อม ไม่ใช่ความสามารถจริงของ retrieval |
+| เก็บ embedding แยกตาราง (`legal_chunk_embeddings`) ไม่ฝังใน JSON | แยกตาราง + `profile_id` | ทำให้เปลี่ยน embedding model ใหม่ได้โดยไม่ต้องแก้ข้อความต้นฉบับ ตรวจสอบที่มาของแต่ละ vector ได้ และลบ/สร้างใหม่เฉพาะ profile เดียวได้โดยไม่กระทบของเดิม |
 
-# Mode 2 — Legal essay
+## 4. ผลลัพธ์แยกตามโหมด
 
-System prompt:
+### 4.1 Citation answering — RAG (5 ข้อ)
 
-```python
-SYSTEM = "You are a Thai legal expert. Answer the question with legal analysis and cite the relevant มาตรา."
-```
+**ขั้นตอน:** ค้นหาผู้สมัคร 20 มาตราด้วย hybrid search → ให้โมเดลเอง "คัดกรอง" เหลือเฉพาะมาตราที่เกี่ยวข้องจริง (rerank) → ส่งเฉพาะที่คัดแล้วให้โมเดลตอบคำถามจริง
 
-โจทย์และ test reference สร้างขึ้นเพื่อการทดลองโดย ChatGPT 5.6 sol
-ไม่ได้มาจาก NitiBench และไม่ได้ผ่านการรับรองโดยผู้เชี่ยวชาญกฎหมาย
-จึงรายงาน model output และความสอดคล้องเบื้องต้นเท่านั้น
+**เหตุผลที่มีขั้นตอน rerank คั่นกลาง แทนที่จะส่ง 20 มาตราให้ตอบเลย:** model card ระบุเองว่าความแม่นยำสูงสุดเมื่อ context มีมาตราที่เกี่ยวข้องเพียงไม่กี่มาตรา ยิ่งใส่มาตราที่ไม่เกี่ยวมาก ยิ่งเสี่ยงให้โมเดลอ้างมาตราใกล้เคียงผิดตัว (near-miss) ขั้นตอน rerank จึงจำลองสถานการณ์ใช้งานจริงที่ retrieval ทั่วไปมักได้ผลลัพธ์ปนกันมา ไม่ใช่หลักฐานที่คัดมาสมบูรณ์แบบ
 
-## Legal essay 1 — ยักยอกกับใช้เอกสารสิทธิปลอม
+**ผล:** ตอบถูกครบ 5/5 ข้อ — reranker คัดมาตราที่ถูกต้องได้ 100% (precision/recall = 1.00), citation ตรงเฉลยทั้ง 5 ข้อ, JSON ผ่านรูปแบบทุกข้อ
 
-<details>
-<summary>กดเพื่อดูโจทย์ฉบับเต็ม</summary>
+**ข้อควรระวังที่ต้องบอกไว้เสมอ:** ผล 5/5 มาจากตัวอย่างที่เลือกมาเพียง 5 ข้อ ไม่ใช่การรับประกันผลกับทุกคำถาม และไม่ควรตีความว่าโมเดลวินิจฉัยกฎหมายได้เองโดยไม่ต้องมีคนตรวจ
 
-จำเลยเป็นพนักงานเก็บเงินของบริษัท มีหน้าที่เก็บเงินค่าสินค้าจากลูกค้า
-และนำส่งเข้าบัญชีของบริษัทภายในวันทำการถัดไป จำเลยรับเงินจากลูกค้ารายหนึ่ง
-จำนวน 120,000 บาท แล้วเบียดบังเงินดังกล่าวไปใช้เป็นประโยชน์ส่วนตัว
-จำเลยจัดทำต้นฉบับใบเสร็จรับเงินปลอมในนามบริษัทมอบให้แก่ลูกค้า
-และนำสำเนาใบเสร็จดังกล่าวไปใช้ประกอบรายงานการรับชำระเงิน
-เพื่อให้บริษัทเข้าใจว่าจำเลยได้ดำเนินการเกี่ยวกับเงินที่รับจากลูกค้า
-โดยถูกต้องแล้ว
+### 4.2 Legal essay drafting (2 ข้อ)
 
-ศาลชั้นต้นพิพากษาว่าจำเลยมีความผิดฐานยักยอกทรัพย์และฐานใช้
-เอกสารสิทธิปลอม โดยเห็นว่าเป็นความผิดหลายกรรมต่างกันและให้ลงโทษทุกกรรม
-เป็นกระทงความผิดไป จำเลยอุทธรณ์และฎีกาว่า การใช้ใบเสร็จรับเงินปลอม
-เป็นส่วนหนึ่งของแผนการยักยอกเงินและมีเจตนามุ่งหมายเดียวกัน
-จึงเป็นกรรมเดียวผิดกฎหมายหลายบทตามประมวลกฎหมายอาญา มาตรา 90
+**ผล:** ไม่ตรงเฉลยทั้ง 2 ข้อ (0/2)
 
-</details>
+- ข้อ 1 (ยักยอกเงิน+ใช้เอกสารปลอม): โมเดลตอบว่าเป็น "หลายกรรม" และอธิบายมาตรา 90 สลับหลักกับมาตรา 91 — ตรงข้ามกับเฉลย
+- ข้อ 2 (มัดจำ 300,000 บาท): โมเดลตอบว่าไม่ใช่มัดจำ ให้ริบทั้งหมด ไม่อ้างมาตรา 377, 378 หรือกฎหมายข้อสัญญาไม่เป็นธรรมเลย — ตรงข้ามกับเฉลยเช่นกัน
 
-<details>
-<summary>กดเพื่อดู test reference ที่ใช้เปรียบเทียบ</summary>
+**เหตุผลที่ไม่ใช้แค่ keyword checklist ในการตัดสิน:** ตรวจพบว่าคำตอบข้อ 1 มี keyword บางคำที่ตรงกับเฉลยอยู่ แต่**บทสรุปทางกฎหมาย (holding) กลับด้าน** ถ้าตัดสินด้วยการนับ keyword อย่างเดียวจะให้คะแนนผ่านทั้งที่คำตอบผิดหลักการ จึงต้องใช้การตรวจเนื้อหาจริง (substantive review) เป็นตัวชี้ขาดแทน
 
-Test reference วางหลักว่า การปลอม/ใช้ใบเสร็จเป็นส่วนหนึ่งของแผนยักยอก
-และมีวัตถุประสงค์เดียวกัน จึงเป็นกรรมเดียวผิดกฎหมายหลายบทตามมาตรา 90
-ไม่ใช่หลายกรรมตามมาตรา 91 ผู้ปลอมและใช้เอกสารเองให้ลงโทษฐานใช้
-ตามมาตรา 268 วรรคสอง ประกอบมาตรา 265 และให้ลงโทษบทหนักที่สุด
+### 4.3 Closed-book (5 ข้อ)
 
-Reference ยังแยกกรณีที่การปลอมภายหลังมีวัตถุประสงค์ใหม่และเป็นอิสระ
-ซึ่งอาจถือเป็นหลายกรรมได้
+**ผล:** ผ่าน 1 ข้อ, ผ่านบางส่วน 2 ข้อ, ไม่ผ่าน 2 ข้อ — JSON ถูกรูปแบบครบ 5/5 (แม้เนื้อหาจะผิด)
 
-</details>
+จุดที่พบผิดบ่อย: เลขมาตราคลาดเคลื่อน (เช่น อ้าง `65/9` แทนที่จะเป็น `65 ทวิ (9)`) และกฎหมายลำดับรอง/สนธิสัญญาที่ต้องใช้ประกอบ (เช่น อนุสัญญาภาษีซ้อนไทย–สิงคโปร์) มักถูกข้ามไปหรืออ้างผิดฉบับ
 
-<details>
-<summary>กดเพื่อดูคำตอบจริงจาก OpenThai</summary>
+**เหตุผลที่ต้องเตือนเรื่องนี้เป็นพิเศษ:** closed-book คือการตอบจากความจำล้วน ๆ ไม่มีเอกสารมายืนยัน ความผิดพลาดประเภทเลขมาตรา/กฎหมายลำดับรองจึงเป็นความเสี่ยงที่ตรวจจับยากที่สุด เพราะคำตอบอ่านดูมั่นใจและมีรูปแบบ JSON ที่ถูกต้อง ทำให้ดูน่าเชื่อถือกว่าความเป็นจริง
 
-โมเดลวินิจฉัยว่าเป็นความผิดหลายกรรมต่างกันและต้องรับโทษทุกกรรม
-เป็นกระทง โดยอ้างมาตรา 352 และมาตรา 268 พร้อมอธิบายว่าการยักยอกเงิน
-กับการใช้เอกสารปลอมเป็นการกระทำสองส่วนที่แยกจากกัน
+## 5. ระบบค้นหาหลักฐาน (Retrieval) — ทำไมต้องเทียบหลายแบบ
 
-โมเดลยังกล่าวว่า:
+ทดสอบ retrieval 200 คำถามแยกจากการตอบจริง เพื่อหาว่าวิธีค้นแบบไหนแม่นที่สุด **ก่อน**นำไปใช้กับ 5 คำถาม RAG ด้านบน
 
-> ประมวลกฎหมายอาญา มาตรา 90 กำหนดว่า หากบุคคลกระทำความผิดหลายกรรม
-> ต่างกัน ให้ลงโทษทุกกรรมเป็นกระทงความผิดไป ... การยักยอกเงินและ
-> การใช้เอกสารสิทธิปลอมเป็นการกระทำสองกรรมต่างกัน
+| Profile | Recall@20 | MRR | ทำไมถึงลอง |
+|---|---:|---:|---|
+| Dense (embedding อย่างเดียว) | 0.8458 | 0.6619 | baseline มาตรฐาน จับความหมายได้แม้ใช้คำต่างกัน |
+| Sparse (full-text + trigram) | 0.7392 | 0.5118 | ช่วยจับเลขมาตรา ชื่อกฎหมาย และคำเฉพาะที่ dense อาจพลาด |
+| Vanilla RRF (รวมอันดับสองระบบเท่า ๆ กัน) | 0.8431 | 0.6485 | วิธีมาตรฐานที่ใช้กันทั่วไปในการรวมผล hybrid search |
+| **Weighted RRF (dense น้ำหนัก 1.0, sparse 0.75)** | **0.8458** | **0.6710** | แก้ปัญหาที่พบจาก vanilla RRF |
 
-**ผลเบื้องต้น:** holding ขัดกับ test reference และมีความเสี่ยงอธิบายหลัก
-มาตรา 90/91 สลับกัน Keyword checklist แสดง 3/5 แต่เป็น false positive
-บางส่วน เพราะพบคำว่า “กรรมเดียว” ในประโยคที่โมเดลใช้ปฏิเสธ holding นั้น
+**เหตุผลที่ไม่ใช้ vanilla RRF (แบบมาตรฐาน) เป็นค่าสุดท้าย:** ผลทดสอบพบว่า sparse ranker ในชุดข้อมูลนี้อ่อนกว่า dense อย่างชัดเจน (recall 0.7392 vs 0.8458) การให้น้ำหนักเท่ากันแบบ vanilla RRF จึง**ดึงผลลัพธ์ดี ๆ ของ dense ลง** แทนที่จะช่วยเสริม — Recall@20 ลดจาก 0.8458 เหลือ 0.8431 และ MRR ลดจาก 0.6619 เหลือ 0.6485 การลอง weighted RRF (ลดน้ำหนัก sparse เหลือ 0.75) จึงเป็นการแก้ปัญหานี้โดยตรง ไม่ใช่การเลือกตามความเชื่อ
 
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/legal_essay/essay-01-embezzlement-forged-receipt.txt)
+## 6. PostgreSQL เทียบ Milvus — ทำไมต้องทดสอบสอง backend
 
-</details>
+| Backend | Recall@20 | MRR | Latency เฉลี่ย |
+|---|---:|---:|---:|
+| PostgreSQL weighted RRF | **0.8458** | **0.6710** | ~1,827 ms |
+| Milvus (Thai n-gram RRF) | 0.8388 | 0.6427 | **~4.3 ms** |
 
-## Legal essay 2 — มัดจำ เบี้ยปรับ และอำนาจศาลลดมัดจำ
+**เหตุผลที่ทดสอบ Milvus เพิ่ม ทั้งที่ PostgreSQL ให้คุณภาพดีกว่า:** ต้องแยกตอบสองคำถามที่ต่างกัน — "คุณภาพการค้นดีแค่ไหน" กับ "เร็วแค่ไหนตอนใช้งานจริง" PostgreSQL ชนะด้าน**คุณภาพ**เล็กน้อย (Recall +0.0070, MRR +0.0283) แต่ Milvus เร็วกว่าประมาณ **425 เท่า** เพราะเป็น native hybrid search ในตัว ไม่ต้องยิง query สองรอบแบบ sequential เหมือนที่ implementation ปัจจุบันของ PostgreSQL ทำอยู่ ดังนั้นถ้าเน้นคุณภาพสูงสุดให้ใช้ PostgreSQL weighted RRF แต่ถ้าเน้น throughput/latency ในงานปริมาณมาก Milvus คือตัวเลือกที่คุ้มกว่า โดยยังต้องเพิ่ม weighted fusion หรือ reranker เพื่อปิดช่องว่างคุณภาพที่เหลืออยู่
 
-<details>
-<summary>กดเพื่อดูโจทย์ฉบับเต็ม</summary>
+**เหตุผลที่ใช้ Thai character n-gram แทน tokenizer มาตรฐานใน Milvus:** ภาษาไทยไม่มีช่องว่างระหว่างคำ tokenizer แบบมาตรฐานจึงตัดคำผิดบ่อย ผลทดสอบยืนยันว่า n-gram ให้ MRR สูงกว่าอย่างชัดเจน (0.6427 เทียบ 0.5499 ของ analyzer มาตรฐาน)
 
-โจทก์และจำเลยทำสัญญาจะซื้อจะขายที่ดินราคา 3,000,000 บาท
-โจทก์ชำระเงินจำนวน 300,000 บาทในวันทำสัญญา โดยตกลงว่าเงินดังกล่าว
-เป็นหลักฐานการทำสัญญา เป็นประกันการปฏิบัติตามสัญญา และจะนำไปหักออกจาก
-ราคาที่ดินเมื่อมีการจดทะเบียนโอนกรรมสิทธิ์ ราคาส่วนที่เหลือกำหนดชำระ
-ภายใน 60 วัน
+## 7. สรุปเชิงใช้งาน
 
-สัญญาระบุว่าหากโจทก์ผิดนัด จำเลยมีสิทธิบอกเลิกสัญญาและริบเงิน
-300,000 บาททั้งหมด เมื่อครบกำหนดโจทก์ไม่ชำระราคาส่วนที่เหลือ
-จำเลยจึงบอกเลิกสัญญาและริบเงิน ต่อมาจำเลยขายที่ดินให้บุคคลอื่น
-ได้ในราคาเดิม และพิสูจน์ความเสียหายได้ 40,000 บาท
+1. **RAG ให้ผลน่าเชื่อถือที่สุด** เมื่อฐานข้อมูลเก็บหนึ่งมาตราต่อหนึ่ง chunk, retrieval พบมาตราที่ถูกต้อง, และให้โมเดลคัดกรองหลักฐานก่อนตอบ — เพราะทุกขั้นตอนมีจุดตรวจสอบความถูกต้องแยกกันได้ (retrieval recall, rerank precision, citation F1)
+2. **Closed-book มีความเสี่ยงสูงสุด** เพราะไม่มีจุดตรวจสอบระหว่างทาง ผิดตรงไหนก็ตรวจไม่พบจนกว่าจะมีคนตรวจคำตอบซ้ำ
+3. **Legal essay ที่เขียนลื่นไหลไม่ได้แปลว่า holding ถูกต้อง** ทั้งสองข้อในรอบนี้อ่านดูเป็นมืออาชีพแต่ข้อสรุปกลับด้านทั้งคู่ — ย้ำว่าความลื่นไหลของภาษากับความถูกต้องทางกฎหมายเป็นคนละมิติกัน ต้องตรวจแยก
 
-โจทก์ฟ้องเรียกเงินคืน 260,000 บาท โดยอ้างว่าแม้เป็นมัดจำ
-แต่การริบทั้งหมดสูงเกินส่วนเมื่อเทียบกับความเสียหายจริง
+**ข้อจำกัดที่ต้องระบุไว้เสมอ:** ผลทั้งหมดเป็นการประเมินระบบค้นหา+ตอบ (retrieval-and-response system) ในสภาพแวดล้อมและชุดคำถามของผู้ทดสอบเท่านั้น ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย ก่อนใช้งานจริงต้องตรวจกับตัวบทกฎหมายฉบับปัจจุบันและผู้เชี่ยวชาญเสมอ
 
-</details>
+## 8. ไฟล์สำหรับตรวจสอบย้อนกลับ (reproducibility)
 
-<details>
-<summary>กดเพื่อดู test reference ที่ใช้เปรียบเทียบ</summary>
+| ไฟล์ | เนื้อหา |
+|---|---|
+| `results/three-mode-raw-20260730/` | ผลดิบ RAG, essay, closed-book ทั้ง 12 เคส (prompt, response, timing, tokens) |
+| `results/rag-postgresql-vs-milvus-20260730/` | ผลเปรียบเทียบ retrieval backend 200 คำถาม |
+| `EVALUATION_REVIEW.md` | การตรวจเนื้อหาหลังโมเดลตอบเสร็จ (post-generation substantive review) แยกจากคะแนน keyword |
 
-Test reference จำแนกเงิน 300,000 บาทเป็นมัดจำตาม ป.พ.พ. มาตรา 377
-ให้สิทธิริบเมื่อผิดสัญญาตามมาตรา 378 (2) แต่เห็นว่าศาลอาจลดมัดจำ
-ที่สูงเกินส่วนตาม พ.ร.บ. ว่าด้วยข้อสัญญาที่ไม่เป็นธรรม พ.ศ. 2540
-มาตรา 7
-
-เมื่อพิสูจน์ความเสียหายได้ 40,000 บาท จึงวางผลให้ริบเท่านั้นและคืน
-260,000 บาท พร้อมแยกมัดจำจากเบี้ยปรับตามมาตรา 379/383
-
-</details>
-
-<details>
-<summary>กดเพื่อดูคำตอบจริงจาก OpenThai</summary>
-
-โมเดลเห็นว่าเงินดังกล่าวเป็นส่วนหนึ่งของราคาที่ดินและคู่สัญญาตกลงให้
-ริบได้ทั้งหมด จึงสรุปว่าไม่มีเหตุให้คืน 260,000 บาทและควรยกฟ้อง
-
-โมเดลไม่ได้อ้างมาตรา 377, 378, พ.ร.บ. ว่าด้วยข้อสัญญาที่ไม่เป็นธรรม
-มาตรา 7 หรือแยกหลักมาตรา 379/383 ตาม test reference
-
-**ผลเบื้องต้น:** holding ขัด test reference ในสาระสำคัญ
-Keyword checklist ผ่าน 1/5 ข้อ แต่ผลนี้ยังไม่ใช่ expert legal score
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/legal_essay/essay-02-deposit-penalty-reduction.txt)
-
-</details>
-
-## สรุป Legal essay
-
-| Metric | ผล |
-|---|---:|
-| จำนวน | 2 |
-| ตอบจบโดย `finish_reason=stop` | 2/2 |
-| ชน `max_tokens` | 0 |
-| เวลาเฉลี่ย | 30.816s |
-| Tokens รวม | 2,803 |
-| Automated keyword checklist | 40% |
-| Holding ตรง test reference จากการอ่านเบื้องต้น | 0/2 |
-
-Keyword checklist ไม่เข้าใจ negation หรือ reasoning จึงไม่ควรใช้เป็น
-legal correctness score ควรให้ผู้เชี่ยวชาญตรวจ citation, holding,
-coverage และ fluency แยกกันตามแนว model card
-
-# Mode 3 — Closed-book
-
-System prompt:
-
-```python
-SYSTEM = (
-    "You are an expert on Thai law. You are given ONLY a legal question, "
-    "with NO reference material provided. Using your OWN knowledge of Thai "
-    "statutes, answer in Thai and cite the specific sections that apply. "
-    'Output ONLY JSON: {"answer":"...","citations":[...]}'
-)
-```
-
-คำถาม 5 ข้อนี้สร้างเพื่อการทดสอบโดย Claude Sonnet 5.0 และไม่มี statute
-context ใน prompt Expected sections เป็น test-design assumptions
-ไม่ใช่ NitiBench expert ground truth จึงใช้ตรวจเชิงโครงสร้างเบื้องต้นเท่านั้น
-
-## Closed-book 1 — VAT ส่งออกข้าวโพด
-
-<details>
-<summary>กดเพื่อดูโจทย์และคำตอบ</summary>
-
-**โจทย์**
-
-บริษัทรับซื้อข้าวโพดจากเกษตรกร นำมาคัดขนาดและอบแห้งโดยยังไม่แปรรูป
-แล้วส่งออกทั้งหมด หากขายในประเทศเข้าเกณฑ์ยกเว้นตามมาตรา 81 (1) (ก)
-บริษัทจะมีสิทธิเสีย VAT อัตรา 0% ตามมาตรา 80/1 (1) หรือไม่
-
-**คำตอบจริง**
-
-```json
-{
-  "answer": "บริษัทฯ มีสิทธิเสียภาษีมูลค่าเพิ่มในอัตราร้อยละ 0 ตามมาตรา 80/1 (1) แห่งประมวลรัษฎากร เนื่องจากข้าวโพดที่ขายเป็นพืชผลทางการเกษตรที่ยังมิได้แปรสภาพ และการส่งออกไปจำหน่ายให้แก่ลูกค้าในต่างประเทศถือเป็นการส่งออกสินค้าตามเงื่อนไขที่กฎหมายกำหนดให้ได้รับยกเว้นภาษีมูลค่าเพิ่ม",
-  "citations": [
-    {"law": "ป.รัษฎากร", "section": "80/1"},
-    {"law": "ป.รัษฎากร", "section": "81"}
-  ]
-}
-```
-
-Expected-section check: 2/2 แต่ถ้อยคำ “อัตรา 0%” กับ “ยกเว้น”
-ควรให้ผู้เชี่ยวชาญตรวจความแม่นยำ
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/closed_book/closed-01-corn-export-vat.txt)
-
-</details>
-
-## Closed-book 2 — บริษัทขายที่ดินหลังถือครอง 6 ปี
-
-<details>
-<summary>กดเพื่อดูโจทย์และคำตอบ</summary>
-
-**โจทย์**
-
-บริษัทรับเหมาก่อสร้างซื้อที่ดินเพื่อใช้เป็นสำนักงานและลานเก็บวัสดุ
-ต่อมาย้ายสำนักงานและขายที่ดินหลังถือครอง 6 ปี การขายอยู่ในบังคับ
-ภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) หรือไม่
-
-**คำตอบจริง**
-
-```json
-{
-  "answer": "การขายที่ดินของบริษัทฯ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร ...",
-  "citations": [
-    {"law": "ป.รัษฎากร", "section": "91/2"}
-  ]
-}
-```
-
-Expected-section check: 1/1 ส่วนเงื่อนไขและกฎหมายลำดับรองยังต้องตรวจ
-โดยผู้เชี่ยวชาญ
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/closed_book/closed-02-company-land-sbt.txt)
-
-</details>
-
-## Closed-book 3 — จำหน่ายหนี้สูญ
-
-<details>
-<summary>กดเพื่อดูโจทย์และคำตอบ</summary>
-
-**โจทย์**
-
-บริษัทมีลูกหนี้การค้า 800,000 บาท ติดตามทวงถามแล้ว ลูกหนี้เลิกกิจการ
-และไม่มีทรัพย์สินให้บังคับ บริษัทต้องการจำหน่ายหนี้สูญเป็นรายจ่าย
-ต้องใช้มาตราใดและกฎหมายลำดับรองฉบับใด
-
-**คำตอบจริง**
-
-```json
-{
-  "answer": "การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้อยู่ภายใต้บังคับมาตรา 65/9 แห่งประมวลรัษฎากร โดยต้องเป็นไปตาม ... กฎกระทรวงฉบับที่ 118 (พ.ศ. 2534)",
-  "citations": [
-    {"law": "ป.รัษฎากร", "section": "65/9"}
-  ]
-}
-```
-
-Test design คาด `มาตรา 65 ทวิ (9)` และกฎกระทรวง ฉบับที่ 186
-จึงไม่ตรง expected-section check
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/closed_book/closed-03-bad-debt-writeoff.txt)
-
-</details>
-
-## Closed-book 4 — ค่าบริการแก่บริษัทสิงคโปร์
-
-<details>
-<summary>กดเพื่อดูโจทย์และคำตอบ</summary>
-
-**โจทย์**
-
-บริษัทไทยจ่ายค่าที่ปรึกษาการตลาดให้บริษัทสิงคโปร์ซึ่งไม่มีสถานประกอบการถาวร
-ในไทยและทำงานทั้งหมดจากสิงคโปร์ บริษัทไทยต้องหักภาษีตามมาตราใด
-
-**คำตอบจริง**
-
-```json
-{
-  "answer": "บริษัทฯ มีหน้าที่ต้องหักภาษี ณ ที่จ่ายและนำส่งตามมาตรา 50 แห่งประมวลรัษฎากร ...",
-  "citations": [
-    {"law": "ป.รัษฎากร", "section": "50"}
-  ]
-}
-```
-
-Test design คาดให้วิเคราะห์มาตรา 70 ประกอบอนุสัญญาภาษีซ้อนไทย–สิงคโปร์
-จึงไม่ตรง expected-section check
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/closed_book/closed-04-singapore-service-withholding.txt)
-
-</details>
-
-## Closed-book 5 — บ้านพักที่นายจ้างจัดให้
-
-<details>
-<summary>กดเพื่อดูโจทย์และคำตอบ</summary>
-
-**โจทย์**
-
-บริษัทเช่าบ้านจากบุคคลภายนอกและให้ผู้บริหารพักโดยไม่คิดค่าเช่า
-มูลค่าการอยู่อาศัยเป็นเงินได้พึงประเมินตามมาตราใด และต้องรวมคำนวณ
-ภาษีเงินได้บุคคลธรรมดาหรือไม่
-
-**คำตอบจริง**
-
-```json
-{
-  "answer": "มูลค่าของการได้อยู่อาศัยในบ้านพักโดยไม่เสียค่าเช่า ถือเป็นเงินได้พึงประเมินตามมาตรา 40 แห่งประมวลรัษฎากร พนักงานมีหน้าที่ต้องนำมูลค่าดังกล่าวไปรวมคำนวณเพื่อเสียภาษีเงินได้บุคคลธรรมดา",
-  "citations": [
-    {"law": "ประมวลรัษฎากร", "section": "40"}
-  ]
-}
-```
-
-Test design คาดมาตรา 39 และ 40 (1) โมเดลจึงตรงบางส่วน
-
-**Artifact:** [TXT เต็ม](results/three-mode-raw-20260730/closed_book/closed-05-employee-housing-benefit.txt)
-
-</details>
-
-## สรุป Closed-book
-
-| Metric | ผล |
-|---|---:|
-| จำนวน | 5 |
-| Valid JSON | 5/5 |
-| Expected-section macro recall | 50% |
-| เวลาเฉลี่ย | 5.881s |
-| Tokens รวม | 3,035 |
-| ชน `max_tokens` | 0 |
-
-Closed-book ตอบเร็วและรักษา JSON contract ได้ดี แต่เลขมาตราและกฎหมายลำดับรอง
-ยังไม่สม่ำเสมอ จึงเหมาะกับการหา issue/keyword เบื้องต้นมากกว่าการยืนยัน
-ข้อกฎหมายโดยไม่มีแหล่งอ้างอิง
-
-# ข้อสรุปเชิงระบบ
-
-1. **Citation RAG เป็นเส้นทางที่แข็งแรงที่สุดในชุดนี้**
-   เมื่อ retriever ส่งมาตราที่ถูก OpenThai ตอบและอ้างมาตราตรง NitiBench
-   ครบ 5/5 ทั้ง PostgreSQL และ Milvus
-
-2. **คุณภาพ retrieval สำคัญกว่า vector database เพียงอย่างเดียว**
-   ทั้งสอง backend ให้คำตอบเท่ากัน ความต่างหลักใน sample นี้คือ latency
-   ไม่ใช่ citation quality
-
-3. **Milvus ลด retrieval latency แต่ LLM ยังเป็นคอขวด**
-   Milvus retrieval รวม embedding เฉลี่ย 0.057s แต่ end-to-end 7.280s
-   เวลาส่วนใหญ่จึงอยู่ที่ OpenThai rerank และ generation
-
-4. **PostgreSQL ยังเป็น baseline ที่ใช้งานได้ดี**
-   เหมาะเมื่อมี PostgreSQL อยู่แล้ว ต้องการ transactional metadata,
-   SQL filtering และขนาด/traffic ยังไม่สูง
-
-5. **หนึ่งมาตราต่อหนึ่ง chunk ช่วย citation contract**
-   `law_name` + `section_num` + body ที่ตัด repeated heading ออก
-   ทำให้ embedding ไม่ซ้ำ metadata และประกอบ `<law>` context ได้ตรง
-   รูปแบบที่โมเดลถูกฝึก
-
-6. **Reranker ต้องมี structured-output guard**
-   พบ JSON ขาดวงเล็บหนึ่งครั้ง แม้ model intent เลือก candidate ถูก
-   จึงต้อง validate/recover syntax โดยไม่ hardcode มาตรา
-
-7. **Legal essay ต้องใช้ semantic/expert judge**
-   Keyword checklist ให้คะแนนเกินจริงเมื่อคำสำคัญอยู่ในประโยคปฏิเสธ
-   ควรตรวจ citation, holding, coverage และ fluency แยกกัน
-
-8. **Closed-book ไม่ควรใช้ยืนยันเลขมาตราในงาน high-stakes**
-   รอบนี้ valid JSON ครบ แต่ expected-section macro recall เพียง 50%
-   และพลาดกฎหมายลำดับรอง/อนุสัญญาในคำถามภาษีที่ซับซ้อน
-
-# ขอบเขตและข้อจำกัด
-
-- RAG มีเพียง 5 คำถาม และแต่ละข้อมี positive section หลักหนึ่งมาตรา
-- ชุด 5 ข้อเป็น fixed test set ใน runner ไม่ใช่ auditable random sample
-- PostgreSQL และ Milvus ใช้ sparse retrieval/RRF configuration ต่างกัน
-- การวัดเวลาเกิดคนละรอบ จึงได้รับผลจาก warm-up, cache และภาระของเครื่อง
-- ไม่ใช่ stress, concurrency หรือ production load benchmark
-- Token ที่ต่างกันเกิดจาก candidate packet ต่างกัน ไม่ได้แปลว่าเปลี่ยน
-  database แล้ว token จะลดลงเสมอ
-- RAG citation ตรง ground truth ไม่รับรองว่าคำตอบครอบคลุมข้อเท็จจริงจริง
-  ข้อยกเว้น กฎหมายลำดับรอง หรือกฎหมายที่แก้ไขภายหลัง
-- Legal essay references สร้างเพื่อการทดสอบโดย ChatGPT 5.6 sol
-  และ Closed-book test design สร้างโดย Claude Sonnet 5.0
-  ทั้งสองส่วนยังไม่ได้ผ่าน legal-expert adjudication
-- Automated checklist และ expected-section matching ไม่ใช่คำวินิจฉัยกฎหมาย
-- ก่อนใช้จริงต้องตรวจตัวบทฉบับปัจจุบัน แหล่งทางการ และให้ผู้เชี่ยวชาญ
-  ตรวจคำตอบ โดยเฉพาะงานภาษี คดีอาญา และข้อพิพาท
-
-Repository นี้ไม่เก็บ model weights, database credentials, access token
-หรือ chat sessions
+**เหตุผลที่เก็บทุกไฟล์ raw แยกจาก README สรุป:** เพื่อให้ใครก็ตามตรวจสอบย้อนกลับได้ว่าคะแนนสรุปแต่ละบรรทัดมาจาก prompt/response จริงข้อไหน ไม่ใช่ตัวเลขที่สรุปลอย ๆ โดยไม่มีหลักฐานอ้างอิง
