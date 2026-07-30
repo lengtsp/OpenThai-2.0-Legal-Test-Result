@@ -150,6 +150,238 @@ Question
 Milvus collection `nitibench_legal_v2_rrf` มี 3,934 records พร้อม
 `dense_vector`, `sparse_thai`, `law_name`, `section_num` และ `content`
 
+Runtime ที่ใช้คือ Milvus Server `v2.6.20` และ PyMilvus `2.6.14`
+
+### BM25 กำหนดไว้อย่างไร
+
+ข้อควรแยกให้ชัดก่อน:
+
+- **PostgreSQL pipeline รอบนี้ไม่ได้ใช้ BM25 โดยตรง** แต่ใช้
+  `tsvector/ts_rank_cd` ร่วมกับ `pg_trgm`
+- **Milvus pipeline ใช้ native BM25** ผ่าน field `sparse_thai`
+- มีการสร้าง `sparse_raw` จาก standard analyzer ไว้ทดลองด้วย
+  แต่ final inference ที่รายงานเลือก `sparse_thai`
+
+#### 1. ข้อความต้นทาง
+
+BM25 ไม่ได้ใช้ dense `embedding_text` แต่ใช้ `legal_chunks.content`
+ซึ่งมีชื่อกฎหมาย เลขมาตรา และข้อความตัวบท เช่น:
+
+```text
+ประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 565
+การเช่าถือสวนนั้น ท่านให้สันนิษฐานไว้ก่อนว่าเช่ากันปีหนึ่ง
+การเช่านาก็ให้สันนิษฐานไว้ก่อนว่าเช่ากันตลอดฤดูทำนาปีหนึ่ง
+```
+
+ทั้ง document และ query ถูกส่งผ่านฟังก์ชัน `thai_lexical_text()`
+แบบเดียวกันก่อนเข้า BM25
+
+#### 2. Thai lexical preprocessing
+
+ขั้นตอนที่ใช้จริง:
+
+1. แปลงเลขไทย `๐-๙` เป็นเลขอารบิก `0-9`
+2. แปลงภาษาอังกฤษเป็น lowercase
+3. แยก lexical units ด้วย pattern `[ก-๙a-z0-9/.-]+`
+4. เก็บ lexical unit เดิม เช่น `มาตรา`, `565`, `การเช่าถือสวน`
+5. สร้าง character n-grams ขนาด 3 และ 4 ตัวอักษร
+6. สร้าง n-grams เพิ่มจากข้อความที่ตัดช่องว่าง/เครื่องหมายออกทั้งสาย
+   เพื่อช่วยจับคำไทยที่ไม่มีตัวแบ่งคำชัดเจน
+7. ตัด token ซ้ำภายในข้อความหนึ่ง record
+8. รวม token ด้วยช่องว่างเพื่อให้ Milvus `whitespace` tokenizer อ่านได้
+
+โค้ดหลัก:
+
+```python
+def thai_lexical_text(value: str) -> str:
+    normalized = value.translate(
+        str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
+    ).lower()
+    lexical_units = re.findall(r"[ก-๙a-z0-9/.-]+", normalized)
+    tokens = []
+    seen = set()
+
+    def add(token):
+        token = token.strip()
+        if token and token not in seen:
+            seen.add(token)
+            tokens.append(token)
+
+    for unit in lexical_units:
+        add(unit)
+        compact = re.sub(r"[^ก-๙a-z0-9/]+", "", unit)
+        for width in (3, 4):
+            if len(compact) < width:
+                add(compact)
+                continue
+            for index in range(max(0, len(compact) - width + 1)):
+                add(compact[index:index + width])
+
+    whole = re.sub(r"[^ก-๙a-z0-9/]+", "", normalized)
+    for width in (3, 4):
+        for index in range(max(0, len(whole) - width + 1)):
+            add(whole[index:index + width])
+
+    return " ".join(tokens)
+```
+
+<details>
+<summary>กดเพื่อดูตัวอย่างการแปลงคำถามเป็น BM25 tokens</summary>
+
+คำถาม:
+
+```text
+การเช่าถือสวนมีระยะเวลากี่ปี
+```
+
+ได้ 52 unique tokens ตัวอย่างเช่น:
+
+```text
+การเช่าถือสวนมีระยะเวลากี่ปี
+การ ารเ รเช เช่ ช่า ่าถ าถื ถือ ือส อสว สวน วนม นมี
+มีร ีระ ระย ะยะ ยะเ ะเว เวล วลา ลาก ากี กี่ ี่ป ่ปี
+การเ ารเช รเช่ เช่า ช่าถ ่าถื าถือ ถือส ือสว อสวน
+สวนม วนมี นมีร มีระ ีระย ระยะ ะยะเ ยะเว ะเวล
+เวลา วลาก ลากี ากี่ กี่ป ี่ปี
+```
+
+ตัวบทมาตรา 565 ตัวอย่างข้างต้นได้ 223 unique tokens
+จึงมี token ร่วมกับ query ทั้งระดับข้อความเดิมและ 3/4-grams
+
+</details>
+
+#### 3. Milvus schema และ BM25 function
+
+`lexical_text` ใช้ whitespace analyzer ส่วน `sparse_thai`
+เป็น sparse vector ที่ Milvus สร้างจาก BM25:
+
+```python
+schema.add_field(
+    field_name="lexical_text",
+    datatype=DataType.VARCHAR,
+    max_length=65535,
+    enable_analyzer=True,
+    analyzer_params={"tokenizer": "whitespace"},
+)
+
+schema.add_field(
+    field_name="sparse_thai",
+    datatype=DataType.SPARSE_FLOAT_VECTOR,
+)
+
+schema.add_function(
+    Function(
+        name="thai_ngram_bm25",
+        input_field_names=["lexical_text"],
+        output_field_names=["sparse_thai"],
+        function_type=FunctionType.BM25,
+    )
+)
+
+indexes.add_index(
+    field_name="sparse_thai",
+    index_type="SPARSE_INVERTED_INDEX",
+    metric_type="BM25",
+)
+```
+
+Milvus เป็นผู้คำนวณองค์ประกอบของ BM25 เช่น document frequency,
+inverse document frequency, document length normalization และ
+term-frequency saturation จาก collection
+
+โค้ดรอบนี้ส่ง `params={}` ตอน search จึง **ไม่ได้ pin ค่า `k1` และ `b`
+เอง** แต่ใช้ค่า default ของ Milvus version ที่ติดตั้ง หากต้องการ
+reproducibility ข้าม version ควรบันทึก Milvus version และกำหนด
+BM25 parameters ให้ชัดเจนเมื่อ API/version รองรับ
+
+#### 4. BM25 query
+
+Query ถูกแปลงด้วย `thai_lexical_text()` แล้วค้น field `sparse_thai`
+จำนวน 20 รายการ:
+
+```python
+sparse_query = thai_lexical_text(question)
+
+sparse_request = AnnSearchRequest(
+    data=[sparse_query],
+    anns_field="sparse_thai",
+    param={"metric_type": "BM25", "params": {}},
+    limit=20,
+)
+```
+
+BM25 ให้คะแนนสูงกับมาตราที่มี token สำคัญตรงกับ query โดย token ที่พบ
+ในเอกสารจำนวนน้อยจะมีน้ำหนัก IDF สูงกว่า token ทั่วไป เช่นเลขมาตรา
+ชื่อกฎหมาย หรือวลีเฉพาะ ส่วน document-length normalization ช่วยไม่ให้
+มาตรายาวได้เปรียบจากจำนวนคำเพียงอย่างเดียว
+
+#### 5. รวม BM25 กับ dense retrieval
+
+Dense และ BM25 ดึงอย่างละ 20 candidates แล้วรวมด้วย Milvus native RRF
+แบบน้ำหนักเท่ากัน:
+
+```python
+dense_request = AnnSearchRequest(
+    data=[query_vector],
+    anns_field="dense_vector",
+    param={"metric_type": "COSINE", "params": {"ef": 100}},
+    limit=20,
+)
+
+result = client.hybrid_search(
+    collection_name="nitibench_legal_v2_rrf",
+    reqs=[dense_request, sparse_request],
+    ranker=RRFRanker(80),
+    limit=20,
+)
+```
+
+แนวคิดคะแนน RRF:
+
+```text
+RRF(document) =
+    1 / (80 + dense_rank)
+  + 1 / (80 + bm25_rank)
+```
+
+RRF ใช้ลำดับแทนการนำ cosine score กับ BM25 score มาบวกตรง ๆ
+จึงไม่ต้อง normalize score ที่มีคนละ scale เอกสารที่ติดอันดับดี
+ทั้ง dense และ BM25 จะถูกดันขึ้นด้านบน
+
+#### 6. ข้อจำกัดของ BM25 implementation รอบนี้
+
+- การตัด token ซ้ำด้วย `seen` ทำให้ term frequency ภายใน document
+  ส่วนใหญ่ใกล้ลักษณะ binary presence; BM25 จึงพึ่ง IDF/rank มากขึ้น
+- 3/4-grams เพิ่ม recall สำหรับภาษาไทย แต่เพิ่ม index size และอาจสร้าง
+  partial matches ที่ไม่เกี่ยวข้อง
+- การสร้าง n-grams จากข้อความที่ลบช่องว่างทั้งสายอาจสร้าง token
+  ข้ามขอบเขตคำ
+- `params={}` ไม่ pin `k1/b`
+- ใช้ full section content สูงสุด 65,000 UTF-8 bytes; มาตราที่ยาวมาก
+  อาจถูก truncate ก่อนเข้า Milvus
+- เลขมาตราเดียวกันมีได้ในหลายกฎหมาย จึงต้องเก็บ `law_name`
+  และให้ dense/RRF ช่วยแยกบริบท
+- BM25 ไม่เข้าใจความหมายทางกฎหมายหรือ actor/scope
+  จึงยังต้องใช้ dense retrieval และ OpenThai evidence selection
+
+#### PostgreSQL sparse score ที่ใช้เปรียบเทียบ
+
+ฝั่ง PostgreSQL ใช้คะแนน:
+
+```text
+sparse_score =
+    2.0 * ts_rank_cd(search_tsv, plainto_tsquery('simple', question))
+  + max(
+        similarity(content, question),
+        word_similarity(question, content),
+        similarity(law_name || ' ' || section_num, question)
+    )
+```
+
+จากนั้นนำ dense rank และ sparse rank มารวมด้วย application-side
+RRF `k=60` ดังนั้นตาราง PostgreSQL vs Milvus เป็นการเทียบ tuned pipelines
+ไม่ใช่การเทียบ BM25 implementation เดียวกันบน database สองตัว
+
 การเปรียบเทียบนี้เป็นการเทียบ **pipeline ที่ปรับให้เหมาะกับแต่ละ backend**
 ไม่ใช่การควบคุม sparse index และ RRF ให้เหมือนกันทุกประการ
 
