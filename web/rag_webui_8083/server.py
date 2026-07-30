@@ -712,7 +712,28 @@ def _citation_evidence_plan(question: str, hits: list[dict[str, Any]]) -> list[d
 
     # Purpose limitation / cross-selling: keep the disclosure purpose and the
     # recipient's duty, after excluding provisions limited to loan brokers.
+    # When the actor is the bank as a user of the credit-information service,
+    # prefer the provision that expressly states a user's duties and attach
+    # only a penalty that cross-references that provision.  This avoids
+    # confusing the bank's onward use with the credit bureau's initial
+    # disclosure duty.
     if any(term in lower for term in ("cross-selling", "การตลาด", "บริษัทประกัน", "เสนอขาย")):
+        user_duties = [
+            hit for hit in pool
+            if "ผู้ใช้บริการมีหน้าที่" in str(hit.get("content", ""))
+            and "ไม่เปิดเผยหรือเผยแพร่ข้อมูลแก่ผู้อื่นที่ไม่มีสิทธิรับรู้ข้อมูล" in str(hit.get("content", ""))
+        ]
+        if user_duties:
+            duty_sections = {
+                _section_number(hit.get("section"))
+                for hit in user_duties
+            }
+            penalties = [
+                hit for hit in pool
+                if "ต้องระวางโทษ" in str(hit.get("content", ""))
+                and bool(duty_sections & _referenced_sections(hit.get("content", "")))
+            ]
+            return finish([*user_duties, *penalties])
         purpose = [
             hit for hit in pool
             if "ประโยชน์ในการวิเคราะห์สินเชื่อและการออกบัตรเครดิต" in str(hit.get("content", ""))
