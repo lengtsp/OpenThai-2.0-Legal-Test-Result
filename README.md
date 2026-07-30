@@ -8,9 +8,30 @@ Repository นี้เก็บผลทดสอบอิสระของ
 README ฉบับนี้รายงานเฉพาะ **Citation RAG** โดยเปรียบเทียบ PostgreSQL กับ
 Milvus บนคำถามและ ground truth ชุดเดียวกัน ส่วน Closed-book และ Legal essay
 ยังไม่นำมาสรุปเป็นผลด้านความถูกต้อง เนื่องจากต้องให้ผู้เชี่ยวชาญกฎหมายตรวจ
-คำวินิจฉัย เนื้อหามาตรา กฎหมายลำดับรอง และข้อยกเว้นเพิ่มเติม
+คำวินิจฉัย เนื้อหามาตรา กฎหมายลำดับรอง และข้อยกเว้นเพิ่มเติม แต่ได้เผยแพร่
+raw TXT ของทั้งสอง mode ไว้ครบเพื่อให้ตรวจสอบย้อนหลังได้
 
 > ผลนี้เป็นการประเมินระบบช่วยค้นและตอบ ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย
+
+## จำนวน scenarios และ raw artifacts
+
+ชุด three-mode benchmark มี **12 scenarios** ไม่ใช่เพียง 5 ข้อ:
+
+| Mode | Unique scenarios | Backend runs | TXT files | สถานะการประเมิน |
+|---|---:|---:|---:|---|
+| Legal essay | 2 | Retrieval-free 1 รอบ | 2 | รอผู้เชี่ยวชาญตรวจ |
+| Citation RAG | 5 | PostgreSQL + Milvus | 10 | สรุปผลใน README นี้ |
+| Closed-book | 5 | Retrieval-free 1 รอบ | 5 | รอผู้เชี่ยวชาญตรวจ |
+| **รวม** | **12** | — | **17** | — |
+
+RAG มี 5 scenarios แต่มี TXT 10 ไฟล์ เพราะคำถามเดียวกันถูกรันกับ retrieval
+backend สองแบบ ส่วน Legal essay และ Closed-book ไม่ผูกกับ PostgreSQL หรือ
+Milvus เนื่องจากเป็น retrieval-free modes
+
+- [Raw Legal essay 2 ไฟล์](results/three-mode-raw-20260730/legal_essay/)
+- [Raw Closed-book 5 ไฟล์](results/three-mode-raw-20260730/closed_book/)
+- [RAG ผ่าน PostgreSQL 5 ไฟล์](results/rag-postgresql-vs-milvus-20260730/postgresql/)
+- [RAG ผ่าน Milvus 5 ไฟล์](results/rag-postgresql-vs-milvus-20260730/milvus/)
 
 ## สรุปสั้น
 

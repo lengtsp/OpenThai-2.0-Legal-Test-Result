@@ -1,0 +1,148 @@
+OpenThai 2.0 Legal benchmark artifact
+================================================================================
+created_at_utc: 2026-07-30T03:21:35.211928+00:00
+mode: closed_book
+id: closed-04-singapore-service-withholding
+title: ค่าบริการการตลาดแก่บริษัทสิงคโปร์
+model: iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b
+vllm_endpoint: http://127.0.0.1:3033/v1/chat/completions
+context_window_tokens: 32768
+
+SUMMARY
+--------------------------------------------------------------------------------
+{
+  "citation_recall": 0.0,
+  "json_valid": true,
+  "elapsed_seconds": 4.7251,
+  "total_tokens": 580,
+  "finish_reason": "stop"
+}
+
+FULL RECORD: request -> response -> timing -> token usage -> evaluation
+--------------------------------------------------------------------------------
+{
+  "created_at": "2026-07-30T03:21:35.211928+00:00",
+  "mode": "closed_book",
+  "id": "closed-04-singapore-service-withholding",
+  "title": "ค่าบริการการตลาดแก่บริษัทสิงคโปร์",
+  "parameters": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 2048,
+    "thinking": false,
+    "seed": 42
+  },
+  "question": "บริษัท จ. จำกัด (บริษัทฯ) จดทะเบียนจัดตั้งในประเทศไทย ได้ว่าจ้างบริษัท F. ซึ่งจดทะเบียนจัดตั้งขึ้นตามกฎหมายของประเทศสิงคโปร์และไม่มีสถานประกอบการถาวรในประเทศไทย ให้ดูแลและให้คำปรึกษาด้านการตลาดแก่บริษัทฯ โดยบริษัท F. ปฏิบัติงานทั้งหมดจากสำนักงานในประเทศสิงคโปร์ ไม่มีพนักงานเดินทางเข้ามาปฏิบัติงานในประเทศไทยแต่อย่างใด บริษัทฯ ชำระค่าตอบแทนเป็นรายเดือนโดยโอนเงินไปยังบัญชีธนาคารของบริษัท F. ที่ประเทศสิงคโปร์โดยตรง บริษัทฯ จึงขอหารือว่า เมื่อบริษัทฯ จ่ายค่าตอบแทนดังกล่าวออกไปต่างประเทศ บริษัทฯ มีหน้าที่ต้องหักภาษีจากเงินได้พึงประเมินที่จ่ายและนำส่งตามมาตราใดแห่งประมวลรัษฎากร",
+  "reference_holding_for_post_generation_review": "ต้องวิเคราะห์มาตรา 70 ประกอบประเภทเงินได้และอนุสัญญาภาษีซ้อนไทย–สิงคโปร์; หากเป็นกำไรจากธุรกิจของบริษัทสิงคโปร์ที่ไม่มีสถานประกอบการถาวรในไทย สิทธิการเก็บภาษีอาจถูกจำกัดตามอนุสัญญา",
+  "expected_sections_for_post_generation_review": [
+    "70"
+  ],
+  "model_call": {
+    "request": {
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert on Thai law. You are given ONLY a legal question, with NO reference material provided. Using your OWN knowledge of Thai statutes, answer in Thai and cite the specific sections that apply (law name + bare section number, มาตรา). Output ONLY a JSON object: {\"answer\":\"<Thai answer>\",\"citations\":[{\"law\":\"<law name>\",\"section\":\"<bare section number e.g. 40 or 77/1>\"}]}."
+        },
+        {
+          "role": "user",
+          "content": "บริษัท จ. จำกัด (บริษัทฯ) จดทะเบียนจัดตั้งในประเทศไทย ได้ว่าจ้างบริษัท F. ซึ่งจดทะเบียนจัดตั้งขึ้นตามกฎหมายของประเทศสิงคโปร์และไม่มีสถานประกอบการถาวรในประเทศไทย ให้ดูแลและให้คำปรึกษาด้านการตลาดแก่บริษัทฯ โดยบริษัท F. ปฏิบัติงานทั้งหมดจากสำนักงานในประเทศสิงคโปร์ ไม่มีพนักงานเดินทางเข้ามาปฏิบัติงานในประเทศไทยแต่อย่างใด บริษัทฯ ชำระค่าตอบแทนเป็นรายเดือนโดยโอนเงินไปยังบัญชีธนาคารของบริษัท F. ที่ประเทศสิงคโปร์โดยตรง บริษัทฯ จึงขอหารือว่า เมื่อบริษัทฯ จ่ายค่าตอบแทนดังกล่าวออกไปต่างประเทศ บริษัทฯ มีหน้าที่ต้องหักภาษีจากเงินได้พึงประเมินที่จ่ายและนำส่งตามมาตราใดแห่งประมวลรัษฎากร"
+        }
+      ],
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "max_tokens": 2048,
+      "seed": 42,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "response": {
+      "id": "chatcmpl-b986549663120bf3",
+      "object": "chat.completion",
+      "created": 1785381690,
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "\n{\"answer\": \"บริษัทฯ มีหน้าที่ต้องหักภาษี ณ ที่จ่ายและนำส่งตามมาตรา 50 แห่งประมวลรัษฎากร เนื่องจากบริษัท F. เป็นผู้ไม่มีสถานประกอบการถาวรในประเทศไทย และการจ่ายค่าตอบแทนดังกล่าวเป็นการจ่ายเงินได้พึงประเมินให้แก่บุคคลที่ไม่มีสถานประกอบการถาวรในประเทศไทย\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"50\"}]}",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ],
+      "service_tier": null,
+      "system_fingerprint": "vllm-0.25.1-nohash",
+      "usage": {
+        "prompt_tokens": 427,
+        "total_tokens": 580,
+        "completion_tokens": 153,
+        "prompt_tokens_details": null
+      },
+      "prompt_logprobs": null,
+      "prompt_token_ids": null,
+      "prompt_text": null,
+      "kv_transfer_params": null,
+      "metrics": null
+    },
+    "text": "\n{\"answer\": \"บริษัทฯ มีหน้าที่ต้องหักภาษี ณ ที่จ่ายและนำส่งตามมาตรา 50 แห่งประมวลรัษฎากร เนื่องจากบริษัท F. เป็นผู้ไม่มีสถานประกอบการถาวรในประเทศไทย และการจ่ายค่าตอบแทนดังกล่าวเป็นการจ่ายเงินได้พึงประเมินให้แก่บุคคลที่ไม่มีสถานประกอบการถาวรในประเทศไทย\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"50\"}]}",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 427,
+      "total_tokens": 580,
+      "completion_tokens": 153,
+      "prompt_tokens_details": null
+    },
+    "elapsed_seconds": 4.7251
+  },
+  "evaluation": {
+    "json_valid": true,
+    "answer": "บริษัทฯ มีหน้าที่ต้องหักภาษี ณ ที่จ่ายและนำส่งตามมาตรา 50 แห่งประมวลรัษฎากร เนื่องจากบริษัท F. เป็นผู้ไม่มีสถานประกอบการถาวรในประเทศไทย และการจ่ายค่าตอบแทนดังกล่าวเป็นการจ่ายเงินได้พึงประเมินให้แก่บุคคลที่ไม่มีสถานประกอบการถาวรในประเทศไทย",
+    "citations": [
+      {
+        "law": "ป.รัษฎากร",
+        "section": "50"
+      }
+    ],
+    "section_checks": [
+      {
+        "expected_section": "70",
+        "matched": false
+      }
+    ],
+    "citation_recall": 0.0
+  },
+  "timing": {
+    "generation_seconds": 4.7251,
+    "total_seconds": 4.7253
+  },
+  "token_usage": {
+    "prompt_tokens": 427,
+    "completion_tokens": 153,
+    "total_tokens": 580
+  },
+  "summary": {
+    "citation_recall": 0.0,
+    "json_valid": true,
+    "elapsed_seconds": 4.7251,
+    "total_tokens": 580,
+    "finish_reason": "stop"
+  },
+  "mode_contract": {
+    "retrieval_used": false,
+    "retrieval_backend": null,
+    "milvus_used": false,
+    "reason": "โหมดนี้เป็น retrieval-free control ตามนิยามการทดสอบ การเพิ่ม Milvus จะเปลี่ยนโหมดให้เป็น RAG"
+  }
+}

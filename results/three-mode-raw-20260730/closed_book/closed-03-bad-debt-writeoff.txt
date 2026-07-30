@@ -1,0 +1,148 @@
+OpenThai 2.0 Legal benchmark artifact
+================================================================================
+created_at_utc: 2026-07-30T03:21:30.486305+00:00
+mode: closed_book
+id: closed-03-bad-debt-writeoff
+title: จำหน่ายหนี้สูญของบริษัท
+model: iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b
+vllm_endpoint: http://127.0.0.1:3033/v1/chat/completions
+context_window_tokens: 32768
+
+SUMMARY
+--------------------------------------------------------------------------------
+{
+  "citation_recall": 0.0,
+  "json_valid": true,
+  "elapsed_seconds": 5.1183,
+  "total_tokens": 609,
+  "finish_reason": "stop"
+}
+
+FULL RECORD: request -> response -> timing -> token usage -> evaluation
+--------------------------------------------------------------------------------
+{
+  "created_at": "2026-07-30T03:21:30.486305+00:00",
+  "mode": "closed_book",
+  "id": "closed-03-bad-debt-writeoff",
+  "title": "จำหน่ายหนี้สูญของบริษัท",
+  "parameters": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 2048,
+    "thinking": false,
+    "seed": 42
+  },
+  "question": "บริษัท ง. จำกัด (บริษัทฯ) ขายสินค้าให้ลูกค้ารายหนึ่งเป็นเงินเชื่อ มูลค่าหนี้คงค้าง 800,000 บาท บริษัทฯ ได้ติดตามทวงถามหนี้ดังกล่าวหลายครั้งแต่ไม่ได้รับชำระ และได้รับแจ้งจากกรมพัฒนาธุรกิจการค้าว่าลูกหนี้เลิกกิจการและไม่มีทรัพย์สินใดเหลือให้บังคับคดี บริษัทฯ จึงประสงค์จะจำหน่ายหนี้ดังกล่าวเป็นหนี้สูญออกจากบัญชีลูกหนี้เพื่อนำไปหักเป็นรายจ่ายในการคำนวณกำไรสุทธิเพื่อเสียภาษีเงินได้นิติบุคคล บริษัทฯ จึงขอหารือว่า การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้ อยู่ภายใต้บังคับมาตราใดแห่งประมวลรัษฎากร และจะต้องเป็นไปตามหลักเกณฑ์ วิธีการ เงื่อนไขตามกฎหมายลำดับรองฉบับใด",
+  "reference_holding_for_post_generation_review": "การจำหน่ายหนี้สูญเป็นไปตามมาตรา 65 ทวิ (9) แห่งประมวลรัษฎากร และต้องปฏิบัติตามหลักเกณฑ์ วิธีการ และเงื่อนไขในกฎกระทรวง ฉบับที่ 186 (พ.ศ. 2534) รวมฉบับแก้ไข",
+  "expected_sections_for_post_generation_review": [
+    "65 ทวิ"
+  ],
+  "model_call": {
+    "request": {
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert on Thai law. You are given ONLY a legal question, with NO reference material provided. Using your OWN knowledge of Thai statutes, answer in Thai and cite the specific sections that apply (law name + bare section number, มาตรา). Output ONLY a JSON object: {\"answer\":\"<Thai answer>\",\"citations\":[{\"law\":\"<law name>\",\"section\":\"<bare section number e.g. 40 or 77/1>\"}]}."
+        },
+        {
+          "role": "user",
+          "content": "บริษัท ง. จำกัด (บริษัทฯ) ขายสินค้าให้ลูกค้ารายหนึ่งเป็นเงินเชื่อ มูลค่าหนี้คงค้าง 800,000 บาท บริษัทฯ ได้ติดตามทวงถามหนี้ดังกล่าวหลายครั้งแต่ไม่ได้รับชำระ และได้รับแจ้งจากกรมพัฒนาธุรกิจการค้าว่าลูกหนี้เลิกกิจการและไม่มีทรัพย์สินใดเหลือให้บังคับคดี บริษัทฯ จึงประสงค์จะจำหน่ายหนี้ดังกล่าวเป็นหนี้สูญออกจากบัญชีลูกหนี้เพื่อนำไปหักเป็นรายจ่ายในการคำนวณกำไรสุทธิเพื่อเสียภาษีเงินได้นิติบุคคล บริษัทฯ จึงขอหารือว่า การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้ อยู่ภายใต้บังคับมาตราใดแห่งประมวลรัษฎากร และจะต้องเป็นไปตามหลักเกณฑ์ วิธีการ เงื่อนไขตามกฎหมายลำดับรองฉบับใด"
+        }
+      ],
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "max_tokens": 2048,
+      "seed": 42,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "response": {
+      "id": "chatcmpl-b2f3b64e50bf99bf",
+      "object": "chat.completion",
+      "created": 1785381685,
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "\n{\"answer\": \"การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้อยู่ภายใต้บังคับมาตรา 65/9 แห่งประมวลรัษฎากร โดยต้องเป็นไปตามหลักเกณฑ์ วิธีการ เงื่อนไข และการกำหนดมูลค่าที่ต้องสูญเสียไปตามที่กำหนดไว้ในกฎกระทรวงฉบับที่ 118 (พ.ศ. 2534) ออกตามความในประมวลรัษฎากร\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"65/9\"}]}",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ],
+      "service_tier": null,
+      "system_fingerprint": "vllm-0.25.1-nohash",
+      "usage": {
+        "prompt_tokens": 439,
+        "total_tokens": 609,
+        "completion_tokens": 170,
+        "prompt_tokens_details": null
+      },
+      "prompt_logprobs": null,
+      "prompt_token_ids": null,
+      "prompt_text": null,
+      "kv_transfer_params": null,
+      "metrics": null
+    },
+    "text": "\n{\"answer\": \"การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้อยู่ภายใต้บังคับมาตรา 65/9 แห่งประมวลรัษฎากร โดยต้องเป็นไปตามหลักเกณฑ์ วิธีการ เงื่อนไข และการกำหนดมูลค่าที่ต้องสูญเสียไปตามที่กำหนดไว้ในกฎกระทรวงฉบับที่ 118 (พ.ศ. 2534) ออกตามความในประมวลรัษฎากร\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"65/9\"}]}",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 439,
+      "total_tokens": 609,
+      "completion_tokens": 170,
+      "prompt_tokens_details": null
+    },
+    "elapsed_seconds": 5.1183
+  },
+  "evaluation": {
+    "json_valid": true,
+    "answer": "การจำหน่ายหนี้สูญของบริษัทฯ ในกรณีนี้อยู่ภายใต้บังคับมาตรา 65/9 แห่งประมวลรัษฎากร โดยต้องเป็นไปตามหลักเกณฑ์ วิธีการ เงื่อนไข และการกำหนดมูลค่าที่ต้องสูญเสียไปตามที่กำหนดไว้ในกฎกระทรวงฉบับที่ 118 (พ.ศ. 2534) ออกตามความในประมวลรัษฎากร",
+    "citations": [
+      {
+        "law": "ป.รัษฎากร",
+        "section": "65/9"
+      }
+    ],
+    "section_checks": [
+      {
+        "expected_section": "65 ทวิ",
+        "matched": false
+      }
+    ],
+    "citation_recall": 0.0
+  },
+  "timing": {
+    "generation_seconds": 5.1183,
+    "total_seconds": 5.1185
+  },
+  "token_usage": {
+    "prompt_tokens": 439,
+    "completion_tokens": 170,
+    "total_tokens": 609
+  },
+  "summary": {
+    "citation_recall": 0.0,
+    "json_valid": true,
+    "elapsed_seconds": 5.1183,
+    "total_tokens": 609,
+    "finish_reason": "stop"
+  },
+  "mode_contract": {
+    "retrieval_used": false,
+    "retrieval_backend": null,
+    "milvus_used": false,
+    "reason": "โหมดนี้เป็น retrieval-free control ตามนิยามการทดสอบ การเพิ่ม Milvus จะเปลี่ยนโหมดให้เป็น RAG"
+  }
+}

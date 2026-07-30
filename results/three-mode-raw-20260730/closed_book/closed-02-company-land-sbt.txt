@@ -1,0 +1,148 @@
+OpenThai 2.0 Legal benchmark artifact
+================================================================================
+created_at_utc: 2026-07-30T03:21:25.367429+00:00
+mode: closed_book
+id: closed-02-company-land-sbt
+title: บริษัทขายที่ดินที่ใช้เป็นสำนักงานหลังถือครอง 6 ปี
+model: iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b
+vllm_endpoint: http://127.0.0.1:3033/v1/chat/completions
+context_window_tokens: 32768
+
+SUMMARY
+--------------------------------------------------------------------------------
+{
+  "citation_recall": 1.0,
+  "json_valid": true,
+  "elapsed_seconds": 9.1513,
+  "total_tokens": 669,
+  "finish_reason": "stop"
+}
+
+FULL RECORD: request -> response -> timing -> token usage -> evaluation
+--------------------------------------------------------------------------------
+{
+  "created_at": "2026-07-30T03:21:25.367429+00:00",
+  "mode": "closed_book",
+  "id": "closed-02-company-land-sbt",
+  "title": "บริษัทขายที่ดินที่ใช้เป็นสำนักงานหลังถือครอง 6 ปี",
+  "parameters": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 2048,
+    "thinking": false,
+    "seed": 42
+  },
+  "question": "บริษัท ค. จำกัด (บริษัทฯ) ประกอบกิจการรับเหมาก่อสร้าง ได้ซื้อที่ดินแปลงหนึ่งเพื่อใช้เป็นที่ตั้งสำนักงานและลานเก็บวัสดุก่อสร้าง โดยมิได้มีวัตถุประสงค์เพื่อขายต่อแต่อย่างใด ต่อมาเมื่อบริษัทฯ ย้ายสำนักงานไปยังทำเลใหม่ จึงได้จดทะเบียนโอนขายที่ดินแปลงดังกล่าว โดยถือครองที่ดินมาเป็นเวลา 6 ปีนับแต่วันได้มาซึ่งกรรมสิทธิ์จนถึงวันโอน บริษัทฯ จึงขอหารือว่า การขายที่ดินของบริษัทฯ ในกรณีนี้ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันอยู่ในบังคับต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากรหรือไม่ เพียงใด",
+  "reference_holding_for_post_generation_review": "การขายอสังหาริมทรัพย์ของนิติบุคคลเข้าลักษณะขายเป็นทางค้าหรือหากำไรตามหลักเกณฑ์กฎหมายลำดับรอง จึงอยู่ในบังคับภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6); ระยะเวลาถือครอง 6 ปีไม่ได้ทำให้บริษัทได้รับข้อยกเว้นแบบบุคคลธรรมดาโดยอัตโนมัติ",
+  "expected_sections_for_post_generation_review": [
+    "91/2"
+  ],
+  "model_call": {
+    "request": {
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert on Thai law. You are given ONLY a legal question, with NO reference material provided. Using your OWN knowledge of Thai statutes, answer in Thai and cite the specific sections that apply (law name + bare section number, มาตรา). Output ONLY a JSON object: {\"answer\":\"<Thai answer>\",\"citations\":[{\"law\":\"<law name>\",\"section\":\"<bare section number e.g. 40 or 77/1>\"}]}."
+        },
+        {
+          "role": "user",
+          "content": "บริษัท ค. จำกัด (บริษัทฯ) ประกอบกิจการรับเหมาก่อสร้าง ได้ซื้อที่ดินแปลงหนึ่งเพื่อใช้เป็นที่ตั้งสำนักงานและลานเก็บวัสดุก่อสร้าง โดยมิได้มีวัตถุประสงค์เพื่อขายต่อแต่อย่างใด ต่อมาเมื่อบริษัทฯ ย้ายสำนักงานไปยังทำเลใหม่ จึงได้จดทะเบียนโอนขายที่ดินแปลงดังกล่าว โดยถือครองที่ดินมาเป็นเวลา 6 ปีนับแต่วันได้มาซึ่งกรรมสิทธิ์จนถึงวันโอน บริษัทฯ จึงขอหารือว่า การขายที่ดินของบริษัทฯ ในกรณีนี้ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันอยู่ในบังคับต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากรหรือไม่ เพียงใด"
+        }
+      ],
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "max_tokens": 2048,
+      "seed": 42,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "response": {
+      "id": "chatcmpl-b43ffa9a2c46ad2f",
+      "object": "chat.completion",
+      "created": 1785381676,
+      "model": "iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "\n{\"answer\": \"การขายที่ดินของบริษัทฯ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร เนื่องจากบริษัทฯ ได้ซื้อที่ดินมาเพื่อใช้เป็นที่ตั้งสำนักงานและลานเก็บวัสดุก่อสร้าง ซึ่งเป็นกิจการหลักของบริษัทฯ การถือครองที่ดินไว้เป็นเวลา 6 ปีก่อนโอนยังถือเป็นการถือครองเพื่อประกอบกิจการของบริษัทฯ ไม่ใช่การถือครองเพื่อการลงทุนระยะยาว จึงไม่ได้รับการยกเว้นตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"91/2\"}]}",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ],
+      "service_tier": null,
+      "system_fingerprint": "vllm-0.25.1-nohash",
+      "usage": {
+        "prompt_tokens": 401,
+        "total_tokens": 669,
+        "completion_tokens": 268,
+        "prompt_tokens_details": null
+      },
+      "prompt_logprobs": null,
+      "prompt_token_ids": null,
+      "prompt_text": null,
+      "kv_transfer_params": null,
+      "metrics": null
+    },
+    "text": "\n{\"answer\": \"การขายที่ดินของบริษัทฯ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร เนื่องจากบริษัทฯ ได้ซื้อที่ดินมาเพื่อใช้เป็นที่ตั้งสำนักงานและลานเก็บวัสดุก่อสร้าง ซึ่งเป็นกิจการหลักของบริษัทฯ การถือครองที่ดินไว้เป็นเวลา 6 ปีก่อนโอนยังถือเป็นการถือครองเพื่อประกอบกิจการของบริษัทฯ ไม่ใช่การถือครองเพื่อการลงทุนระยะยาว จึงไม่ได้รับการยกเว้นตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร\", \"citations\": [{\"law\": \"ป.รัษฎากร\", \"section\": \"91/2\"}]}",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 401,
+      "total_tokens": 669,
+      "completion_tokens": 268,
+      "prompt_tokens_details": null
+    },
+    "elapsed_seconds": 9.1513
+  },
+  "evaluation": {
+    "json_valid": true,
+    "answer": "การขายที่ดินของบริษัทฯ ถือเป็นการขายอสังหาริมทรัพย์เป็นทางค้าหรือหากำไรอันต้องเสียภาษีธุรกิจเฉพาะตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร เนื่องจากบริษัทฯ ได้ซื้อที่ดินมาเพื่อใช้เป็นที่ตั้งสำนักงานและลานเก็บวัสดุก่อสร้าง ซึ่งเป็นกิจการหลักของบริษัทฯ การถือครองที่ดินไว้เป็นเวลา 6 ปีก่อนโอนยังถือเป็นการถือครองเพื่อประกอบกิจการของบริษัทฯ ไม่ใช่การถือครองเพื่อการลงทุนระยะยาว จึงไม่ได้รับการยกเว้นตามมาตรา 91/2 (6) แห่งประมวลรัษฎากร",
+    "citations": [
+      {
+        "law": "ป.รัษฎากร",
+        "section": "91/2"
+      }
+    ],
+    "section_checks": [
+      {
+        "expected_section": "91/2",
+        "matched": true
+      }
+    ],
+    "citation_recall": 1.0
+  },
+  "timing": {
+    "generation_seconds": 9.1513,
+    "total_seconds": 9.1514
+  },
+  "token_usage": {
+    "prompt_tokens": 401,
+    "completion_tokens": 268,
+    "total_tokens": 669
+  },
+  "summary": {
+    "citation_recall": 1.0,
+    "json_valid": true,
+    "elapsed_seconds": 9.1513,
+    "total_tokens": 669,
+    "finish_reason": "stop"
+  },
+  "mode_contract": {
+    "retrieval_used": false,
+    "retrieval_backend": null,
+    "milvus_used": false,
+    "reason": "โหมดนี้เป็น retrieval-free control ตามนิยามการทดสอบ การเพิ่ม Milvus จะเปลี่ยนโหมดให้เป็น RAG"
+  }
+}
