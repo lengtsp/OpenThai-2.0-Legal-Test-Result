@@ -21,14 +21,19 @@
 | NitiBench | [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | 3,934 chunks | ระดับมาตรา; source store ไม่มี page field |
 | พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 225 units | 73 parent + 152 child; corpus ใช้งานจริงรวมฉบับแก้ไข 1–6 |
 | Digital Fraud Management | [BOT 2568/0254](https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/ThaiPDF/25680254.pdf) | 54 units | ระดับข้อ/ข้อย่อย พร้อมเลขหน้า |
+| NCSA Cloud Security Framework | [NCSA cloud-security page](https://www.ncsa.or.th/page/cloudsecurity) | 326 units | 24 page parents + 326 atomic children; แยก cell/รายการ CSC-CSP และเลขหน้า PDF |
 
 PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็นเอกสารหลักสำหรับตรวจเทียบ แต่ยังไม่รวม
 ฉบับที่ 6 ปี 2565 จึงไม่ใช้แทน corpus ฉบับรวม 1–6 และไม่สร้าง amendment-only dataset แยก
 
-> **หมายเหตุเรื่องลักษณะข้อมูล:** NCB และ Digital Fraud เป็น corpus ที่ extract จากตัวบทต้นทาง
+> **หมายเหตุเรื่องลักษณะข้อมูล:** NCB, Digital Fraud และ NCSA Cloud เป็น corpus ที่ extract จากตัวบทต้นทาง
 > โดยแยกตามมาตรา/ข้อ/ข้อย่อย, parent-child, การอ้างอิงข้าม และเลขหน้า PDF เพื่อใช้ retrieval
 > ไม่ใช่ชุดคำถาม-คำตอบที่สร้างจาก scenario หรือเหตุการณ์จริง. คำถาม benchmark มีไว้ทดสอบ
 > การค้นคืนและการตอบหลังจากสร้าง corpus แล้วเท่านั้น และไม่ถูกนำเข้า embedding หรือ retrieval corpus.
+>
+> สำหรับ NCSA Cloud ใช้ Doc#16122 ที่เคย ingest ไว้ (SHA-256 `96fb…9269e2`, PDF pp. 465–488):
+> ตรวจ source-to-child ซ้ำแล้ว 326/326 child fragments ย้อนพบใน OCR หน้าที่อ้างถึง และ 99/99 table cells
+> มี child citation. ลิงก์ Drive ที่รับมาไม่เผยชื่อ/แฮชไฟล์ จึงไม่ได้อ้างว่าเป็นไฟล์เดียวกันโดยตรง.
 
 ## Hybrid RAG ที่ใช้จริง
 
@@ -43,6 +48,7 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 | NitiBench fusion | Milvus dense cosine + Thai BM25 + native RRF | ตามด้วย BGE rerank |
 | NCB fusion | parent/child hybrid + explicit-reference expansion | คง parent/child และมาตราที่อ้างถึง |
 | Digital Fraud fusion | dense + Thai lexical RRF + explicit-reference closure | คงข้อ/ข้อย่อยและ page provenance |
+| NCSA Cloud fusion | atomic evidence hierarchy + dense/Thai lexical RRF + BGE rerank | citation address แยกข้อ/บทบาท CSC-CSP/รายการ/หน้า |
 | Reranker | BGE-M3 cross-encoder | rerank หลักฐานก่อนส่งโมเดล |
 | Final evidence (`top_k`) | 8 | OpenThai และ Qwen ได้ evidence ชุดเดียวกัน |
 | Generation | temperature 0.0, top_p 1.0, max_tokens 2,048, seed 42, thinking off | JSON answer + citations |
@@ -88,6 +94,21 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 | เมื่อเกิดภัยทุจริตดิจิทัล ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลากระบวนการและดูแลลูกค้าที่ได้รับผลกระทบอย่างไร | ข้อ 5.3.2(4.2), 5.3.2(4.3) | 0.50 · **partial** | 1.00 · supported | OpenThai ครอบคลุมเวลา/การติดต่อกลับตาม 4.2 แต่ขาดการดูแล เยียวยา และเงื่อนไขตาม 4.3 |
 | ผู้ให้บริการทางการเงินต้องรายงานข้อมูลเกี่ยวกับการบริหารจัดการภัยทุจริตดิจิทัลต่อธนาคารแห่งประเทศไทยอย่างไร | ข้อ 5.3.5 | 1.00 · supported | 1.00 · supported | หน้าที่ส่งรายงานตามกำหนดและให้ข้อมูลเพิ่มเติมรายกรณีตรงตัวบท |
 
+### 4) NCSA Cloud Security Framework
+
+ตารางนี้วัด **source-grounded atomic citation** เท่านั้น: citation จะผ่านเมื่อ resolver ระบุได้เป็น
+ข้อกำหนดเดียวในหลักฐานที่ส่งให้โมเดล โดยสำหรับ CSC/CSP ต้องระบุบทบาท/รายการให้แยกกัน;
+หัวข้อกว้างที่มีหลายบทบาทจึงไม่ถูกนับเป็น citation ที่ตรวจสอบเครื่องได้ แม้ใจความคำตอบจะคล้ายตัวบท.
+ยังไม่มี Codex Sol หรือผู้เชี่ยวชาญกฎหมายไทยตรวจ “ความถูกต้องเชิงสาระ” ของ 5 ข้อนี้.
+
+| คำถาม | Expected atomic citation | OpenThai Q4<br>(coverage) | Qwen Q5<br>(coverage) | เหตุผล / จุดให้คนพิจารณา |
+|---|---|---:|---:|---|
+| หน่วยงานที่ใช้ public cloud ต้องคำนึงถึงหลักเกณฑ์ใดเกี่ยวกับข้อมูลหรือระบบสารสนเทศ | ข้อ 4 · เนื้อความ · p.466 | 1.00 | 1.00 | ทั้งคู่ระบุข้อ 4 ได้; ตรวจถ้อยคำเรื่องระดับผลกระทบกับตัวบทฉบับใช้งานจริง |
+| ข้อมูลส่วนบุคคลบน public cloud ต้องจัดระดับผลกระทบด้านความลับขั้นต่ำเท่าใด | ข้อ 5 · เนื้อความ · p.466 | 1.00 | 1.00 | ทั้งคู่ตอบ “ระดับกลาง”; ให้คนตรวจ scope ของข้อ 5 เพิ่มเติม |
+| CSC/CSP ต้องตกลงและบันทึกความรับผิดชอบด้านความปลอดภัยอย่างไร | 5.1.2.1 · CSC/CSP · ก · p.474 | 0.00 | 1.00 | OpenThai อ้างเพียงหัวข้อ 5.1.2.1 จึงไม่บอก actor; Qwen แยก CSC และ CSP ครบ |
+| CSC/CSP ต้องขอหรือให้หลักฐานเอกสารด้านมาตรการควบคุมอย่างไร | 5.1.3.5 · CSC/CSP · ก · p.476 | 0.00 | 1.00 | OpenThai ขาด role/item; Qwen มี expected anchors ครบ แต่มี citation เพิ่ม จึงควรตรวจ scope ต่อ |
+| CSC/CSP มีหน้าที่ใดเรื่องช่องโหว่ทางเทคนิค | 5.2.6.8 · CSC/CSP · ก · p.484 | 0.00 | 1.00 | OpenThai อ้างหัวข้อกว้างเดียว; Qwen แยกหน้าที่ของทั้งสองฝ่ายได้ |
+
 #### วิธีอ่านผล Digital Fraud ของ OpenThai Q4
 
 - **ข้อ 4 (scope):** สาระครบและ citation ข้อ 4 ถูกต้อง; ข้อสังเกตคืออ้างข้ออื่นเกินจำเป็น จึงไม่ใช่คำตอบผิด.
@@ -116,7 +137,7 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 
 ## สรุปตัวชี้วัดเชิงเทคนิคหลังผลรายข้อ
 
-การค้นคืนพบ expected citation ใน top-8 ครบ 15/15 ข้อ และ JSON parse ได้ครบทั้งสองโมเดล. แยกตารางตามโมเดลเพื่อลดความสับสน; ทั้งสองตารางเป็น technical/AI screening ไม่ใช่ leaderboard คุณภาพกฎหมายหรือคะแนนผู้เชี่ยวชาญกฎหมายไทย.
+การค้นคืนพบ expected citation ใน top-8 ครบ 20/20 ข้อ และ JSON parse ได้ครบทั้งสองโมเดล. แยกตารางตามโมเดลเพื่อลดความสับสน; ทั้งสองตารางเป็น technical/AI screening ไม่ใช่ leaderboard คุณภาพกฎหมายหรือคะแนนผู้เชี่ยวชาญกฎหมายไทย.
 
 ### OpenThai 2.0 Legal · Ollama Q4
 
@@ -125,7 +146,8 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 | NitiBench | 100% | 4 supported + 1 partial | 21.73s |
 | NCB (รวมฉบับแก้ไข 1–6) | 100% | 3 supported + 2 partial | 18.85s |
 | Digital Fraud | 70% | 3 supported + 2 partial | 21.18s |
-| **รวม 15 ข้อ** | **90%** | **10 supported + 5 partial** | **20.58s** |
+| NCSA Cloud | 40% | ยังไม่ทำ Codex Sol screening; 3 ข้อหลุดเพราะไม่ระบุ CSC/CSP/item ใน citation | 20.76s |
+| **รวม 20 ข้อ** | **77.5%** | **10 supported + 5 partial (เฉพาะ 15 ข้อเดิม); NCSA รอผู้ตรวจ** | **20.63s** |
 
 ### Qwen3.6-35B-A3B · llama.cpp Q5
 
@@ -134,11 +156,12 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 | NitiBench | 100% | 5 supported | 10.69s |
 | NCB (รวมฉบับแก้ไข 1–6) | 100% | 5 supported | 7.70s |
 | Digital Fraud | 100% | 5 supported | 8.83s |
-| **รวม 15 ข้อ** | **100%** | **15 supported** | **9.07s** |
+| NCSA Cloud | 100% | ยังไม่ทำ Codex Sol screening; atomic citation grounded ครบ 5/5 | 9.66s |
+| **รวม 20 ข้อ** | **100%** | **15 supported (15 ข้อเดิม); NCSA รอผู้ตรวจเชิงสาระ** | **9.22s** |
 
 ### การให้คะแนนหลักที่ต้องใช้ผู้เชี่ยวชาญกฎหมายไทย
 
-ยังไม่มีผู้เชี่ยวชาญกฎหมายไทย adjudicate คำตอบทั้ง 30 ชิ้น ดังนั้น **ยังไม่มีคะแนนหลักที่ใช้เปรียบเทียบ OpenThai กับ Qwen**. ก่อนประกาศผลเปรียบเทียบ ให้ผู้เชี่ยวชาญอย่างน้อย 2 คนตรวจแบบปิดชื่อโมเดล โดยใช้ตัวบทภาษาไทยที่มีผลใช้บังคับเป็นหลัก และแยกคะแนนดังนี้:
+ยังไม่มีผู้เชี่ยวชาญกฎหมายไทย adjudicate คำตอบทั้ง 40 ชิ้น ดังนั้น **ยังไม่มีคะแนนหลักที่ใช้เปรียบเทียบ OpenThai กับ Qwen**. ก่อนประกาศผลเปรียบเทียบ ให้ผู้เชี่ยวชาญอย่างน้อย 2 คนตรวจแบบปิดชื่อโมเดล โดยใช้ตัวบทภาษาไทยที่มีผลใช้บังคับเป็นหลัก และแยกคะแนนดังนี้:
 
 | มิติที่ผู้เชี่ยวชาญตรวจ | น้ำหนัก | สิ่งที่ต้องเทียบจากคำตอบไทย |
 |---|---:|---|
@@ -152,8 +175,8 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 
 | ข้อสรุป | ความหมาย |
 |---|---|
-| Retrieval | ทั้งสองโมเดลได้รับ evidence เดียวกัน และ retrieval พบ expected citation ครบ 15/15 |
-| AI source screening (ไม่ใช่ expert score) | Qwen ได้ `supported` มากกว่าตาม Codex Sol ใน fixed 15 cases; ผลนี้ใช้ชี้แถวที่ควรตรวจ ไม่ใช่ข้อสรุปว่า Qwen ดีกว่า OpenThai โดยรวม |
+| Retrieval | ทั้งสองโมเดลได้รับ evidence เดียวกัน และ retrieval พบ expected citation ครบ 20/20 ใน top-8 |
+| AI source screening (ไม่ใช่ expert score) | Qwen ได้ `supported` มากกว่าตาม Codex Sol ใน fixed 15 cases เดิม; NCSA เพิ่มเฉพาะการตรวจ atomic citation จึงยังไม่มี expert/AI semantic score |
 | Thai legal-expert score | ยังไม่มี; ต้องตรวจแบบปิดชื่อโมเดลตาม rubric ด้านบนก่อนสรุปผลเปรียบเทียบ |
 | Human approval gate | ห้าม approve เฉพาะจาก citation; เปิดตรวจคำตอบเต็มและตัวบททุกแถวที่เป็น partial หรือ over-citation |
 | เวลา | Qwen เร็วกว่ารอบนี้ แต่เป็น sequential run และคนละ runtime/quantization ไม่ใช่ production benchmark |
@@ -174,7 +197,7 @@ PostgreSQL ใช้ dense pgvector + FTS/pg_trgm + application RRF (`k=60`); Mi
 
 ## ข้อจำกัด
 
-- เป็น fixed benchmark 15 ข้อ ไม่ใช่ตัวอย่างสุ่มหรือ coverage ของกฎหมายไทยทั้งหมด
+- เป็น fixed benchmark 20 ข้อ ไม่ใช่ตัวอย่างสุ่มหรือ coverage ของกฎหมายไทยทั้งหมด
 - Citation ตรง ไม่ได้หมายความว่าคำตอบเป็นคำวินิจฉัยทางกฎหมายที่ครบถ้วน
 - Codex Sol เป็น independent model review ไม่ใช่ Thai legal-expert adjudication
 - Repository นี้ไม่มี model weights, credential, token หรือ chat session
