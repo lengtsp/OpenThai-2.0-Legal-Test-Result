@@ -1,0 +1,166 @@
+{
+  "case_id": "ncb-owner-dispute",
+  "dataset": "ncb_credit_info_act",
+  "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+  "question": "หากเจ้าของข้อมูลโต้แย้งความถูกต้องของข้อมูลเครดิตและยังหาข้อยุติไม่ได้ บริษัทข้อมูลเครดิตต้องดำเนินการอย่างไร",
+  "retrieval": {
+    "candidate_recall_at_8": 1.0,
+    "selected_evidence": [
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "27",
+        "page_start": 12,
+        "page_end": 12,
+        "hybrid_rank": 1,
+        "rerank_score": 0.9993
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "19",
+        "page_start": 6,
+        "page_end": 7,
+        "hybrid_rank": 2,
+        "rerank_score": 0.9908
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "25",
+        "page_start": 11,
+        "page_end": 11,
+        "hybrid_rank": 3,
+        "rerank_score": 0.487
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "26",
+        "page_start": 11,
+        "page_end": 11,
+        "hybrid_rank": 4,
+        "rerank_score": 0.7891
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "36",
+        "page_start": 15,
+        "page_end": 15,
+        "hybrid_rank": 5,
+        "rerank_score": 0.6721
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "41",
+        "page_start": 16,
+        "page_end": 16,
+        "hybrid_rank": 6,
+        "rerank_score": 0.737
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "17",
+        "page_start": 6,
+        "page_end": 6,
+        "hybrid_rank": 7,
+        "rerank_score": 0.3965
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "20",
+        "page_start": 7,
+        "page_end": 8,
+        "hybrid_rank": 8,
+        "rerank_score": 0.5446
+      }
+    ],
+    "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+  },
+  "models": {
+    "openthai_2_ollama_q4": {
+      "label": "OpenThai 2.0 Legal · Ollama Q4",
+      "runtime": "Ollama Q4",
+      "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานของเจ้าของข้อมูลไว้ในระบบข้อมูลของเจ้าของข้อมูล และแจ้งข้อโต้แย้งดังกล่าวให้บุคคลที่เกี่ยวข้องทราบ พร้อมทั้งอุทธรณ์ข้อโต้แย้งต่อคณะกรรมการเพื่อวินิจฉัยชี้ขาด",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "27",
+          "pages": "12-12",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 12.301,
+        "end_to_end": 19.003
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 19,
+        "rationale": "ลำดับการดำเนินการอ่านง่าย แต่ถ้อยคำเรื่องใครเป็นผู้อุทธรณ์ยังไม่ชัดพอ"
+      }
+    },
+    "openthai_2_vllm_bf16": {
+      "label": "OpenThai 2.0 Legal · vLLM BF16",
+      "runtime": "local safetensors BF16 via vLLM 0.25.1",
+      "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานประกอบของเจ้าของข้อมูลไว้ในระบบข้อมูลของเจ้าของข้อมูล และระบุในรายงานข้อมูลว่ามีข้อโต้แย้งของเจ้าของข้อมูลในเรื่องใดบ้าง เจ้าของข้อมูลอาจอุทธรณ์ข้อโต้แย้งนั้นต่อคณะกรรมการเพื่อวินิจฉัยชี้ขาด",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "27",
+          "pages": "12-12",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 5.9537,
+        "end_to_end": 12.6557
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": true,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 20,
+        "rationale": "แยกการบันทึก การระบุในรายงาน และสิทธิของเจ้าของข้อมูลได้ชัด"
+      }
+    },
+    "qwen36_35b_a3b_llamacpp_q5": {
+      "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+      "runtime": "llama.cpp Q5",
+      "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานประกอบของเจ้าของข้อมูลไว้ในระบบข้อมูล และในการจัดทำรายงานข้อมูลเพื่อให้บริการแก่สมาชิกหรือผู้ใช้บริการ ต้องระบุในรายงานว่ามีข้อโต้แย้งของเจ้าของข้อมูลในเรื่องใดบ้าง",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "27",
+          "pages": "12-12",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 1.246,
+        "end_to_end": 7.948
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 20,
+        "rationale": "ระบุหน้าที่ของบริษัทและวิธีสื่อข้อโต้แย้งอย่างเป็นลำดับและตรงคำถาม"
+      }
+    }
+  },
+  "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+}

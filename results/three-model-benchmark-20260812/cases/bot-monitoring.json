@@ -1,0 +1,190 @@
+{
+  "case_id": "bot-monitoring",
+  "dataset": "bot_digital_fraud_management",
+  "dataset_label": "BOT Digital Fraud Management",
+  "question": "ผู้ให้บริการทางการเงินต้องมีการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างไร",
+  "retrieval": {
+    "candidate_recall_at_8": 1.0,
+    "selected_evidence": [
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.2 (2)",
+        "page_start": 8,
+        "page_end": 8,
+        "hybrid_rank": 1,
+        "rerank_score": 0.9993
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.2 (2.1)",
+        "page_start": 8,
+        "page_end": 8,
+        "hybrid_rank": 2,
+        "rerank_score": 0.9943
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.2",
+        "page_start": 7,
+        "page_end": 10,
+        "hybrid_rank": 3,
+        "rerank_score": 0.984
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "เอกสารแนบ หน้า 1",
+        "page_start": 14,
+        "page_end": 14,
+        "hybrid_rank": 4,
+        "rerank_score": 0.9854
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.2 (2.2)",
+        "page_start": 8,
+        "page_end": 8,
+        "hybrid_rank": 5,
+        "rerank_score": 0.9772
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.1 (7)",
+        "page_start": 7,
+        "page_end": 7,
+        "hybrid_rank": 6,
+        "rerank_score": 0.9109
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5",
+        "page_start": 4,
+        "page_end": 12,
+        "hybrid_rank": 7,
+        "rerank_score": 0.5945
+      },
+      {
+        "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+        "section": "5.3.2 (3)",
+        "page_start": 8,
+        "page_end": 9,
+        "hybrid_rank": 8,
+        "rerank_score": 0.8882
+      }
+    ],
+    "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+  },
+  "models": {
+    "openthai_2_ollama_q4": {
+      "label": "OpenThai 2.0 Legal · Ollama Q4",
+      "runtime": "Ollama Q4",
+      "answer": "ผู้ให้นบรการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินในเชิงรุกอย่างมีประสิทธิผล ครอบคลุมรูปแบบของภัยทุจริตดิจิทัลจากการทำธุรกรรมทางการเงินที่เปลี่ยนแปลงไปอย่างต่อเนื่อง โดยต้องสามารถประเมินระดับความเสี่ยงของบัญชีทั้งบัญชีของบุคคลที่คาดว่าจะได้รับความเสียหายจากภัยทุจริตดิจิทัลและบุคคลที่มีความเสี่ยงในการนำบัญชีไปใช้เป็นบัญชีม้า รวมถึงตรวจจับการทำธุรกรรมและการใช้บัญชีที่มีความผิดปกติได้อย่างทันท่วงที เพื่อให้นบรการภัยทุจริตดิจิทัลที่เหมาะสมและทันกาล",
+      "citations": [
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2)",
+          "pages": "8-8",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 14.756,
+        "end_to_end": 21.396
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 0.5,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 14,
+        "rationale": "โครงสร้างเนื้อหายังต่อเนื่อง แต่คำเพี้ยนในชื่อ actor และข้อความปิดท้ายลดความชัดมาก"
+      }
+    },
+    "openthai_2_vllm_bf16": {
+      "label": "OpenThai 2.0 Legal · vLLM BF16",
+      "runtime": "local safetensors BF16 via vLLM 0.25.1",
+      "answer": "ผู้ให้บริการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างมีประสิทธิผล โดยต้องสามารถประเมินระดับความเสี่ยงของบัญชีทั้งบัญชีของบุคคลที่คาดว่าจะได้รับความเสียหายจากภัยทุจริตดิจิทัลและบุคคลที่มีความเสี่ยงในการนำบัญชีไปใช้เป็นบัญชีม้า รวมถึงตรวจจับการทำธุรกรรมและการใช้บัญชีที่มีความผิดปกติได้อย่างทันท่วงที เพื่อให้มีการจัดการภัยทุจริตดิจิทัลที่เหมาะสมและทันกาล",
+      "citations": [
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2)",
+          "pages": "8-8",
+          "grounded": true
+        },
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2.1)",
+          "pages": "8-8",
+          "grounded": true
+        },
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2.2)",
+          "pages": "8-8",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 12.2016,
+        "end_to_end": 18.8416
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 0.6667,
+        "exact_expected_citation_set": false,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 20,
+        "rationale": "อธิบายกระบวนการ กลุ่มบัญชีเป้าหมาย และวัตถุประสงค์ได้กระชับและต่อเนื่อง"
+      }
+    },
+    "qwen36_35b_a3b_llamacpp_q5": {
+      "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+      "runtime": "llama.cpp Q5",
+      "answer": "ผู้ให้บริการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินในเชิงรุกอย่างมีประสิทธิผล โดยต้องจัดให้มีระบบการติดตามและตรวจจับธุรกรรมที่ผิดปกติได้ทันท่วงที และกำหนดเงื่อนไขในการติดตามและตรวจจับความผิดปกติโดยพิจารณาจากข้อมูลต่าง ๆ เช่น รูปแบบภัยทุจริตดิจิทัล ช่องทางการให้บริการ พฤติกรรม การใช้บัญชี ข้อมูลพฤติกรรมต้องสงสัย ข้อมูลจากผู้ให้บริการทางการเงินแห่งอื่น ข้อมูลจากระบบ Central Fraud Registry (CFR) และข้อมูลจากหน่วยงานอื่น ๆ นอกจากนี้ ต้องทบทวนและปรับปรุงเงื่อนไขรวมทั้งกระบวนการในการตรวจจับความผิดปกติในเชิงรุกอย่างสม่ำเสมอ โดยนำระบบวิเคราะห์ข้อมูลหรือเทคโนโลยีปัญญาประดิษฐ์มาใช้ เพื่อให้สามารถติดตามและตรวจจับความผิดปกติได้ดียิ่งขึ้น",
+      "citations": [
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2)",
+          "pages": "8-8",
+          "grounded": true
+        },
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2.1)",
+          "pages": "8-8",
+          "grounded": true
+        },
+        {
+          "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+          "section": "5.3.2(2.2)",
+          "pages": "8-8",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 2.561,
+        "end_to_end": 9.201
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 19,
+        "rationale": "สำนวนชัดและอธิบายวิธีติดตามหลายชั้นครบ แต่รายการข้อมูลยาวกว่าที่จำเป็นต่อคำตอบตรง"
+      }
+    }
+  },
+  "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+}

@@ -1,0 +1,178 @@
+{
+  "case_id": "ncb-rejection-reasons",
+  "dataset": "ncb_credit_info_act",
+  "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+  "question": "เมื่อลูกค้าถูกปฏิเสธสินเชื่อเพราะข้อมูลเครดิต ผู้ให้บริการต้องแจ้งเหตุผลและให้สิทธิใดแก่ลูกค้า",
+  "retrieval": {
+    "candidate_recall_at_8": 1.0,
+    "selected_evidence": [
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "28",
+        "page_start": 12,
+        "page_end": 12,
+        "hybrid_rank": 1,
+        "rerank_score": 0.9817
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "24/4",
+        "page_start": 10,
+        "page_end": 11,
+        "hybrid_rank": 2,
+        "rerank_score": 0.9267
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "25",
+        "page_start": 11,
+        "page_end": 11,
+        "hybrid_rank": 3,
+        "rerank_score": 0.817
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "20",
+        "page_start": 7,
+        "page_end": 8,
+        "hybrid_rank": 4,
+        "rerank_score": 0.1389
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "18",
+        "page_start": 6,
+        "page_end": 6,
+        "hybrid_rank": 5,
+        "rerank_score": 0.0827
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "24/2",
+        "page_start": 10,
+        "page_end": 10,
+        "hybrid_rank": 6,
+        "rerank_score": 0.0811
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "26",
+        "page_start": 11,
+        "page_end": 11,
+        "hybrid_rank": 7,
+        "rerank_score": 0.3586
+      },
+      {
+        "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+        "section": "27",
+        "page_start": 12,
+        "page_end": 12,
+        "hybrid_rank": 8,
+        "rerank_score": 0.041
+      }
+    ],
+    "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+  },
+  "models": {
+    "openthai_2_ollama_q4": {
+      "label": "OpenThai 2.0 Legal · Ollama Q4",
+      "runtime": "Ollama Q4",
+      "answer": "สถาบันการเงิน สมาชิก หรือผู้ใช้อุปโภคบริโภคต้องแสดงเหตุผลในการปฏิเสธการให้นิติบุคคลหรือการดำเนินการอื่นที่ก่อให้เกิดการขยายค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้าซึ่งเป็นเจ้าของข้อมูลมีสิทธิตรวจสอบความถูกต้องของข้อมูลดังกล่าวของตนโดยไม่ต้องเสียค่าธรรมเนียม หากผู้นั้นใช้อุทธรณ์ภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธการขอสินเชื่อหรือการดำเนินการอื่น",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "28",
+          "pages": "12-12",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 12.866,
+        "end_to_end": 19.175
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 10,
+        "rationale": "คำอย่าง ‘ผู้ใช้อุปโภคบริโภค’ ‘การให้นิติบุคคล’ และ ‘ใช้อุทธรณ์’ ทำให้ actor และสิทธิคลาดเคลื่อนในระดับการสื่อสาร"
+      }
+    },
+    "openthai_2_vllm_bf16": {
+      "label": "OpenThai 2.0 Legal · vLLM BF16",
+      "runtime": "local safetensors BF16 via vLLM 0.25.1",
+      "answer": "สถาบันการเงิน สมาชิก หรือผู้ใช้บริการต้องแสดงเหตุผลในการปฏิเสธการให้สินเชื่อหรือการขึ้นค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้ามีสิทธิตรวจสอบความถูกต้องของข้อมูลโดยไม่ต้องเสียค่าธรรมเนียมภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธ",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "28",
+          "pages": "12-12",
+          "grounded": true
+        },
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "24/4",
+          "pages": "10-11",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 7.9883,
+        "end_to_end": 14.2973
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 0.5,
+        "exact_expected_citation_set": false,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 19,
+        "rationale": "ภาษาโดยรวมชัดและครบ แต่ส่วนระยะเวลามีโอกาสอ่านได้สองทางว่าไปขยายสิทธิหรือการตรวจสอบ"
+      }
+    },
+    "qwen36_35b_a3b_llamacpp_q5": {
+      "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+      "runtime": "llama.cpp Q5",
+      "answer": "ผู้ให้บริการ (สถาบันการเงิน สมาชิก หรือผู้ใช้บริการ) ต้องแสดงเหตุผลในการปฏิเสธการให้สินเชื่อหรือการขึ้นค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้าซึ่งเป็นเจ้าของข้อมูลมีสิทธิตรวจสอบความถูกต้องของข้อมูลโดยไม่ต้องเสียค่าธรรมเนียม หากผู้นั้นใช้สิทธิขอตรวจสอบภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธ",
+      "citations": [
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "28",
+          "pages": "12-12",
+          "grounded": true
+        },
+        {
+          "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+          "section": "24/4",
+          "pages": "10-11",
+          "grounded": true
+        }
+      ],
+      "json_valid": true,
+      "finish_reason": "stop",
+      "timing_seconds": {
+        "answer": 2.002,
+        "end_to_end": 8.311
+      },
+      "post_inference_metrics": {
+        "expected_citation_recall": 1.0,
+        "citation_precision": 1.0,
+        "exact_expected_citation_set": null,
+        "all_citations_grounded": true
+      },
+      "codex_sol_blind_language_review": {
+        "total_out_of_20": 19,
+        "rationale": "อธิบายผู้มีหน้าที่ เหตุผลที่ต้องแจ้ง และสิทธิของลูกค้าได้ครบ แม้ประโยคค่อนข้างยาว"
+      }
+    }
+  },
+  "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+}

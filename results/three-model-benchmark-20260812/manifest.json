@@ -1,0 +1,43 @@
+{
+  "schema_version": "three-model-rag-public-audit-v1",
+  "case_count": 15,
+  "dataset_counts": {
+    "nitibench": 5,
+    "ncb_credit_info_act": 5,
+    "bot_digital_fraud_management": 5
+  },
+  "models": [
+    "openthai_2_ollama_q4",
+    "openthai_2_vllm_bf16",
+    "qwen36_35b_a3b_llamacpp_q5"
+  ],
+  "source_sha256": {
+    "runs/openthai_vs_qwen36_llama_20260812_172908/results.json": "63a423980d1026e1db2c7cee0e08dafdcd0ebb4c3adc7a48348508f78b1cd8cf",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/results.json": "84754ad5b745d2746fc337d9370a5f7dd6874e972d7c7a7213c814b77c670b42",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/evaluation_post_inference.json": "901ae260cc213ee5ed5df72fe962987c0227aab7e47db08cd22aaa03c48a6785",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/codex_sol_thai_response_quality_three_model.json": "0ef665a9596a93d1b4a0d283abfbef9a6340dd2e951977fcfe68216bc04d2097"
+  },
+  "files": [
+    "all_cases.json",
+    "language_blind_review.json",
+    "language_blind_review.md",
+    "cases/nitibench-unlicensed-futures-market.json",
+    "cases/nitibench-orchard-lease.json",
+    "cases/nitibench-minor-adoption.json",
+    "cases/nitibench-current-account.json",
+    "cases/nitibench-limited-company-shareholder.json",
+    "cases/ncb-owner-dispute.json",
+    "cases/ncb-disclosure-consent.json",
+    "cases/ncb-correction-deadline.json",
+    "cases/ncb-rejection-reasons.json",
+    "cases/ncb-unlawful-disclosure-penalty.json",
+    "cases/bot-scope.json",
+    "cases/bot-governance.json",
+    "cases/bot-monitoring.json",
+    "cases/bot-customer-response.json",
+    "cases/bot-reporting.json"
+  ],
+  "contains_expected_citation_labels": false,
+  "contains_reference_answers": false,
+  "contains_raw_generation_prompts": false
+}

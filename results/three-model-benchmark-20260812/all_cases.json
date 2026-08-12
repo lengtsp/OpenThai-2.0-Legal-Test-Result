@@ -1,0 +1,2545 @@
+{
+  "schema_version": "three-model-rag-public-audit-v1",
+  "scope": "15 fixed questions; three datasets; three saved model responses per question",
+  "comparison_contract": "No expected citation/reference answer was present in embedding, retrieval, rerank, frozen evidence input, or generation prompt. BF16 used the identical frozen final evidence packet, reconstructed without labels.",
+  "models": {
+    "openthai_2_ollama_q4": {
+      "label": "OpenThai 2.0 Legal · Ollama Q4",
+      "runtime": "Ollama Q4"
+    },
+    "openthai_2_vllm_bf16": {
+      "label": "OpenThai 2.0 Legal · vLLM BF16",
+      "runtime": "local safetensors BF16 via vLLM 0.25.1"
+    },
+    "qwen36_35b_a3b_llamacpp_q5": {
+      "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+      "runtime": "llama.cpp Q5"
+    }
+  },
+  "source_sha256": {
+    "runs/openthai_vs_qwen36_llama_20260812_172908/results.json": "63a423980d1026e1db2c7cee0e08dafdcd0ebb4c3adc7a48348508f78b1cd8cf",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/results.json": "84754ad5b745d2746fc337d9370a5f7dd6874e972d7c7a7213c814b77c670b42",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/evaluation_post_inference.json": "901ae260cc213ee5ed5df72fe962987c0227aab7e47db08cd22aaa03c48a6785",
+    "runs/openthai_safetensors_bf16_20260812_213656_run/codex_sol_thai_response_quality_three_model.json": "0ef665a9596a93d1b4a0d283abfbef9a6340dd2e951977fcfe68216bc04d2097"
+  },
+  "cases": [
+    {
+      "case_id": "nitibench-unlicensed-futures-market",
+      "dataset": "nitibench",
+      "dataset_label": "NitiBench",
+      "question": "ศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าไม่มีใบอนุญาตมีความผิดหรือมีผลอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "132",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9964
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "134",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 11,
+            "rerank_score": 0.9809
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "125",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 10,
+            "rerank_score": 0.9796
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "54",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9305
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "127",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 8,
+            "rerank_score": 0.8284
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "133",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 3,
+            "rerank_score": 0.7271
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "130",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 6,
+            "rerank_score": 0.6997
+          },
+          {
+            "law_name": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+            "section": "95",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 18,
+            "rerank_score": 0.58
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าที่ไม่มีใบอนุญาตมีความผิดตามมาตรา 132 ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาทตลอดเวลาที่ฝ่าฝืน",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+              "section": "132",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 15.68,
+            "end_to_end": 36.171
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ถ้อยคำอ่านง่ายและสื่อความผิดกับผลตามที่ถามอย่างตรงไปตรงมา"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าที่ไม่มีใบอนุญาตมีความผิดตามมาตรา 132 ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาทตลอดเวลาที่ยังฝ่าฝืน",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+              "section": "132",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 5.4605,
+            "end_to_end": 46.4425
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "สำนวนชัด กระชับ และเชื่อมผู้กระทำ เงื่อนไข และผลได้ครบถ้วน"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ใดประกอบกิจการในลักษณะเป็นศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าโดยไม่ได้รับใบอนุญาต ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ และปรับอีกไม่เกินวันละหนึ่งหมื่นบาทตลอดเวลาที่ยังฝ่าฝืน",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติสัญญาซื้อขายล่วงหน้า พ.ศ. 2546",
+              "section": "132",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.938,
+            "end_to_end": 22.429
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ระบุผู้กระทำและผลที่เกิดขึ้นเป็นประโยคไทยที่ลื่นไหล ตรงคำถาม และครบในตัวเอง"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "nitibench-orchard-lease",
+      "dataset": "nitibench",
+      "dataset_label": "NitiBench",
+      "question": "การเช่าถือสวนมีหลักเกณฑ์ตามกฎหมายอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "565",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 1,
+            "rerank_score": 0.8457
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "571",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 4,
+            "rerank_score": 0.3169
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "การเช่าถือสวนมีหลักเกณฑ์ตามกฎหมายว่าสันนิษฐานไว้ก่อนว่าเช่ากันปีหนึ่ง",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "565",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 11.398,
+            "end_to_end": 18.844
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "ตอบกฎหลักได้ชัดและตรง แต่สั้นจนให้บริบทประกอบน้อย"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "การเช่าถือสวนมีหลักเกณฑ์ตามกฎหมายว่าถือสันนิษฐานไว้ก่อนว่าเช่ากันปีหนึ่ง",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "565",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.4146,
+            "end_to_end": 17.3066
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 17,
+            "rationale": "วลี ‘ว่าถือสันนิษฐาน’ สะดุดและลดความชัด แม้ใจความหลักยังอ่านออก"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ตามประมวลกฎหมายแพ่งและพาณิชย์ มาตรา 565 การเช่าถือสวนให้สันนิษฐานไว้ก่อนว่าเช่ากันปีหนึ่ง และหากเป็นการเช่าที่นา ให้สันนิษฐานไว้ก่อนว่าเช่ากันตลอดฤดูทำนาปีหนึ่ง",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "565",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.001,
+            "end_to_end": 8.447
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "สำนวนชัดและให้บริบทเพิ่ม แต่ข้อมูลเปรียบเทียบเรื่องการเช่าที่นาทำให้ยาวกว่าคำถามเล็กน้อย"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "nitibench-minor-adoption",
+      "dataset": "nitibench",
+      "dataset_label": "NitiBench",
+      "question": "ผู้เยาว์เป็นบุตรบุญธรรมของบุคคลหลายคนได้หรือไม่",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/26",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 1,
+            "rerank_score": 0.996
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/21",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9553
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1436",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 17,
+            "rerank_score": 0.8456
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/23",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 10,
+            "rerank_score": 0.7827
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/27",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 7,
+            "rerank_score": 0.7825
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/24",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 4,
+            "rerank_score": 0.7675
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/19",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 5,
+            "rerank_score": 0.6444
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1598/22",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 2,
+            "rerank_score": 0.6102
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้เยาว์จะเป็นบุตรบุญธรรมของบุคคลหลายคนได้ไม่ได้ เว้นแต่เป็นบุตรบุญธรรมของคู่สมรสของผู้รักษาบุตรบุญธรรม",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1598/26",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 10.941,
+            "end_to_end": 17.522
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 10,
+            "rationale": "คำซ้อน ‘ได้ไม่ได้’ และคำว่า ‘ผู้รักษาบุตรบุญธรรม’ ทำให้ข้อห้ามกับข้อยกเว้นไม่ชัด"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้เยาว์ที่เป็นบุตรบุญธรรมของบุคคลใดอยู่จะเป็นบุตรบุญธรรมของบุคคลอื่นอีกในขณะเดียวกันไม่ได้ เว้นแต่เป็นบุตรบุญธรรมของคู่สมรสของผู้รับบุตรบุญธรรม",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1598/26",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 3.577,
+            "end_to_end": 16.739
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "บอกหลักและข้อยกเว้นด้วยประโยคสมบูรณ์และไม่กำกวม"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ไม่ได้ เว้นแต่เป็นบุตรบุญธรรมของคู่สมรสของผู้รับบุตรบุญธรรม",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1598/26",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 0.929,
+            "end_to_end": 7.51
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ตอบสั้นแต่สื่อข้อห้ามและข้อยกเว้นครบและชัดเจน"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "nitibench-current-account",
+      "dataset": "nitibench",
+      "dataset_label": "NitiBench",
+      "question": "สัญญาบัญชีเดินสะพัดมีลักษณะและผลทางกฎหมายอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "856",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9765
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "สัญญาบัญชีเดินสะพัดเป็นสัญญาที่บุคคลสองคนตกลงกันว่าจะตีทอนบัญชีหนี้ทั้งหมดหรือบางส่วนที่เกิดขึ้นจากกิจการระหว่างเขาทั้งสองหักกลบลบกัน และชำระเฉพาะส่วนที่เหลือโดยดุลภาค",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "856",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 11.176,
+            "end_to_end": 18.312
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "เรียบเรียงกระชับและเห็นกระบวนการชัด มีคำผิดรูป ‘ตีทอน’ หนึ่งจุด"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "สัญญาบัญชีเดินสะพัด คือสัญญาซึ่งบุคคลสองคนตกลงกันว่าสืบแต่นั้นไป หรือในชั่วเวลากำหนดอันใดอันหนึ่ง ให้ตัดทอนบัญชีหนี้ทั้งหมดหรือแต่บางส่วนอันเกิดขึ้นแต่กิจการในระหว่างเขาทั้งสองนั้นหักกลบลบกัน และคงชำระแต่ส่วนที่เป็นจำนวนคงเหลือโดยดุลภาค",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "856",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 5.2672,
+            "end_to_end": 19.5392
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "ถ้อยคำเป็นทางการและชัด แต่ประโยคยาวตามสำนวนบทบัญญัติจึงไม่กระชับที่สุด"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "สัญญาบัญชีเดินสะพัด คือ สัญญาซึ่งบุคคลสองคนตกลงกันว่าสืบแต่นั้นไป หรือในชั่วเวลากำหนดอันใดอันหนึ่ง ให้ตัดทอนบัญชีหนี้ทั้งหมดหรือแต่บางส่วนอันเกิดขึ้นแต่กิจการในระหว่างเขาทั้งสองนั้นหักกลบลบกัน และคงชำระแต่ส่วนที่เป็นจำนวนคงเหลือโดยดุลภาค",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "856",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 0.881,
+            "end_to_end": 8.017
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "เนื้อความเชื่อมโยงครบและอ่านรู้เรื่อง แต่ใช้ประโยคยาวมากกว่าสำนวนสรุป"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "nitibench-limited-company-shareholder",
+      "dataset": "nitibench",
+      "dataset_label": "NitiBench",
+      "question": "ผู้ถือหุ้นของบริษัทจำกัดต้องรับผิดในหนี้ของบริษัทเพียงใด",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1096",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9727
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1246/7",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9509
+          },
+          {
+            "law_name": "พระราชบัญญัติบริษัทมหาชนจำกัด พ.ศ. 2535",
+            "section": "95",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9445
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1068",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9021
+          },
+          {
+            "law_name": "พระราชบัญญัติบริษัทมหาชนจำกัด พ.ศ. 2535",
+            "section": "144",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 19,
+            "rerank_score": 0.8834
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1095",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 7,
+            "rerank_score": 0.8462
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1133",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 3,
+            "rerank_score": 0.8399
+          },
+          {
+            "law_name": "ประมวลกฎหมายแพ่งและพาณิชย์",
+            "section": "1052",
+            "page_start": null,
+            "page_end": null,
+            "hybrid_rank": 10,
+            "rerank_score": 0.6933
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้ถือหุ้นของบริษัทจำกัดต้องรับผิดในหนี้ของบริษัทเพียงไม่เกินจำนวนเงินที่ตนยังส่งใช้ไม้ครบมูลค่าของหุ้นทีตนถือ",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1096",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 11.456,
+            "end_to_end": 17.784
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 17,
+            "rationale": "ตอบตรงและโครงสร้างดี แต่ ‘ไม้ครบ’ กับ ‘ทีตน’ ทำให้การอ่านสะดุด"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้ถือหุ้นของบริษัทจำกัดต้องรับผิดในหนี้ของบริษัทเพียงไม่เกินจำนวนเงินที่ตนยังส่งใช้ไม่ครบมูลค่าของหุ้นที่ตนถือ",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1096",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 3.2795,
+            "end_to_end": 15.9345
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ประโยคไทยสมบูรณ์ ระบุขอบเขตความรับผิดอย่างตรงและชัด"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ถือหุ้นบริษัทจำกัดต้องรับผิดจำกัดเพียงไม่เกินจำนวนเงินที่ตนยังส่งใช้ไม่ครบมูลค่าของหุ้นที่ตนถือ",
+          "citations": [
+            {
+              "law": "ประมวลกฎหมายแพ่งและพาณิชย์",
+              "section": "1096",
+              "pages": "",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 0.716,
+            "end_to_end": 7.044
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "สั้น กระชับ และเชื่อมผู้ถือหุ้นกับขอบเขตความรับผิดได้ชัดเจน"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "ncb-owner-dispute",
+      "dataset": "ncb_credit_info_act",
+      "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+      "question": "หากเจ้าของข้อมูลโต้แย้งความถูกต้องของข้อมูลเครดิตและยังหาข้อยุติไม่ได้ บริษัทข้อมูลเครดิตต้องดำเนินการอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "27",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9993
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "19",
+            "page_start": 6,
+            "page_end": 7,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9908
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "25",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 3,
+            "rerank_score": 0.487
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "26",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 4,
+            "rerank_score": 0.7891
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "36",
+            "page_start": 15,
+            "page_end": 15,
+            "hybrid_rank": 5,
+            "rerank_score": 0.6721
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "41",
+            "page_start": 16,
+            "page_end": 16,
+            "hybrid_rank": 6,
+            "rerank_score": 0.737
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "17",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 7,
+            "rerank_score": 0.3965
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "20",
+            "page_start": 7,
+            "page_end": 8,
+            "hybrid_rank": 8,
+            "rerank_score": 0.5446
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานของเจ้าของข้อมูลไว้ในระบบข้อมูลของเจ้าของข้อมูล และแจ้งข้อโต้แย้งดังกล่าวให้บุคคลที่เกี่ยวข้องทราบ พร้อมทั้งอุทธรณ์ข้อโต้แย้งต่อคณะกรรมการเพื่อวินิจฉัยชี้ขาด",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "27",
+              "pages": "12-12",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 12.301,
+            "end_to_end": 19.003
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "ลำดับการดำเนินการอ่านง่าย แต่ถ้อยคำเรื่องใครเป็นผู้อุทธรณ์ยังไม่ชัดพอ"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานประกอบของเจ้าของข้อมูลไว้ในระบบข้อมูลของเจ้าของข้อมูล และระบุในรายงานข้อมูลว่ามีข้อโต้แย้งของเจ้าของข้อมูลในเรื่องใดบ้าง เจ้าของข้อมูลอาจอุทธรณ์ข้อโต้แย้งนั้นต่อคณะกรรมการเพื่อวินิจฉัยชี้ขาด",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "27",
+              "pages": "12-12",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 5.9537,
+            "end_to_end": 12.6557
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "แยกการบันทึก การระบุในรายงาน และสิทธิของเจ้าของข้อมูลได้ชัด"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "บริษัทข้อมูลเครดิตต้องบันทึกข้อโต้แย้งพร้อมหลักฐานประกอบของเจ้าของข้อมูลไว้ในระบบข้อมูล และในการจัดทำรายงานข้อมูลเพื่อให้บริการแก่สมาชิกหรือผู้ใช้บริการ ต้องระบุในรายงานว่ามีข้อโต้แย้งของเจ้าของข้อมูลในเรื่องใดบ้าง",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "27",
+              "pages": "12-12",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.246,
+            "end_to_end": 7.948
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ระบุหน้าที่ของบริษัทและวิธีสื่อข้อโต้แย้งอย่างเป็นลำดับและตรงคำถาม"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "ncb-disclosure-consent",
+      "dataset": "ncb_credit_info_act",
+      "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+      "question": "บริษัทข้อมูลเครดิตเปิดเผยข้อมูลแก่สมาชิกหรือผู้ใช้บริการเพื่อวิเคราะห์สินเชื่อได้ภายใต้เงื่อนไขใด",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "20",
+            "page_start": 7,
+            "page_end": 8,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9984
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24/1",
+            "page_start": 9,
+            "page_end": 9,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9959
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "20/1",
+            "page_start": 8,
+            "page_end": 8,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9406
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "51",
+            "page_start": 18,
+            "page_end": 18,
+            "hybrid_rank": 4,
+            "rerank_score": 0.8953
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24/2",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9419
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24/3",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 6,
+            "rerank_score": 0.8924
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24",
+            "page_start": 9,
+            "page_end": 9,
+            "hybrid_rank": 7,
+            "rerank_score": 0.7256
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "18",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 8,
+            "rerank_score": 0.8872
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "บริษัทข้อมูลเครดิตเปิดเผยข้อมูลแก่สมาชิกหรือผู้ใช้บริการเพื่อวิเคราะห์สินเชื่อได้โดยต้องได้รัยความยินยอมจากเจ้าของข้อมูลก่อนทุกครั้ง เว้นแต่เจ้าของข้อมูลได้ให้ความยินยอมไว้เป็นอย่าางอื่่น ทั้งนี้ ตามหลักเกณฑ์ วิธีการ และเงื่อนไขทีคณะกรรมการกำหนด",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "20",
+              "pages": "7-8",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24/1",
+              "pages": "9-9",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "20/1",
+              "pages": "8-8",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "51",
+              "pages": "18-18",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24/2",
+              "pages": "10-10",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24/3",
+              "pages": "10-10",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24",
+              "pages": "9-9",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "18",
+              "pages": "6-6",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 13.346,
+            "end_to_end": 19.632
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 16,
+            "rationale": "ใจความและโครงสร้างยังครบ แต่คำเพี้ยนหลายจุดลดความเป็นมืออาชีพและความลื่นไหล"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "บริษัทข้อมูลเครดิตเปิดเผยข้อมูลแก่สมาชิกหรือผู้ใช้บริการเพื่อวิเคราะห์สินเชื่อได้โดยต้องได้รับความยินยอมจากเจ้าของข้อมูลก่อนทุกครั้ง เว้นแต่เจ้าของข้อมูลได้ให้ความยินยอมไว้เป็นอย่างอื่น ตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการกำหนด",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "20",
+              "pages": "7-8",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 5.8336,
+            "end_to_end": 12.1196
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ภาษาเรียบร้อยและวางเงื่อนไขกับข้อยกเว้นในตำแหน่งที่เข้าใจง่าย"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "บริษัทข้อมูลเครดิตสามารถเปิดเผยหรือให้ข้อมูลแก่สมาชิกหรือผู้ใช้บริการเพื่อประโยชน์ในการวิเคราะห์สินเชื่อและการออกบัตรเครดิต ได้โดยต้องได้รับความยินยอมจากเจ้าของข้อมูลก่อนทุกครั้ง เว้นแต่เจ้าของข้อมูลได้ให้ความยินยอมไว้เป็นอย่างอื่น ทั้งนี้ ตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการกำหนด",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "20",
+              "pages": "7-8",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.144,
+            "end_to_end": 7.43
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "สื่อวัตถุประสงค์ เงื่อนไขความยินยอม และข้อยกเว้นได้เป็นประโยคเดียวที่ชัด"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "ncb-correction-deadline",
+      "dataset": "ncb_credit_info_act",
+      "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+      "question": "เมื่อเจ้าของข้อมูลขอตรวจสอบหรือขอแก้ไขข้อมูลเครดิต บริษัทข้อมูลเครดิตหรือสมาชิกต้องแจ้งผลภายในระยะเวลาใด",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "26",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9996
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "19",
+            "page_start": 6,
+            "page_end": 7,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9893
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "25",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9301
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "18",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9713
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "17",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 5,
+            "rerank_score": 0.8787
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "20",
+            "page_start": 7,
+            "page_end": 8,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9646
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "28",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 7,
+            "rerank_score": 0.6699
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "48",
+            "page_start": 17,
+            "page_end": 17,
+            "hybrid_rank": 8,
+            "rerank_score": 0.826
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ภายในสามสิบวันนับแต่วันที่ได้รับคำขอ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "26",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 11.319,
+            "end_to_end": 17.393
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 18,
+            "rationale": "กำหนดเวลาชัดมาก แต่ละผู้มีหน้าที่และสิ่งที่ต้องแจ้งให้ผู้อ่านอนุมานจากคำถาม"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ภายในสามสิบวันนับแต่วันที่ได้รับคำขอ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "26",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.5258,
+            "end_to_end": 8.5998
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 18,
+            "rationale": "ตอบระยะเวลาโดยตรงและอ่านง่าย แต่คำตอบไม่ครบองค์ประกอบเมื่ออ่านแยกจากคำถาม"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "บริษัทข้อมูลเครดิตหรือสมาชิกต้องแจ้งผลการตรวจสอบหรือแก้ไขข้อมูลพร้อมเหตุผลให้เจ้าของข้อมูลทราบภายในสามสิบวันนับแต่วันที่ได้รับคำขอ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "26",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.06,
+            "end_to_end": 7.134
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ระบุผู้มีหน้าที่ สิ่งที่ต้องแจ้ง เหตุผล และจุดเริ่มนับเวลาไว้ครบ"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "ncb-rejection-reasons",
+      "dataset": "ncb_credit_info_act",
+      "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+      "question": "เมื่อลูกค้าถูกปฏิเสธสินเชื่อเพราะข้อมูลเครดิต ผู้ให้บริการต้องแจ้งเหตุผลและให้สิทธิใดแก่ลูกค้า",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "28",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9817
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24/4",
+            "page_start": 10,
+            "page_end": 11,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9267
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "25",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 3,
+            "rerank_score": 0.817
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "20",
+            "page_start": 7,
+            "page_end": 8,
+            "hybrid_rank": 4,
+            "rerank_score": 0.1389
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "18",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 5,
+            "rerank_score": 0.0827
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "24/2",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 6,
+            "rerank_score": 0.0811
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "26",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 7,
+            "rerank_score": 0.3586
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "27",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 8,
+            "rerank_score": 0.041
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "สถาบันการเงิน สมาชิก หรือผู้ใช้อุปโภคบริโภคต้องแสดงเหตุผลในการปฏิเสธการให้นิติบุคคลหรือการดำเนินการอื่นที่ก่อให้เกิดการขยายค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้าซึ่งเป็นเจ้าของข้อมูลมีสิทธิตรวจสอบความถูกต้องของข้อมูลดังกล่าวของตนโดยไม่ต้องเสียค่าธรรมเนียม หากผู้นั้นใช้อุทธรณ์ภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธการขอสินเชื่อหรือการดำเนินการอื่น",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "28",
+              "pages": "12-12",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 12.866,
+            "end_to_end": 19.175
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 10,
+            "rationale": "คำอย่าง ‘ผู้ใช้อุปโภคบริโภค’ ‘การให้นิติบุคคล’ และ ‘ใช้อุทธรณ์’ ทำให้ actor และสิทธิคลาดเคลื่อนในระดับการสื่อสาร"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "สถาบันการเงิน สมาชิก หรือผู้ใช้บริการต้องแสดงเหตุผลในการปฏิเสธการให้สินเชื่อหรือการขึ้นค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้ามีสิทธิตรวจสอบความถูกต้องของข้อมูลโดยไม่ต้องเสียค่าธรรมเนียมภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "28",
+              "pages": "12-12",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24/4",
+              "pages": "10-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 7.9883,
+            "end_to_end": 14.2973
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 0.5,
+            "exact_expected_citation_set": false,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "ภาษาโดยรวมชัดและครบ แต่ส่วนระยะเวลามีโอกาสอ่านได้สองทางว่าไปขยายสิทธิหรือการตรวจสอบ"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ให้บริการ (สถาบันการเงิน สมาชิก หรือผู้ใช้บริการ) ต้องแสดงเหตุผลในการปฏิเสธการให้สินเชื่อหรือการขึ้นค่าบริการ รวมทั้งแหล่งที่มาของข้อมูลให้ลูกค้าทราบเป็นหนังสือ และให้ลูกค้าซึ่งเป็นเจ้าของข้อมูลมีสิทธิตรวจสอบความถูกต้องของข้อมูลโดยไม่ต้องเสียค่าธรรมเนียม หากผู้นั้นใช้สิทธิขอตรวจสอบภายในสามสิบวันนับแต่วันที่ได้รับคำปฏิเสธ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "28",
+              "pages": "12-12",
+              "grounded": true
+            },
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "24/4",
+              "pages": "10-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.002,
+            "end_to_end": 8.311
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "อธิบายผู้มีหน้าที่ เหตุผลที่ต้องแจ้ง และสิทธิของลูกค้าได้ครบ แม้ประโยคค่อนข้างยาว"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "ncb-unlawful-disclosure-penalty",
+      "dataset": "ncb_credit_info_act",
+      "dataset_label": "พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB)",
+      "question": "บริษัทข้อมูลเครดิตหรือผู้ประมวลผลข้อมูลเปิดเผยข้อมูลนอกวัตถุประสงค์ที่กฎหมายกำหนดมีโทษอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "51",
+            "page_start": 18,
+            "page_end": 18,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9969
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "41",
+            "page_start": 16,
+            "page_end": 16,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9923
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "61",
+            "page_start": 19,
+            "page_end": 19,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9654
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "47",
+            "page_start": 17,
+            "page_end": 17,
+            "hybrid_rank": 4,
+            "rerank_score": 0.973
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "44",
+            "page_start": 17,
+            "page_end": 17,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9738
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "53",
+            "page_start": 18,
+            "page_end": 18,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9123
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "46",
+            "page_start": 17,
+            "page_end": 17,
+            "hybrid_rank": 7,
+            "rerank_score": 0.957
+          },
+          {
+            "law_name": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+            "section": "54",
+            "page_start": 19,
+            "page_end": 19,
+            "hybrid_rank": 8,
+            "rerank_score": 0.9653
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "51",
+              "pages": "18-18",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 12.32,
+            "end_to_end": 19.023
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ภาษาเป็นธรรมชาติและให้ผลที่ถามครบในประโยคเดียว"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "มีโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "51",
+              "pages": "18-18",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.9758,
+            "end_to_end": 9.6788
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "ตอบโทษด้วยสำนวนสมบูรณ์ กระชับ และไม่กำกวม"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ต้องระวางโทษจำคุกไม่เกินสามปี หรือปรับไม่เกินสามแสนบาท หรือทั้งจำทั้งปรับ",
+          "citations": [
+            {
+              "law": "พระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (รวมฉบับแก้ไข ๑-๖)",
+              "section": "51",
+              "pages": "18-18",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 0.98,
+            "end_to_end": 7.683
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "สำนวนชัดเจน ตรงคำถาม และอ่านได้โดยไม่ต้องตีความโครงสร้างเพิ่ม"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "bot-scope",
+      "dataset": "bot_digital_fraud_management",
+      "dataset_label": "BOT Digital Fraud Management",
+      "question": "ประกาศธนาคารแห่งประเทศไทยเรื่องการบริหารจัดการภัยทุจริตดิจิทัลใช้บังคับกับผู้ให้บริการทางการเงินประเภทใดบ้าง",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.4",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9989
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5",
+            "page_start": 4,
+            "page_end": 12,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9873
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "2",
+            "page_start": 3,
+            "page_end": 3,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9815
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.4.2",
+            "page_start": 12,
+            "page_end": 12,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9819
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.1",
+            "page_start": 4,
+            "page_end": 4,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9872
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "2.2",
+            "page_start": 3,
+            "page_end": 3,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9772
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "เอกสารแนบ หน้า 3",
+            "page_start": 16,
+            "page_end": 16,
+            "hybrid_rank": 7,
+            "rerank_score": 0.852
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "4",
+            "page_start": 3,
+            "page_end": 3,
+            "hybrid_rank": 8,
+            "rerank_score": 0.8662
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ประกาศธนาคารแห่งประเทศไทยเรื่องการบริหารจัดการภัยทุจริตดิจิทัลใช้บังคับกับสถาบันการเงินตามกฎหมายว่าด้วยธุรกิจสถาบันการเงินทุกแห่ง บริษัทในกลุ่มธุรกิจทางการเงินของสถาบันการเงินที่ประกอบธุรกิจธนาคารพาณิชย์และธุรกิจบริการเงินอิเล็กทรอนิกส์ในต่างประเทศ และผูบรบธุรกิจระบบการชาระเงินภายใต้การกากับ รวมถึงผูบรบธุรกิจระบบโอนเงินรายย่อยระหว่างผูใช้บริการของระบบ ผูบรบธุรกิจบริการเงินอิเล็กทรอนิกส์ และผูบรบธุรกิจบริการโอนเงินด้วยวิธีการทางอิเล็กทรอนิกส์",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "4",
+              "pages": "3-3",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "2",
+              "pages": "3-3",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.4",
+              "pages": "12-12",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.4.2",
+              "pages": "12-12",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.1",
+              "pages": "4-4",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "2.2",
+              "pages": "3-3",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 15.482,
+            "end_to_end": 22.162
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 12,
+            "rationale": "คำเพี้ยนซ้ำในชื่อผู้ประกอบธุรกิจและคำกริยาหลักทำให้รายการผู้มีหน้าที่อ่านยาก"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ประกาศธนาคารแห่งประเทศไทย เรื่อง การบริหารจัดการภัยทุจริตดิจิทัล ใช้บังคับกับผู้ให้บริการทางการเงิน ดังต่อไปนี้: 1. สถาบันการเงินตามกฎหมายว่าด้วยธุรกิจสถาบันการเงินทุกแห่ง 2. บริษัทในกลุ่มธุรกิจทางการเงินของสถาบันการเงินตามกฎหมายว่าด้วยธุรกิจสถาบันการเงินที่ประกอบธุรกิจธนาคารพาณิชย์และธุรกิจบริการเงินอิเล็กทรอนิกส์ในต่างประเทศ 3. ผู้ประกอบธุรกิจระบบการชำระเงินภายใต้การกำกับ และผู้ประกอบธุรกิจบริการการชำระเงินภายใต้การกำกับตามกฎหมายว่าด้วยระบบการชำระเงิน ได้แก่ ผู้ประกอบธุรกิจระบบโอนเงินรายย่อยระหว่างผู้ใช้บริการของระบบ ผู้ประกอบธุรกิจบริการเงินอิเล็กทรอนิกส์ และผู้ประกอบธุรกิจบริการโอนเงินด้วยวิธีการทางอิเล็กทรอนิกส์ ตามกฎหมายว่าด้วยระบบการชำระเงิน",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "4",
+              "pages": "3-3",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "2",
+              "pages": "3-3",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 14.5982,
+            "end_to_end": 21.2782
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 0.5,
+            "exact_expected_citation_set": false,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "แจกแจงประเภทครบและอ่านง่าย แต่มีข้อความอ้างฐานกฎหมายซ้ำช่วงท้ายเล็กน้อย"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ประกาศฉบับนี้ให้ใช้บังคับกับผู้ให้บริการทางการเงิน ดังนี้ (1) สถาบันการเงินตามกฎหมายว่าด้วยธุรกิจสถาบันการเงินทุกแห่ง (2) บริษัทในกลุ่มธุรกิจทางการเงินของสถาบันการเงินตามกฎหมายว่าด้วยธุรกิจสถาบันการเงินที่ประกอบธุรกิจธนาคารพาณิชย์และธุรกิจบริการเงินอิเล็กทรอนิกส์ในต่างประเทศ และ (3) ผู้ประกอบธุรกิจระบบการชำระเงินภายใต้การกำกับและผู้ประกอบธุรกิจบริการการชำระเงินภายใต้การกำกับตามกฎหมายว่าด้วยระบบการชำระเงิน ได้แก่ ผู้ประกอบธุรกิจระบบโอนเงินรายย่อยระหว่างผู้ใช้บริการของระบบ ผู้ประกอบธุรกิจบริการเงินอิเล็กทรอนิกส์ และผู้ประกอบธุรกิจบริการโอนเงินด้วยวิธีการทางอิเล็กทรอนิกส์",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "4",
+              "pages": "3-3",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.64,
+            "end_to_end": 8.32
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "จัดเป็นรายการเลขชัดเจน แยกกลุ่มหลักกับกลุ่มย่อยได้ดี และตอบขอบเขตตรงคำถาม"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "bot-governance",
+      "dataset": "bot_digital_fraud_management",
+      "dataset_label": "BOT Digital Fraud Management",
+      "question": "ผู้ให้บริการทางการเงินต้องกำหนดนโยบายและการกำกับดูแลการบริหารจัดการภัยทุจริตดิจิทัลอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.1",
+            "page_start": 5,
+            "page_end": 7,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9973
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3",
+            "page_start": 5,
+            "page_end": 12,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9974
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.1 (2)",
+            "page_start": 5,
+            "page_end": 6,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9957
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5",
+            "page_start": 4,
+            "page_end": 12,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9785
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.2",
+            "page_start": 5,
+            "page_end": 5,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9936
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.1 (2.3)",
+            "page_start": 6,
+            "page_end": 6,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9951
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2",
+            "page_start": 7,
+            "page_end": 10,
+            "hybrid_rank": 7,
+            "rerank_score": 0.9884
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "เอกสารแนบ หน้า 1",
+            "page_start": 14,
+            "page_end": 14,
+            "hybrid_rank": 8,
+            "rerank_score": 0.9183
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้ให้นบริการทางการเงินต้องกำหนดนโยบายการบริหารจัดการภัยทุจริตดิจิทัลที่ชัดเจนเป็นลายลักษณ์อักษร โดยได้รับความเห็นชอบจากคณะกรรมการของผู่นบริการทางการเงิน นโยบายดังกล่าวต้องสอดคล้องกับกฎหมายและหลักเกณฑ์ที่เกี่ยวข้อง บริบทของปัญหาภัยทุจริตดิจิทัลในแต่ละช่วงเวลา และครอบคลุมอย่างน้อยในด้านบทบาทหน้าที่ของคณะทานงานหรือผูบริหารระดับสูงที่ได้รับมอบหมาย และหน่วยงานที่รับผิดชอบ เพื่อผลักดันให้มีการบริหารจัดการภัยทุจริตดิจิทัลที่มีประสิทธิผล โดยครอบคลุมตั้งแต่ต้นจนจบกระบวนการ (end-to-end) รวมทั้งประเมินความพร้อมขององค์กรในด้านบุคลากร กระบวนการ เทคโนโลยี และเครื่องมือที่ใช้ในการจัดการภัยทุจริตดิจิทัลอย่างสมบูรณ์",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.1(2)",
+              "pages": "5-6",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 14.909,
+            "end_to_end": 21.524
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 0.5,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 16,
+            "rationale": "ครอบคลุมประเด็นที่ถาม แต่คำเพี้ยนหลายตำแหน่งทำให้บทบาทของผู้กำกับดูแลอ่านไม่ราบรื่น"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้ให้บริการทางการเงินต้องกำหนดนโยบายการบริหารจัดการภัยทุจริตดิจิทัลที่ชัดเจนเป็นลายลักษณ์อักษร โดยได้รับความเห็นชอบจากคณะกรรมการของผู้ให้บริการทางการเงิน นโยบายดังกล่าวต้องสอดคล้องกับกฎหมายและหลักเกณฑ์ที่เกี่ยวข้อง บริบทของปัญหาภัยทุจริตดิจิทัลในแต่ละช่วงเวลา และครอบคลุมอย่างน้อยในด้านบทบาทหน้าที่ของคณะท างานหรือผู้บริหารระดับสูงที่ได้รับมอบหมาย และหน่วยงานที่รับผิดชอบ เพื่อผลักดันให้มีการบริหารจัดการภัยทุจริตดิจิทัลที่มีประสิทธิผล โดยครอบคลุมตั้งแต่ต้นจนจบกระบวนการ (end-to-end) รวมทั้งประเมินความพร้อมขององค์กร ทั้งในด้านบุคลากร กระบวนการ เทคโนโลยีและเครื่องมือที่ใช้ในการจัดการภัยทุจริตดิจิทัลอย่างสม ่าเสมอ",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.1(2)",
+              "pages": "5-6",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 11.3759,
+            "end_to_end": 17.9909
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 0.5,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": false,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 18,
+            "rationale": "สื่อบทบาท นโยบาย และการประเมินได้ชัด มีช่องว่างผิดรูปในคำไทยบางคำและประโยคค่อนข้างยาว"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ให้บริการทางการเงินต้องกำหนดให้มีคณะทำงานหรือผู้บริหารระดับสูงที่ได้รับมอบหมายทำหน้าที่กำหนดนโยบายและกำกับดูแลบริหารจัดการภัยทุจริตดิจิทัล เพื่อให้มีความสำคัญ มีแนวทางที่เหมาะสม ทันกาล และมีประสิทธิผลอย่างต่อเนื่อง โดยต้องกำหนดนโยบายที่เป็นลายลักษณ์อักษร ได้รับความเห็นชอบจากคณะกรรมการ และสอดคล้องกับกฎหมาย หลักเกณฑ์ที่เกี่ยวข้อง บริบทของปัญหาภัยทุจริตดิจิทัลในแต่ละช่วงเวลา และครอบคลุมอย่างน้อย บทบาทหน้าที่ของคณะทำงานหรือผู้บริหารระดับสูงที่ได้รับมอบหมายและหน่วยงานที่รับผิดชอบ เพื่อผลักดันให้มีการบริหารจัดการภัยทุจริตดิจิทัลที่มีประสิทธิผลโดยครอบคลุมตั้งแต่ต้นจนจบกระบวนการ (end-to-end) รวมทั้งประเมินความพร้อมขององค์กรในด้านบุคลากร กระบวนการ เทคโนโลยีและเครื่องมือที่ใช้ในการจัดการภัยทุจริตดิจิทัลอย่างสม่ำเสมอ แนวทางและกระบวนการบริหารจัดการภัยทุจริตดิจิทัลตั้งแต่ต้นจนจบกระบวนการ (end-to-end) เพื่อให้การบริหารจัดการภัยทุจริตดิจิทัลเป็นไปอย่างมีประสิทธิผล และการติดตามและวัดประสิทธิผลของการจัดการภัยทุจริตดิจิทัลอย่างต่อเนื่อง เพื่อทบทวนและปรับปรุงแนวทางและกระบวนการบริหารจัดการภัยทุจริตดิจิทัลให้เหมาะสมกับสถานการณ์อยู่เสมอ",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.1",
+              "pages": "5-7",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.1(2)",
+              "pages": "5-6",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.1(2.3)",
+              "pages": "6-6",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 3.014,
+            "end_to_end": 9.629
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "ภาษาเรียบร้อยและครอบคลุมโครงสร้างกำกับดูแลมากที่สุด แม้ยาวและมีการกล่าว end-to-end ซ้ำ"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "bot-monitoring",
+      "dataset": "bot_digital_fraud_management",
+      "dataset_label": "BOT Digital Fraud Management",
+      "question": "ผู้ให้บริการทางการเงินต้องมีการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (2)",
+            "page_start": 8,
+            "page_end": 8,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9993
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (2.1)",
+            "page_start": 8,
+            "page_end": 8,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9943
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2",
+            "page_start": 7,
+            "page_end": 10,
+            "hybrid_rank": 3,
+            "rerank_score": 0.984
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "เอกสารแนบ หน้า 1",
+            "page_start": 14,
+            "page_end": 14,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9854
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (2.2)",
+            "page_start": 8,
+            "page_end": 8,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9772
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.1 (7)",
+            "page_start": 7,
+            "page_end": 7,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9109
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5",
+            "page_start": 4,
+            "page_end": 12,
+            "hybrid_rank": 7,
+            "rerank_score": 0.5945
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (3)",
+            "page_start": 8,
+            "page_end": 9,
+            "hybrid_rank": 8,
+            "rerank_score": 0.8882
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้ให้นบรการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินในเชิงรุกอย่างมีประสิทธิผล ครอบคลุมรูปแบบของภัยทุจริตดิจิทัลจากการทำธุรกรรมทางการเงินที่เปลี่ยนแปลงไปอย่างต่อเนื่อง โดยต้องสามารถประเมินระดับความเสี่ยงของบัญชีทั้งบัญชีของบุคคลที่คาดว่าจะได้รับความเสียหายจากภัยทุจริตดิจิทัลและบุคคลที่มีความเสี่ยงในการนำบัญชีไปใช้เป็นบัญชีม้า รวมถึงตรวจจับการทำธุรกรรมและการใช้บัญชีที่มีความผิดปกติได้อย่างทันท่วงที เพื่อให้นบรการภัยทุจริตดิจิทัลที่เหมาะสมและทันกาล",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2)",
+              "pages": "8-8",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 14.756,
+            "end_to_end": 21.396
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 0.5,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 14,
+            "rationale": "โครงสร้างเนื้อหายังต่อเนื่อง แต่คำเพี้ยนในชื่อ actor และข้อความปิดท้ายลดความชัดมาก"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้ให้บริการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างมีประสิทธิผล โดยต้องสามารถประเมินระดับความเสี่ยงของบัญชีทั้งบัญชีของบุคคลที่คาดว่าจะได้รับความเสียหายจากภัยทุจริตดิจิทัลและบุคคลที่มีความเสี่ยงในการนำบัญชีไปใช้เป็นบัญชีม้า รวมถึงตรวจจับการทำธุรกรรมและการใช้บัญชีที่มีความผิดปกติได้อย่างทันท่วงที เพื่อให้มีการจัดการภัยทุจริตดิจิทัลที่เหมาะสมและทันกาล",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2)",
+              "pages": "8-8",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2.1)",
+              "pages": "8-8",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2.2)",
+              "pages": "8-8",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 12.2016,
+            "end_to_end": 18.8416
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 0.6667,
+            "exact_expected_citation_set": false,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 20,
+            "rationale": "อธิบายกระบวนการ กลุ่มบัญชีเป้าหมาย และวัตถุประสงค์ได้กระชับและต่อเนื่อง"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ให้บริการทางการเงินต้องมีกระบวนการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินในเชิงรุกอย่างมีประสิทธิผล โดยต้องจัดให้มีระบบการติดตามและตรวจจับธุรกรรมที่ผิดปกติได้ทันท่วงที และกำหนดเงื่อนไขในการติดตามและตรวจจับความผิดปกติโดยพิจารณาจากข้อมูลต่าง ๆ เช่น รูปแบบภัยทุจริตดิจิทัล ช่องทางการให้บริการ พฤติกรรม การใช้บัญชี ข้อมูลพฤติกรรมต้องสงสัย ข้อมูลจากผู้ให้บริการทางการเงินแห่งอื่น ข้อมูลจากระบบ Central Fraud Registry (CFR) และข้อมูลจากหน่วยงานอื่น ๆ นอกจากนี้ ต้องทบทวนและปรับปรุงเงื่อนไขรวมทั้งกระบวนการในการตรวจจับความผิดปกติในเชิงรุกอย่างสม่ำเสมอ โดยนำระบบวิเคราะห์ข้อมูลหรือเทคโนโลยีปัญญาประดิษฐ์มาใช้ เพื่อให้สามารถติดตามและตรวจจับความผิดปกติได้ดียิ่งขึ้น",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2)",
+              "pages": "8-8",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2.1)",
+              "pages": "8-8",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(2.2)",
+              "pages": "8-8",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.561,
+            "end_to_end": 9.201
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "สำนวนชัดและอธิบายวิธีติดตามหลายชั้นครบ แต่รายการข้อมูลยาวกว่าที่จำเป็นต่อคำตอบตรง"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "bot-customer-response",
+      "dataset": "bot_digital_fraud_management",
+      "dataset_label": "BOT Digital Fraud Management",
+      "question": "เมื่อเกิดภัยทุจริตดิจิทัล ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลากระบวนการและดูแลลูกค้าที่ได้รับผลกระทบอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4)",
+            "page_start": 9,
+            "page_end": 10,
+            "hybrid_rank": 1,
+            "rerank_score": 0.999
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3",
+            "page_start": 5,
+            "page_end": 12,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9933
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4.2)",
+            "page_start": 9,
+            "page_end": 9,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9988
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4.3)",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9975
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2",
+            "page_start": 7,
+            "page_end": 10,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9849
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4.4)",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 6,
+            "rerank_score": 0.9912
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.1",
+            "page_start": 5,
+            "page_end": 7,
+            "hybrid_rank": 7,
+            "rerank_score": 0.9907
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "เอกสารแนบ หน้า 2",
+            "page_start": 15,
+            "page_end": 15,
+            "hybrid_rank": 8,
+            "rerank_score": 0.9078
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้ให้นบริการทางการเงินต้องกำหนดระยะเวลาของกระบวนการดูแลลูกค้าที่ได้รับความเสียหายจากภัยทุจริตดิจิทัลให้นั้นชัดเจน เช่น การแจ้งให้นลูกค้าที่เกี่ยวข้องทราบเมื่่อเกิ้เหตุการณ์ การติดต่อกลับไปยังลูกค้าดังกล่าวอย่างรวดเร็วภายในเวลาที่เหมาะสมภายหลังลูกค้าแจ้งผูนบริการทางการเงินเกี่ยวกับเหตุการณ์ที่อาจเข้าในสายเปนภัยทุจริตดิจิทัล",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(4.2)",
+              "pages": "9-9",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 13.842,
+            "end_to_end": 20.537
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 0.5,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 12,
+            "rationale": "คำผิดรูปหลายจุดรบกวนการอ่าน และกล่าวถึงการติดต่อเป็นหลักโดยยังสื่อส่วนการดูแลลูกค้าไม่ครบ"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลาของกระบวนการดูแลลูกค้าที่ได้รับความเสียหายจากภัยทุจริตดิจิทัลให้ชัดเจน เช่น การแจ้งให้ลูกค้าที่เกี่ยวข้องทราบเมื่อเกิดเหตุการณ์ การติดต่อกลับไปยังลูกค้าดังกล่าวอย่างรวดเร็วภายในเวลาที่เหมาะสมภายหลังลูกค้าแจ้งผู้ให้บริการทางการเงินเกี่ยวกับเหตุการณ์ที่อาจเข้าข่ายเป็นภัยทุจริตดิจิทัล",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(4.2)",
+              "pages": "9-9",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 8.0641,
+            "end_to_end": 14.7591
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 0.5,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": false,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 18,
+            "rationale": "ประโยคสะอาดและตรง แต่สื่อเฉพาะเวลาแจ้งและติดต่อกลับ ยังไม่ครอบคลุมการดูแลผลกระทบตามทุกส่วนของคำถาม"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลาของกระบวนการดูแลลูกค้าที่ได้รับความเสียหายให้ชัดเจน เช่น การแจ้งให้ลูกค้าทราบและการติดต่อกลับอย่างรวดเร็วภายในเวลาที่เหมาะสม (ข้อ 5.3.2 (4.2)) และต้องดูแลลูกค้าอย่างเหมาะสม รวดเร็ว และเป็นธรรม โดยจัดให้มีผู้รับผิดชอบดูแลและประสานงานอย่างชัดเจน รวมถึงแก้ไขปัญหาที่เกิดจากผลกระทบต่อบุคคลที่ไม่มีส่วนเกี่ยวข้องอย่างรวดเร็ว เช่น การปลดการระงับบัญชีโดยเร็ว และการเยียวยาความเสียหายให้แก่ลูกค้าอย่างรวดเร็วเมื่อพิสูจน์ได้ว่าลูกค้าได้รับความเสียหายจากความบกพร่องของผู้ให้บริการทางการเงินหรือเมื่อได้รับคำสั่งจากหน่วยงานที่เกี่ยวข้อง (ข้อ 5.3.2 (4.3))",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(4.2)",
+              "pages": "9-9",
+              "grounded": true
+            },
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.2(4.3)",
+              "pages": "10-10",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 2.161,
+            "end_to_end": 8.856
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "แบ่งการกำหนดเวลา ผู้รับผิดชอบ การแก้ผลกระทบ และการเยียวยาได้ครบ แม้เป็นย่อหน้ายาว"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    },
+    {
+      "case_id": "bot-reporting",
+      "dataset": "bot_digital_fraud_management",
+      "dataset_label": "BOT Digital Fraud Management",
+      "question": "ผู้ให้บริการทางการเงินต้องรายงานข้อมูลเกี่ยวกับการบริหารจัดการภัยทุจริตดิจิทัลต่อธนาคารแห่งประเทศไทยอย่างไร",
+      "retrieval": {
+        "candidate_recall_at_8": 1.0,
+        "selected_evidence": [
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.5",
+            "page_start": 11,
+            "page_end": 11,
+            "hybrid_rank": 1,
+            "rerank_score": 0.9993
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4.4)",
+            "page_start": 10,
+            "page_end": 10,
+            "hybrid_rank": 2,
+            "rerank_score": 0.9996
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "เอกสารแนบ หน้า 3",
+            "page_start": 16,
+            "page_end": 16,
+            "hybrid_rank": 3,
+            "rerank_score": 0.9424
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.3",
+            "page_start": 10,
+            "page_end": 11,
+            "hybrid_rank": 4,
+            "rerank_score": 0.9832
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2",
+            "page_start": 7,
+            "page_end": 10,
+            "hybrid_rank": 5,
+            "rerank_score": 0.9541
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3.2 (4)",
+            "page_start": 9,
+            "page_end": 10,
+            "hybrid_rank": 6,
+            "rerank_score": 0.968
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5",
+            "page_start": 4,
+            "page_end": 12,
+            "hybrid_rank": 7,
+            "rerank_score": 0.8507
+          },
+          {
+            "law_name": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+            "section": "5.3",
+            "page_start": 5,
+            "page_end": 12,
+            "hybrid_rank": 8,
+            "rerank_score": 0.8812
+          }
+        ],
+        "contract": "Same final hybrid-retrieved and reranked evidence for Q4/Qwen; BF16 reconstructs this frozen, label-free evidence and does not rerun retrieval."
+      },
+      "models": {
+        "openthai_2_ollama_q4": {
+          "label": "OpenThai 2.0 Legal · Ollama Q4",
+          "runtime": "Ollama Q4",
+          "answer": "ผู้ให้บริการทางการเงินต้องจัดทําและจัดส่งแบบรายงานเพื่อประโยชน์ในการติดตามประเมินประสิทธิผลของการบริหารจัดการภัยทุจริตดิจิทัลในภาพรวมและของผู้ให้นบริการทางการเงิน รวมทั้งความเหมาะสมของนโยบายทางการตามรูปแบบและระยะเวลาที่ธนาคารแห่งประเทศไทยกำหนด รวมถึงจัดทําและจัดส่งรายงานและข้อมูลเพิ่มเติมเป็นรายกรณีตามที่ธนาคารแห่งประเทศไทยร้องขอ",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.5",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 13.614,
+            "end_to_end": 20.283
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 16,
+            "rationale": "ตอบองค์ประกอบหลักครบ แต่คำ ‘ผู้ให้นบริการ’ และรูปอักขระไม่สม่ำเสมอทำให้คุณภาพภาษาลดลง"
+          }
+        },
+        "openthai_2_vllm_bf16": {
+          "label": "OpenThai 2.0 Legal · vLLM BF16",
+          "runtime": "local safetensors BF16 via vLLM 0.25.1",
+          "answer": "ผู้ให้บริการทางการเงินต้องจัดทำและจัดส่งแบบรายงานเพื่อประโยชน์ในการติดตามประเมินประสิทธิผลของการบริหารจัดการภัยทุจริตดิจิทัลในภาพรวมและของผู้ให้บริการทางการเงิน รวมทั้งความเหมาะสมของนโยบายทางการตามรูปแบบและระยะเวลาที่ธนาคารแห่งประเทศไทยกำหนด รวมถึงจัดทำและจัดส่งรายงานและข้อมูลอื่นเพิ่มเติมเป็นรายกรณีตามที่ธนาคารแห่งประเทศไทยร้องขอ",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.5",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 7.4677,
+            "end_to_end": 14.1367
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": true,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 19,
+            "rationale": "สื่อหน้าที่ รูปแบบเวลา และรายงานเพิ่มเติมได้ครบและอ่านต่อเนื่อง แม้ประโยคยาว"
+          }
+        },
+        "qwen36_35b_a3b_llamacpp_q5": {
+          "label": "Qwen3.6-35B-A3B · llama.cpp Q5",
+          "runtime": "llama.cpp Q5",
+          "answer": "ผู้ให้บริการทางการเงินต้องจัดทําและจัดส่งแบบรายงานเพื่อประโยชน์ในการติดตามประเมินประสิทธิผลของการบริหารจัดการภัยทุจริตดิจิทัลในภาพรวมและของผู้ให้บริการทางการเงิน รวมทั้งความเหมาะสมของนโยบายทางการ ตามรูปแบบและระยะเวลาที่ธนาคารแห่งประเทศไทยกําหนด รวมถึงจัดทําและจัดส่งรายงานและข้อมูลอื่นเพิ่มเติมเป็นรายกรณีตามที่ธนาคารแห่งประเทศไทยร้องขอ",
+          "citations": [
+            {
+              "law": "ประกาศธนาคารแห่งประเทศไทย ที่ 57/2568 เรื่อง หลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัล (Digital Fraud Management)",
+              "section": "5.3.5",
+              "pages": "11-11",
+              "grounded": true
+            }
+          ],
+          "json_valid": true,
+          "finish_reason": "stop",
+          "timing_seconds": {
+            "answer": 1.496,
+            "end_to_end": 8.165
+          },
+          "post_inference_metrics": {
+            "expected_citation_recall": 1.0,
+            "citation_precision": 1.0,
+            "exact_expected_citation_set": null,
+            "all_citations_grounded": true
+          },
+          "codex_sol_blind_language_review": {
+            "total_out_of_20": 18,
+            "rationale": "สารสื่อสารครบและลำดับดี แต่รูปอักขระ ‘ทํา/กําหนด’ และประโยคยาวลดความลื่นไหลเล็กน้อย"
+          }
+        }
+      },
+      "review_boundary": "Preliminary/unreviewed. Metrics and Codex Sol language review do not replace Thai legal-expert adjudication."
+    }
+  ]
+}
