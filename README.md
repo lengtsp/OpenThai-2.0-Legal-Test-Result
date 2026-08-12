@@ -1,107 +1,147 @@
-# ผลทดสอบ OpenThai 2.0 Legal (อิสระ ไม่เกี่ยวข้องกับผู้พัฒนา)
+# ทดสอบ OpenThai 2.0 Legal สำหรับ Thai Legal RAG ด้วย Ollama (Q4)
 
-**วันที่ทดสอบ:** 30 กรกฎาคม 2026
-**ผู้จัดทำ:** ผู้ทดสอบอิสระ ไม่ใช่ผู้พัฒนาโมเดล ไม่มีความเกี่ยวข้องกับ iApp Technology หรือทีม OpenThai ผลทั้งหมดมาจากการรันจริงบนเครื่อง local ผ่าน vLLM **ไม่ใช่คำรับรองคุณภาพโมเดลและไม่ใช่คำปรึกษาทางกฎหมาย**
+รายงานการทดสอบอิสระของ
+[OpenThai 2.0 Legal](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b)
+เมื่อใช้ตอบคำถามกฎหมายไทยแบบ RAG ผ่าน Ollama Q4 เทียบกับ
+`Qwen3.6-35B-A3B` บน llama.cpp Q5
 
-## 1. ทำไมต้องทดสอบซ้ำเอง
+ผู้จัดทำเป็นผู้ทดสอบอิสระ ไม่เกี่ยวข้องกับผู้พัฒนาโมเดล ผลทั้งหมดเป็น
+**preliminary / unreviewed** ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย
+ก่อนนำไปใช้จริงต้องให้ผู้เชี่ยวชาญกฎหมายไทยตรวจตัวบทฉบับปัจจุบัน ข้อเท็จจริง และข้อยกเว้น
 
-[OpenThai 2.0 Legal](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b) เผยแพร่ตัวเลข benchmark ของตัวเองไว้ใน model card (เช่น citation F1, holding, coverage, fluency) แต่ตัวเลขเหล่านั้นเป็น**ตัวเลขที่ผู้พัฒนารายงานเอง** repo นี้จึงทำการทดสอบซ้ำอย่างอิสระ ด้วยชุดคำถามและ pipeline ของผู้ทดสอบเอง เพื่อดูว่าโมเดลทำงานได้จริงแค่ไหนเมื่อถูกใช้แบบที่ผู้ใช้งานทั่วไปจะเจอ
+## เว็บสำหรับทดลองใช้
 
-## 2. ขอบเขตการทดสอบ
+เว็บ local `rag_webui_8083` ใช้เลือกชุดข้อมูล สนทนา และเปิดตารางคลังข้อมูลได้
 
-ทดสอบ 3 ความสามารถหลักตามที่ model card ระบุว่ารองรับ รวม 12 คำถาม:
+- เลือก NitiBench, พ.ร.บ. NCB, Digital Fraud หรือรวมทุกชุด
+- แสดง source, score, page index และ parent/child provenance ของหลักฐาน
+- มีประวัติแชทและ use case ที่เปลี่ยนตาม dataset
+- เปิด Dataset table แยกจากหน้าสนทนาเพื่อดู record/chunk ได้
 
-| โหมด | จำนวนข้อ | ทดสอบอะไร |
-|---|---:|---|
-| Citation answering — RAG | 5 | ให้ retrieval หากฎหมายจริง แล้วโมเดลอ้างมาตราที่ถูกต้อง |
-| Legal essay drafting | 2 | เขียนบทวิเคราะห์กฎหมายจากข้อเท็จจริง ไม่มีเอกสารอ้างอิง |
-| Citation answering — closed-book | 5 | ตอบจากความจำในตัวโมเดล ไม่มี context ให้เลย |
+## ชุดข้อมูลที่ใช้
 
-**เหตุผลที่แยก 3 โหมดนี้ทดสอบแยกกัน:** งานแต่ละแบบต้องการความสามารถคนละด้าน (ความจำ vs. การอ่านหลักฐาน vs. การเขียนเชิงวิเคราะห์) การเอาคะแนนมารวมกันจะบิดเบือนภาพรวม เช่น โมเดลอาจเก่งเรื่องอ้างอิงเมื่อมีหลักฐานให้ แต่จำเลขมาตราผิดเมื่อไม่มีหลักฐาน ถ้ารวมคะแนนจะไม่เห็นจุดอ่อนนี้
+| Dataset | แหล่งข้อมูล | Corpus ที่ทดสอบ | Provenance |
+|---|---|---:|---|
+| NitiBench | [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | 3,934 legal chunks | Passage embedding ใช้เฉพาะตัวบทกฎหมาย ไม่รวมคำตอบหรือเฉลย |
+| พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 225 units: 73 parent + 152 child | corpus ใช้งานจริงเป็นฉบับรวมแก้ไข 1–6 หนึ่งชุด ไม่แยก amendment-only dataset |
+| Digital Fraud Management | [แนวนโยบาย BOT 2568/0254](https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/ThaiPDF/25680254.pdf) | 54 units | แยกตามข้อ/ข้อย่อย พร้อมเลขหน้า |
 
-นอกจากนี้ยังทดสอบ **retrieval แยกต่างหากอีก 200 คำถาม** (ก่อนส่งเข้าโมเดล) เพื่อตรวจว่าระบบค้นหาหลักฐานเองแม่นแค่ไหน เพราะ **ถ้าค้นหลักฐานผิด ต่อให้โมเดลเก่งแค่ไหนก็ตอบถูกไม่ได้** — จึงต้องแยกวัด "ความผิดพลาดจากการค้นหา" ออกจาก "ความผิดพลาดจากการตอบ" ให้ชัดเจน
+ไฟล์ NCB จาก BOT ที่ระบุว่า Updated-2559 เป็นเล่มหลักรวมถึงปี 2559 และไม่รวมฉบับที่ 6
+ปี 2565 จึงใช้เป็นเอกสารตรวจเทียบ แต่ไม่แทน corpus ฉบับรวม 1–6 ที่ใช้ตอบจริง
+การเทียบมาตรา 20, 26–28 และ 51 ยืนยันว่า 5 use cases NCB ในรายงานยังตรงกับสาระหลัก
+โดยมาตรา 51 ของชุดรวม 1–6 เพิ่มขอบเขตอ้างถึงมาตรา 24/1 แต่โทษสูงสุดไม่เปลี่ยน
 
-## 3. การตั้งค่าและเหตุผลเบื้องหลังแต่ละค่า
+## แนวทางทดสอบ
 
-| หัวข้อ | ค่าที่ใช้ | เหตุผล |
-|---|---|---|
-| Generation model | `iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b` ผ่าน vLLM 0.25.1 | ใช้ตัว weight ที่เผยแพร่จริง ไม่ใช่ quantized build เพื่อวัดผลจากโมเดลตัวเต็ม |
-| Served context | 32,768 token (รวม prompt+completion) | ตรงตามค่าที่ model card แนะนำ เพื่อให้ผลเทียบกับตัวเลขที่ผู้พัฒนาประกาศได้ ไม่ใช่ค่าที่ผู้ทดสอบเลือกเอง |
-| Citation answering (RAG/closed-book): `temperature=0.0, top_p=1.0` | ตายตัว ไม่สุ่ม | งานอ้างอิงมาตรากฎหมายต้องการ**คำตอบเดิมทุกครั้ง**ที่ถามซ้ำ การสุ่ม (temperature สูง) จะทำให้เลขมาตราที่อ้างเปลี่ยนไปมาโดยไม่มีเหตุผล ซึ่งยอมรับไม่ได้กับงานกฎหมาย |
-| Legal essay: `temperature=0.7, top_p=0.9` | เปิดความหลากหลาย | งานเขียนบทวิเคราะห์ต้องการความลื่นไหลและมุมมองที่เป็นธรรมชาติ ไม่ใช่คำตอบตายตัวแบบ citation จึงใช้ค่าที่โมเดลแนะนำสำหรับ "drafting" โดยเฉพาะ |
-| `thinking = off` ทุกโหมด | ปิด | (1) เป็นค่าที่ model card ใช้ตอนทำ benchmark ตัวเลขที่เผยแพร่เอง จึงต้องใช้ค่าเดียวกันเพื่อเทียบกันได้ตรง ๆ (2) เมื่อเปิด thinking พบว่ากระบวนการคิดภาษาอังกฤษหลุดออกมาปนกับคำตอบจริง กลายเป็นปัญหาเรื่อง format/privacy ถ้านำไปแสดงในหน้า UI ตรง ๆ |
-| `max_tokens = 2,048` (citation) / `4,096` (essay) | ตามตารางแนะนำใน model card | model card เตือนว่า**ห้ามตั้งต่ำกว่า 1,536 สำหรับงาน citation** เพราะถ้า JSON ถูกตัดกลางคัน จะเสีย array `citations` ทั้งชุด กลายเป็นคะแนน 0 ทั้งข้อทั้งที่คำตอบถูกเกือบหมด — 2,048 จึงเป็นค่าปลอดภัยที่มีระยะห่างพอสมควรจากขีดอันตรายนั้น |
-| หน่วย retrieval = 1 มาตรา ต่อ 1 chunk (ไม่ตัดตามจำนวนตัวอักษร) | คงมาตราให้ครบ | กฎหมายมีเงื่อนไข ข้อยกเว้น และการอ้างอิงข้ามมาตราอยู่ในมาตราเดียวกัน ถ้าตัด chunk ตามจำนวนตัวอักษรแบบตายตัว อาจตัดเงื่อนไขสำคัญขาดออกจากเนื้อหาหลัก ทำให้โมเดลอ้างถูกมาตราแต่เข้าใจเนื้อหาไม่ครบ |
-| ไม่นำ `answer`/`reference_answer` ของ NitiBench เข้า index ที่ใช้ embed | ตัดออกทั้งหมด | ป้องกัน**data leakage** — ถ้าเฉลยเผลอหลุดเข้าไปอยู่ใน passage ที่ใช้ค้นหา ผลจะดีเกินจริงเพราะโมเดล "เห็นเฉลย" ทางอ้อม ไม่ใช่ความสามารถจริงของ retrieval |
-| เก็บ embedding แยกตาราง (`legal_chunk_embeddings`) ไม่ฝังใน JSON | แยกตาราง + `profile_id` | ทำให้เปลี่ยน embedding model ใหม่ได้โดยไม่ต้องแก้ข้อความต้นฉบับ ตรวจสอบที่มาของแต่ละ vector ได้ และลบ/สร้างใหม่เฉพาะ profile เดียวได้โดยไม่กระทบของเดิม |
+ใช้คำถามคงที่ 15 ข้อ: dataset ละ 5 ข้อ ทั้งสองโมเดลได้รับ evidence ชุดเดียวกัน
+จึงวัดการสังเคราะห์คำตอบและ citation หลัง retrieval ได้เป็นธรรม
 
-## 4. ผลลัพธ์แยกตามโหมด
+```text
+คำถาม
+  ├─ Dense: Qwen3-Embedding-4B, 2,560 มิติ, L2-normalized
+  ├─ Sparse: lexical / Thai n-gram retrieval
+  └─ Hybrid fusion + rerank
+                ↓
+      top_k = 8 evidence ชุดเดียวกัน
+                ↓
+  OpenThai Q4         Qwen3.6-35B-A3B Q5
+                ↓
+     JSON answer + grounded citations
+                ↓
+  ให้คะแนน expected citation หลัง inference เท่านั้น
+```
 
-### 4.1 Citation answering — RAG (5 ข้อ)
+`expected citation`, คำตอบอ้างอิง และเฉลยไม่ถูกส่งเข้า embedding, retriever, reranker
+หรือ prompt ของโมเดล ใช้เฉพาะเพื่อให้คะแนนหลังโมเดลตอบแล้ว
 
-**ขั้นตอน:** ค้นหาผู้สมัคร 20 มาตราด้วย hybrid search → ให้โมเดลเอง "คัดกรอง" เหลือเฉพาะมาตราที่เกี่ยวข้องจริง (rerank) → ส่งเฉพาะที่คัดแล้วให้โมเดลตอบคำถามจริง
+| Parameter | Value |
+|---|---:|
+| retrieval top_k | 8 |
+| embedding | Qwen3-Embedding-4B, 2,560 dimensions |
+| temperature / top_p | 0.0 / 1.0 |
+| max_tokens | 2,048 |
+| seed | 42 |
+| output | JSON answer + citation |
 
-**เหตุผลที่มีขั้นตอน rerank คั่นกลาง แทนที่จะส่ง 20 มาตราให้ตอบเลย:** model card ระบุเองว่าความแม่นยำสูงสุดเมื่อ context มีมาตราที่เกี่ยวข้องเพียงไม่กี่มาตรา ยิ่งใส่มาตราที่ไม่เกี่ยวมาก ยิ่งเสี่ยงให้โมเดลอ้างมาตราใกล้เคียงผิดตัว (near-miss) ขั้นตอน rerank จึงจำลองสถานการณ์ใช้งานจริงที่ retrieval ทั่วไปมักได้ผลลัพธ์ปนกันมา ไม่ใช่หลักฐานที่คัดมาสมบูรณ์แบบ
+## สรุปผล 3 datasets × 5 questions
 
-**ผล:** ตอบถูกครบ 5/5 ข้อ — reranker คัดมาตราที่ถูกต้องได้ 100% (precision/recall = 1.00), citation ตรงเฉลยทั้ง 5 ข้อ, JSON ผ่านรูปแบบทุกข้อ
+รอบทดสอบสมบูรณ์ 15/15 ข้อ ทุกข้อ retrieval พบ expected citation ใน top-8
+และทั้งสองโมเดลส่ง JSON ที่ parse ได้ครบ 15/15 ข้อ
 
-**ข้อควรระวังที่ต้องบอกไว้เสมอ:** ผล 5/5 มาจากตัวอย่างที่เลือกมาเพียง 5 ข้อ ไม่ใช่การรับประกันผลกับทุกคำถาม และไม่ควรตีความว่าโมเดลวินิจฉัยกฎหมายได้เองโดยไม่ต้องมีคนตรวจ
-
-### 4.2 Legal essay drafting (2 ข้อ)
-
-**ผล:** ไม่ตรงเฉลยทั้ง 2 ข้อ (0/2)
-
-- ข้อ 1 (ยักยอกเงิน+ใช้เอกสารปลอม): โมเดลตอบว่าเป็น "หลายกรรม" และอธิบายมาตรา 90 สลับหลักกับมาตรา 91 — ตรงข้ามกับเฉลย
-- ข้อ 2 (มัดจำ 300,000 บาท): โมเดลตอบว่าไม่ใช่มัดจำ ให้ริบทั้งหมด ไม่อ้างมาตรา 377, 378 หรือกฎหมายข้อสัญญาไม่เป็นธรรมเลย — ตรงข้ามกับเฉลยเช่นกัน
-
-**เหตุผลที่ไม่ใช้แค่ keyword checklist ในการตัดสิน:** ตรวจพบว่าคำตอบข้อ 1 มี keyword บางคำที่ตรงกับเฉลยอยู่ แต่**บทสรุปทางกฎหมาย (holding) กลับด้าน** ถ้าตัดสินด้วยการนับ keyword อย่างเดียวจะให้คะแนนผ่านทั้งที่คำตอบผิดหลักการ จึงต้องใช้การตรวจเนื้อหาจริง (substantive review) เป็นตัวชี้ขาดแทน
-
-### 4.3 Closed-book (5 ข้อ)
-
-**ผล:** ผ่าน 1 ข้อ, ผ่านบางส่วน 2 ข้อ, ไม่ผ่าน 2 ข้อ — JSON ถูกรูปแบบครบ 5/5 (แม้เนื้อหาจะผิด)
-
-จุดที่พบผิดบ่อย: เลขมาตราคลาดเคลื่อน (เช่น อ้าง `65/9` แทนที่จะเป็น `65 ทวิ (9)`) และกฎหมายลำดับรอง/สนธิสัญญาที่ต้องใช้ประกอบ (เช่น อนุสัญญาภาษีซ้อนไทย–สิงคโปร์) มักถูกข้ามไปหรืออ้างผิดฉบับ
-
-**เหตุผลที่ต้องเตือนเรื่องนี้เป็นพิเศษ:** closed-book คือการตอบจากความจำล้วน ๆ ไม่มีเอกสารมายืนยัน ความผิดพลาดประเภทเลขมาตรา/กฎหมายลำดับรองจึงเป็นความเสี่ยงที่ตรวจจับยากที่สุด เพราะคำตอบอ่านดูมั่นใจและมีรูปแบบ JSON ที่ถูกต้อง ทำให้ดูน่าเชื่อถือกว่าความเป็นจริง
-
-## 5. ระบบค้นหาหลักฐาน (Retrieval) — ทำไมต้องเทียบหลายแบบ
-
-ทดสอบ retrieval 200 คำถามแยกจากการตอบจริง เพื่อหาว่าวิธีค้นแบบไหนแม่นที่สุด **ก่อน**นำไปใช้กับ 5 คำถาม RAG ด้านบน
-
-| Profile | Recall@20 | MRR | ทำไมถึงลอง |
-|---|---:|---:|---|
-| Dense (embedding อย่างเดียว) | 0.8458 | 0.6619 | baseline มาตรฐาน จับความหมายได้แม้ใช้คำต่างกัน |
-| Sparse (full-text + trigram) | 0.7392 | 0.5118 | ช่วยจับเลขมาตรา ชื่อกฎหมาย และคำเฉพาะที่ dense อาจพลาด |
-| Vanilla RRF (รวมอันดับสองระบบเท่า ๆ กัน) | 0.8431 | 0.6485 | วิธีมาตรฐานที่ใช้กันทั่วไปในการรวมผล hybrid search |
-| **Weighted RRF (dense น้ำหนัก 1.0, sparse 0.75)** | **0.8458** | **0.6710** | แก้ปัญหาที่พบจาก vanilla RRF |
-
-**เหตุผลที่ไม่ใช้ vanilla RRF (แบบมาตรฐาน) เป็นค่าสุดท้าย:** ผลทดสอบพบว่า sparse ranker ในชุดข้อมูลนี้อ่อนกว่า dense อย่างชัดเจน (recall 0.7392 vs 0.8458) การให้น้ำหนักเท่ากันแบบ vanilla RRF จึง**ดึงผลลัพธ์ดี ๆ ของ dense ลง** แทนที่จะช่วยเสริม — Recall@20 ลดจาก 0.8458 เหลือ 0.8431 และ MRR ลดจาก 0.6619 เหลือ 0.6485 การลอง weighted RRF (ลดน้ำหนัก sparse เหลือ 0.75) จึงเป็นการแก้ปัญหานี้โดยตรง ไม่ใช่การเลือกตามความเชื่อ
-
-## 6. PostgreSQL เทียบ Milvus — ทำไมต้องทดสอบสอง backend
-
-| Backend | Recall@20 | MRR | Latency เฉลี่ย |
+| Dataset | Expected-citation recall OpenThai / Qwen | Codex Sol source-grounded review OpenThai / Qwen | เวลา end-to-end เฉลี่ย OpenThai / Qwen |
 |---|---:|---:|---:|
-| PostgreSQL weighted RRF | **0.8458** | **0.6710** | ~1,827 ms |
-| Milvus (Thai n-gram RRF) | 0.8388 | 0.6427 | **~4.3 ms** |
+| NitiBench | 100% / 100% | 4 supported + 1 partial / 5 supported | 21.73s / 10.69s |
+| NCB (full 1–6) | 100% / 100% | 3 supported + 2 partial / 5 supported | 18.85s / 7.70s |
+| Digital Fraud | 70% / 100% | 3 supported + 2 partial / 5 supported | 21.18s / 8.83s |
+| **รวม 15 ข้อ** | **90% / 100%** | **10 supported + 5 partial / 15 supported** | **20.58s / 9.07s** |
 
-**เหตุผลที่ทดสอบ Milvus เพิ่ม ทั้งที่ PostgreSQL ให้คุณภาพดีกว่า:** ต้องแยกตอบสองคำถามที่ต่างกัน — "คุณภาพการค้นดีแค่ไหน" กับ "เร็วแค่ไหนตอนใช้งานจริง" PostgreSQL ชนะด้าน**คุณภาพ**เล็กน้อย (Recall +0.0070, MRR +0.0283) แต่ Milvus เร็วกว่าประมาณ **425 เท่า** เพราะเป็น native hybrid search ในตัว ไม่ต้องยิง query สองรอบแบบ sequential เหมือนที่ implementation ปัจจุบันของ PostgreSQL ทำอยู่ ดังนั้นถ้าเน้นคุณภาพสูงสุดให้ใช้ PostgreSQL weighted RRF แต่ถ้าเน้น throughput/latency ในงานปริมาณมาก Milvus คือตัวเลือกที่คุ้มกว่า โดยยังต้องเพิ่ม weighted fusion หรือ reranker เพื่อปิดช่องว่างคุณภาพที่เหลืออยู่
+Codex Sol อ่านคำตอบจริง 30 คำตอบเทียบกับตัวบทที่รับเข้า benchmark โดยแยกจาก metric
+อัตโนมัติ จึงตรวจพบการสลับผู้มีหน้าที่ การละเงื่อนไขหลายส่วน และการอ้างบทที่อยู่ใกล้เคียง
+แม้ citation จะ grounded แล้ว
 
-**เหตุผลที่ใช้ Thai character n-gram แทน tokenizer มาตรฐานใน Milvus:** ภาษาไทยไม่มีช่องว่างระหว่างคำ tokenizer แบบมาตรฐานจึงตัดคำผิดบ่อย ผลทดสอบยืนยันว่า n-gram ให้ MRR สูงกว่าอย่างชัดเจน (0.6427 เทียบ 0.5499 ของ analyzer มาตรฐาน)
+> เวลาเป็นการรัน sequential บนเครื่องเดียวกัน ไม่ใช่ production latency หรือ concurrency benchmark
 
-## 7. สรุปเชิงใช้งาน
+<details>
+<summary>รายการทดสอบ ผลรายข้อ และขอบเขตการตรวจ — ซ่อนคำถาม/คำตอบ/ผลละเอียด</summary>
 
-1. **RAG ให้ผลน่าเชื่อถือที่สุด** เมื่อฐานข้อมูลเก็บหนึ่งมาตราต่อหนึ่ง chunk, retrieval พบมาตราที่ถูกต้อง, และให้โมเดลคัดกรองหลักฐานก่อนตอบ — เพราะทุกขั้นตอนมีจุดตรวจสอบความถูกต้องแยกกันได้ (retrieval recall, rerank precision, citation F1)
-2. **Closed-book มีความเสี่ยงสูงสุด** เพราะไม่มีจุดตรวจสอบระหว่างทาง ผิดตรงไหนก็ตรวจไม่พบจนกว่าจะมีคนตรวจคำตอบซ้ำ
-3. **Legal essay ที่เขียนลื่นไหลไม่ได้แปลว่า holding ถูกต้อง** ทั้งสองข้อในรอบนี้อ่านดูเป็นมืออาชีพแต่ข้อสรุปกลับด้านทั้งคู่ — ย้ำว่าความลื่นไหลของภาษากับความถูกต้องทางกฎหมายเป็นคนละมิติกัน ต้องตรวจแยก
+| Dataset | Case | Expected citation | OpenThai: citation / review | Qwen: citation / review |
+|---|---|---|---|---|
+| NitiBench | unlicensed futures market | 132 | 1.00 / supported | 1.00 / supported |
+| NitiBench | orchard lease | 565 | 1.00 / supported | 1.00 / supported |
+| NitiBench | minor adoption | 1598/26 | 1.00 / partially supported | 1.00 / supported |
+| NitiBench | current account | 856 | 1.00 / supported | 1.00 / supported |
+| NitiBench | limited company shareholder | 1096 | 1.00 / supported | 1.00 / supported |
+| NCB | owner dispute | 27 | 1.00 / partially supported | 1.00 / supported |
+| NCB | disclosure consent | 20 | 1.00 / supported; over-citation | 1.00 / supported |
+| NCB | correction deadline | 26 | 1.00 / supported | 1.00 / supported |
+| NCB | rejection reasons | 28 | 1.00 / partially supported | 1.00 / supported |
+| NCB | unlawful disclosure penalty | 51 | 1.00 / supported | 1.00 / supported |
+| Digital Fraud | scope | 4 | 1.00 / supported; over-citation | 1.00 / supported |
+| Digital Fraud | governance | 5.3.1, 5.3.1(2) | 0.50 / partially supported | 1.00 / supported |
+| Digital Fraud | monitoring | 5.3.2(2), 5.3.2(2.1) | 0.50 / supported | 1.00 / supported |
+| Digital Fraud | customer response | 5.3.2(4.2), 5.3.2(4.3) | 0.50 / partially supported | 1.00 / supported |
+| Digital Fraud | reporting | 5.3.5 | 1.00 / supported | 1.00 / supported |
 
-**ข้อจำกัดที่ต้องระบุไว้เสมอ:** ผลทั้งหมดเป็นการประเมินระบบค้นหา+ตอบ (retrieval-and-response system) ในสภาพแวดล้อมและชุดคำถามของผู้ทดสอบเท่านั้น ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย ก่อนใช้งานจริงต้องตรวจกับตัวบทกฎหมายฉบับปัจจุบันและผู้เชี่ยวชาญเสมอ
+`supported` คือสาระสำคัญของคำตอบตามหลักฐานที่รับเข้า benchmark;
+`partially supported` คือมีหลักฐานรองรับแก่นคำตอบ แต่ขาด/สลับ actor/เงื่อนไข/
+ขอบเขต citation ที่เป็นสาระสำคัญ ไม่มีคำตอบระดับ unsupported ในรอบนี้
 
-## 8. ไฟล์สำหรับตรวจสอบย้อนกลับ (reproducibility)
+</details>
 
-| ไฟล์ | เนื้อหา |
-|---|---|
-| `results/three-mode-raw-20260730/` | ผลดิบ RAG, essay, closed-book ทั้ง 12 เคส (prompt, response, timing, tokens) |
-| `results/rag-postgresql-vs-milvus-20260730/` | ผลเปรียบเทียบ retrieval backend 200 คำถาม |
-| `EVALUATION_REVIEW.md` | การตรวจเนื้อหาหลังโมเดลตอบเสร็จ (post-generation substantive review) แยกจากคะแนน keyword |
+## ทำไม citation ตรง แต่คำตอบยังไม่ครบได้
 
-**เหตุผลที่เก็บทุกไฟล์ raw แยกจาก README สรุป:** เพื่อให้ใครก็ตามตรวจสอบย้อนกลับได้ว่าคะแนนสรุปแต่ละบรรทัดมาจาก prompt/response จริงข้อไหน ไม่ใช่ตัวเลขที่สรุปลอย ๆ โดยไม่มีหลักฐานอ้างอิง
+OpenThai ดึงหลักฐานที่ถูกต้องได้ดี แต่คำตอบที่เป็น `partially supported` พบรูปแบบต่อไปนี้:
+
+- สลับผู้มีหน้าที่กับผู้มีสิทธิอุทธรณ์
+- เปลี่ยนความถี่หรือเงื่อนไขของข้อกำหนด
+- ตอบเพียงด้านเดียวของคำถามที่ต้องครอบคลุมหลายหน้าที่
+- อ้างมาตราข้างเคียงหลายมาตรา ทั้งที่มาตราหลักเพียงมาตราเดียวรองรับข้ออ้าง
+
+ดังนั้น metric retrieval/citation ต้องรายงานแยกจาก source-grounded answer review
+
+## ผลเสริม: PostgreSQL และ Milvus
+
+<details>
+<summary>Baseline NitiBench 5 ข้อของ retrieval backend</summary>
+
+| Metric | PostgreSQL hybrid RRF | Milvus native BM25 + RRF |
+|---|---:|---:|
+| candidate recall@20 | 100% | 100% |
+| citation recall / precision | 100% / 100% | 100% / 100% |
+| exact citation set | 5/5 | 5/5 |
+| retrieval เฉลี่ย | 1.630s | 0.057s |
+| end-to-end เฉลี่ย | 9.156s | 7.280s |
+
+PostgreSQL ใช้ dense pgvector + FTS/pg_trgm + application RRF (`k=60`);
+Milvus ใช้ dense cosine + Thai 3/4-gram BM25 + native RRF (`k=80`).
+เวลาเป็นคนละ run/cache จึงไม่ใช่การรับประกัน performance ใน production
+
+</details>
+
+## ข้อจำกัดและขอบเขต human review
+
+- เป็น fixed benchmark 15 ข้อ ไม่ใช่ตัวอย่างสุ่มหรือ coverage ของกฎหมายไทยทั้งหมด
+- Expected citation ตรง ไม่เท่ากับคำวินิจฉัยทางกฎหมายถูกต้องครบถ้วน
+- Codex Sol เป็น independent model review ไม่ใช่ Thai legal-expert adjudication
+- ต้องทดสอบคำถามหลายมาตรา ข้อยกเว้น และข้อเท็จจริงจริงเพิ่มเติมก่อนใช้งาน
+- repository นี้ไม่เก็บ model weights, credential, access token หรือ chat session
