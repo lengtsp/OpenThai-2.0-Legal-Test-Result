@@ -6,12 +6,12 @@
 > ผลนี้เป็น **preliminary / unreviewed** ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย
 > ก่อนใช้งานจริงต้องให้ผู้เชี่ยวชาญกฎหมายไทยตรวจตัวบทฉบับปัจจุบัน ข้อเท็จจริง และข้อยกเว้น
 
-## สิ่งที่ทดสอบ
+## ชุดข้อมูล
 
-| Dataset | แหล่งข้อมูล | ขนาด corpus | การอ้างอิง |
+| Dataset | แหล่งข้อมูล | Corpus | Provenance |
 |---|---|---:|---|
-| NitiBench | [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | 3,934 chunks | ระดับมาตรา; ไม่มี page field จาก source store |
-| พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 225 units | 73 parent + 152 child; page-anchored; corpus ใช้งานจริงรวมฉบับแก้ไข 1–6 |
+| NitiBench | [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | 3,934 chunks | ระดับมาตรา; source store ไม่มี page field |
+| พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต พ.ศ. ๒๕๔๕ (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 225 units | 73 parent + 152 child; corpus ใช้งานจริงรวมฉบับแก้ไข 1–6 |
 | Digital Fraud Management | [BOT 2568/0254](https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/ThaiPDF/25680254.pdf) | 54 units | ระดับข้อ/ข้อย่อย พร้อมเลขหน้า |
 
 PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็นเอกสารหลักสำหรับตรวจเทียบ แต่ยังไม่รวม
@@ -19,30 +19,79 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 
 ## Hybrid RAG ที่ใช้จริง
 
-ทุกคำถามค้นเฉพาะ corpus ที่เลือกก่อน จึงไม่ปะปนหลักฐานคนละชุดข้อมูล
-
 ```text
-คำถาม
-  ├─ Dense retrieval
-  ├─ Sparse / lexical retrieval
-  ├─ Hybrid fusion (RRF หรือ parent/child hybrid ตาม corpus)
-  ├─ BGE reranker
-  └─ หลักฐาน 8 รายการ → โมเดลตอบ JSON พร้อม citation
+คำถาม → Dense + Sparse retrieval → Hybrid fusion → BGE rerank → evidence 8 รายการ → JSON answer + citation
 ```
 
-| ขั้นตอน / parameter | ค่าที่ใช้ในการทดสอบ | หมายเหตุ |
+| ขั้นตอน / parameter | ค่าที่ใช้ | หมายเหตุ |
 |---|---|---|
-| Embedding | Qwen3-Embedding-4B, 2,560 มิติ, L2-normalized | ใช้ข้อความตัวบทเท่านั้น |
-| Candidate ก่อน rerank | 20 | จำกัดในแต่ละ corpus |
-| NitiBench fusion | Milvus dense cosine + Thai BM25 + native RRF | จากนั้น BGE rerank |
-| NCB fusion | parent/child hybrid + explicit-reference expansion | รักษา parent/child และมาตราที่อ้างถึง |
-| Digital Fraud fusion | dense + Thai lexical RRF + explicit-reference closure | รักษา ข้อ/ข้อย่อย และเลขหน้า |
+| Embedding | Qwen3-Embedding-4B, 2,560 มิติ, L2-normalized | passage มีเฉพาะตัวบทกฎหมาย |
+| Candidate ก่อน rerank | 20 ต่อ corpus | ไม่ปะปนเอกสารข้าม dataset ก่อน retrieval |
+| NitiBench fusion | Milvus dense cosine + Thai BM25 + native RRF | ตามด้วย BGE rerank |
+| NCB fusion | parent/child hybrid + explicit-reference expansion | คง parent/child และมาตราที่อ้างถึง |
+| Digital Fraud fusion | dense + Thai lexical RRF + explicit-reference closure | คงข้อ/ข้อย่อยและ page provenance |
 | Reranker | BGE-M3 cross-encoder | rerank หลักฐานก่อนส่งโมเดล |
-| Final evidence (`top_k`) | 8 | ทั้งสองโมเดลรับ evidence ชุดเดียวกัน |
+| Final evidence (`top_k`) | 8 | OpenThai และ Qwen ได้ evidence ชุดเดียวกัน |
 | Generation | temperature 0.0, top_p 1.0, max_tokens 2,048, seed 42, thinking off | JSON answer + citations |
-| Leakage control | expected citation / เฉลย ใช้หลัง inference เท่านั้น | ไม่เข้า embedding, retriever, reranker หรือ prompt |
+| Leakage control | expected citation / เฉลย ใช้หลัง inference | ไม่เข้า embedding, retriever, reranker หรือ prompt |
 
-## ผลทดสอบ: 3 datasets × 5 คำถาม
+## ผลรายข้อสำหรับ Human in the Loop
+
+ผลในคอลัมน์โมเดลเป็น `citation recall · Codex Sol review`:
+
+- `supported` = สาระสำคัญตามหลักฐานที่รับเข้า benchmark
+- `partial` = แก่นคำตอบมีหลักฐาน แต่ actor, เงื่อนไข, scope หรือส่วนสำคัญขาด/คลาดเคลื่อน
+- `over-citation` = คำตอบมีสาระรองรับ แต่มี citation ที่ไม่จำเป็นหรือไม่ตรงข้ออ้าง
+
+ทุกแถวที่เป็น `partial` หรือ `over-citation` ควรให้ผู้ตรวจมนุษย์เปิดคำตอบเต็มและตัวบทต้นทางก่อนอนุมัติ
+
+### 1) NitiBench
+
+| คำถาม | Expected citation | OpenThai Q4 | Qwen Q5 | เหตุผล / จุดให้คนพิจารณา |
+|---|---|---|---|---|
+| ศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าไม่มีใบอนุญาตมีความผิดหรือมีผลอย่างไร | มาตรา 132 | 1.00 · supported | 1.00 · supported | โทษจำคุก ปรับ และปรับรายวันตรงตัวบท |
+| การเช่าถือสวนมีหลักเกณฑ์ตามกฎหมายอย่างไร | มาตรา 565 | 1.00 · supported | 1.00 · supported | หลักเกณฑ์การเช่าถือสวนตรงตัวบท; Qwen กล่าวถึงนาซึ่งเกินคำถามแต่ไม่เปลี่ยนผล |
+| ผู้เยาว์เป็นบุตรบุญธรรมของบุคคลหลายคนได้หรือไม่ | มาตรา 1598/26 | 1.00 · **partial** | 1.00 · supported | OpenThai สื่อข้อห้ามและข้อยกเว้นได้ แต่ใช้คำเรียกผู้รับบุตรบุญธรรมผิดและข้อความผิดรูป จึงต้องตรวจ actor |
+| สัญญาบัญชีเดินสะพัดมีลักษณะและผลทางกฎหมายอย่างไร | มาตรา 856 | 1.00 · supported | 1.00 · supported | นิยามและผลการหักกลบลบหนี้ตรงตัวบท |
+| ผู้ถือหุ้นของบริษัทจำกัดต้องรับผิดในหนี้ของบริษัทเพียงใด | มาตรา 1096 | 1.00 · supported | 1.00 · supported | รับผิดไม่เกินจำนวนเงินที่ยังส่งใช้ไม่ครบตรงตัวบท |
+
+### 2) NCB — พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต
+
+| คำถาม | Expected citation | OpenThai Q4 | Qwen Q5 | เหตุผล / จุดให้คนพิจารณา |
+|---|---|---|---|---|
+| หากเจ้าของข้อมูลโต้แย้งความถูกต้องของข้อมูลเครดิตและยังหาข้อยุติไม่ได้ บริษัทข้อมูลเครดิตต้องดำเนินการอย่างไร | มาตรา 27 | 1.00 · **partial** | 1.00 · supported | OpenThai ไม่กล่าวถึงหน้าที่ระบุข้อโต้แย้งในรายงาน และทำให้สิทธิอุทธรณ์ของเจ้าของข้อมูลดูเป็นหน้าที่ของบริษัท |
+| บริษัทข้อมูลเครดิตเปิดเผยข้อมูลแก่สมาชิกหรือผู้ใช้บริการเพื่อวิเคราะห์สินเชื่อได้ภายใต้เงื่อนไขใด | มาตรา 20 | 1.00 · supported + **over-citation** | 1.00 · supported | สาระความยินยอมถูกต้อง แต่ OpenThai อ้างมาตราใกล้เคียงเกินจำเป็น; คนตรวจควรตัด citation ให้เหลือมาตรา 20 |
+| เมื่อเจ้าของข้อมูลขอตรวจสอบหรือขอแก้ไขข้อมูลเครดิต บริษัทข้อมูลเครดิตหรือสมาชิกต้องแจ้งผลภายในระยะเวลาใด | มาตรา 26 | 1.00 · supported | 1.00 · supported | กำหนด 30 วันนับแต่ได้รับคำขอและหน้าที่แจ้งเหตุผลตรงตัวบท |
+| เมื่อลูกค้าถูกปฏิเสธสินเชื่อเพราะข้อมูลเครดิต ผู้ให้บริการต้องแจ้งเหตุผลและให้สิทธิใดแก่ลูกค้า | มาตรา 28 | 1.00 · **partial** | 1.00 · supported | OpenThai เรียกสิทธิขอตรวจสอบภายใน 30 วันว่า “อุทธรณ์” และข้อความระบุ actor/ธุรกรรมผิดรูป |
+| บริษัทข้อมูลเครดิตหรือผู้ประมวลผลข้อมูลเปิดเผยข้อมูลนอกวัตถุประสงค์ที่กฎหมายกำหนดมีโทษอย่างไร | มาตรา 51 | 1.00 · supported | 1.00 · supported | โทษสูงสุดจำคุก 3 ปี ปรับ 300,000 บาท หรือทั้งจำทั้งปรับตรงตัวบท |
+
+### 3) BOT Digital Fraud Management
+
+| คำถาม | Expected citation | OpenThai Q4 | Qwen Q5 | เหตุผล / จุดให้คนพิจารณา |
+|---|---|---|---|---|
+| ประกาศธนาคารแห่งประเทศไทยเรื่องการบริหารจัดการภัยทุจริตดิจิทัลใช้บังคับกับผู้ให้บริการทางการเงินประเภทใดบ้าง | ข้อ 4 | 1.00 · supported + **over-citation** | 1.00 · supported | OpenThai ระบุขอบเขตได้ครบ แต่ควรอ้างข้อ 4 โดยตรงแทนข้อใกล้เคียงหลายข้อ |
+| ผู้ให้บริการทางการเงินต้องกำหนดนโยบายและการกำกับดูแลการบริหารจัดการภัยทุจริตดิจิทัลอย่างไร | ข้อ 5.3.1, 5.3.1(2) | 0.50 · **partial** | 1.00 · supported | OpenThai ขาดโครงสร้าง governance สำคัญ และเปลี่ยน “อย่างสม่ำเสมอ” เป็น “อย่างสมบูรณ์” ซึ่งมีความหมายต่างกัน |
+| ผู้ให้บริการทางการเงินต้องมีการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างไร | ข้อ 5.3.2(2), 5.3.2(2.1) | 0.50 · supported | 1.00 · supported | สาระการติดตามเชิงรุกและความเสี่ยงทั้งสองกลุ่มถูกต้อง แต่ OpenThai ไม่อ้างครบทุกข้อย่อยที่คาดไว้ |
+| เมื่อเกิดภัยทุจริตดิจิทัล ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลากระบวนการและดูแลลูกค้าที่ได้รับผลกระทบอย่างไร | ข้อ 5.3.2(4.2), 5.3.2(4.3) | 0.50 · **partial** | 1.00 · supported | OpenThai ครอบคลุมเวลา/การติดต่อกลับตาม 4.2 แต่ขาดการดูแล เยียวยา และเงื่อนไขตาม 4.3 |
+| ผู้ให้บริการทางการเงินต้องรายงานข้อมูลเกี่ยวกับการบริหารจัดการภัยทุจริตดิจิทัลต่อธนาคารแห่งประเทศไทยอย่างไร | ข้อ 5.3.5 | 1.00 · supported | 1.00 · supported | หน้าที่ส่งรายงานตามกำหนดและให้ข้อมูลเพิ่มเติมรายกรณีตรงตัวบท |
+
+## ภาพตัวอย่างคำถามและคำตอบที่รันจริง
+
+ภาพต่อไปนี้ capture จากแท็บ **ผลทดสอบ** ของเว็บ RAG (หลักฐาน top-k 8) โดยเปิดคำตอบเต็มของทั้งสองโมเดลสำหรับคำถามข้อแรกของแต่ละชุดข้อมูล ผลเป็น benchmark record ที่บันทึกไว้ ไม่ใช่การรันสด และยังต้องให้ผู้เชี่ยวชาญกฎหมายตรวจทานก่อนใช้ตัดสินใจ
+
+### NitiBench — มาตรา 132
+
+![ตัวอย่าง NitiBench: คำถามเรื่องศูนย์ซื้อขายสัญญาซื้อขายล่วงหน้าไม่มีใบอนุญาต และคำตอบ OpenThai/Qwen](assets/benchmark-examples/nitibench-example.png)
+
+### NCB — มาตรา 27
+
+![ตัวอย่าง NCB: คำถามเรื่องข้อโต้แย้งข้อมูลเครดิต และคำตอบ OpenThai/Qwen](assets/benchmark-examples/ncb-example.png)
+
+### Digital Fraud Management — ข้อ 4
+
+![ตัวอย่าง Digital Fraud: คำถามเรื่องขอบเขตผู้ให้บริการทางการเงิน และคำตอบ OpenThai/Qwen](assets/benchmark-examples/digital-fraud-example.png)
+
+## สรุปคะแนนหลังผลรายข้อ
 
 การค้นคืนพบ expected citation ใน top-8 ครบ 15/15 ข้อ และ JSON parse ได้ครบทั้งสองโมเดล
 
@@ -53,44 +102,16 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 | Digital Fraud | 70% / 100% | 3 supported + 2 partial / 5 supported | 21.18s / 8.83s |
 | **รวม 15 ข้อ** | **90% / 100%** | **10 supported + 5 partial / 15 supported** | **20.58s / 9.07s** |
 
-### สรุปผลที่ควรอ่าน
-
-| หัวข้อ | ข้อสรุปจากรอบทดสอบนี้ |
+| ข้อสรุป | ความหมาย |
 |---|---|
-| Retrieval | ทั้งคู่ใช้ evidence ชุดเดียวกันและ retrieval พบ expected citation ครบ 15/15 |
-| การตอบจาก evidence | Qwen ทำได้ดีกว่าในชุด 15 ข้อนี้: supported 15/15 เทียบกับ OpenThai 10/15 |
-| จุดที่ OpenThai พลาด | สลับ actor/หน้าที่, ละเงื่อนไขหลายส่วน, ตอบไม่ครบคำถามหลายส่วน, หรือ over-cite |
+| Retrieval | ทั้งสองโมเดลได้รับ evidence เดียวกัน และ retrieval พบ expected citation ครบ 15/15 |
+| Answer synthesis | Qwen ทำได้ดีกว่าใน fixed 15 cases นี้: supported 15/15 เทียบกับ OpenThai 10/15 |
+| Human approval gate | ห้าม approve เฉพาะจาก citation; เปิดตรวจคำตอบเต็มและตัวบททุกแถวที่เป็น partial หรือ over-citation |
 | เวลา | Qwen เร็วกว่ารอบนี้ แต่เป็น sequential run และคนละ runtime/quantization ไม่ใช่ production benchmark |
-
-`supported` หมายถึงสาระสำคัญของคำตอบตามหลักฐานที่รับเข้า benchmark;
-`partial` หมายถึงแก่นคำตอบมีหลักฐาน แต่ actor, เงื่อนไข, scope หรือส่วนสำคัญยังขาด/คลาดเคลื่อน
-
-<details>
-<summary>รายการ use case และผลรายข้อ — ซ่อนคำถาม คำตอบ และผลละเอียด</summary>
-
-| Dataset | Case | Expected citation | OpenThai: citation / review | Qwen: citation / review |
-|---|---|---|---|---|
-| NitiBench | unlicensed futures market | 132 | 1.00 / supported | 1.00 / supported |
-| NitiBench | orchard lease | 565 | 1.00 / supported | 1.00 / supported |
-| NitiBench | minor adoption | 1598/26 | 1.00 / partial | 1.00 / supported |
-| NitiBench | current account | 856 | 1.00 / supported | 1.00 / supported |
-| NitiBench | limited-company shareholder | 1096 | 1.00 / supported | 1.00 / supported |
-| NCB | owner dispute | 27 | 1.00 / partial | 1.00 / supported |
-| NCB | disclosure consent | 20 | 1.00 / supported; over-citation | 1.00 / supported |
-| NCB | correction deadline | 26 | 1.00 / supported | 1.00 / supported |
-| NCB | rejection reasons | 28 | 1.00 / partial | 1.00 / supported |
-| NCB | unlawful disclosure penalty | 51 | 1.00 / supported | 1.00 / supported |
-| Digital Fraud | scope | 4 | 1.00 / supported; over-citation | 1.00 / supported |
-| Digital Fraud | governance | 5.3.1, 5.3.1(2) | 0.50 / partial | 1.00 / supported |
-| Digital Fraud | monitoring | 5.3.2(2), 5.3.2(2.1) | 0.50 / supported | 1.00 / supported |
-| Digital Fraud | customer response | 5.3.2(4.2), 5.3.2(4.3) | 0.50 / partial | 1.00 / supported |
-| Digital Fraud | reporting | 5.3.5 | 1.00 / supported | 1.00 / supported |
-
-</details>
 
 ## ผลเสริม: PostgreSQL เทียบ Milvus
 
-เป็น baseline NitiBench 5 ข้อแยกจากการเทียบโมเดลข้างต้น
+Baseline NitiBench 5 ข้อ แยกจากการเทียบโมเดลข้างต้น
 
 | Metric | PostgreSQL hybrid RRF | Milvus native BM25 + RRF |
 |---|---:|---:|
