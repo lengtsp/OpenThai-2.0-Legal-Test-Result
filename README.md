@@ -116,14 +116,25 @@ PDF NCB จาก BOT ที่ระบุ `Updated-2559` ใช้เป็น
 
 ## สรุปตัวชี้วัดเชิงเทคนิคหลังผลรายข้อ
 
-การค้นคืนพบ expected citation ใน top-8 ครบ 15/15 ข้อ และ JSON parse ได้ครบทั้งสองโมเดล. ตารางนี้ไม่ใช่ leaderboard ของคุณภาพกฎหมาย: Qwen Q5 ทำ `expected-citation coverage` ได้สูงกว่าใน fixed set นี้ ขณะที่ OpenThai Q4 มีคำตอบที่ source-supported หลายข้อ แต่บางข้อเลือก citation ไม่ครบ, ตอบไม่ครบหลายเงื่อนไข หรือมีคำเพี้ยนที่ต้องพิจารณาความหมายทางกฎหมาย.
+การค้นคืนพบ expected citation ใน top-8 ครบ 15/15 ข้อ และ JSON parse ได้ครบทั้งสองโมเดล. แยกตารางตามโมเดลเพื่อลดความสับสน; ทั้งสองตารางเป็น technical/AI screening ไม่ใช่ leaderboard คุณภาพกฎหมายหรือคะแนนผู้เชี่ยวชาญกฎหมายไทย.
 
-| Dataset | Expected-citation coverage<br>OpenThai / Qwen | Codex Sol AI source screening<br>OpenThai / Qwen | เวลา end-to-end เฉลี่ย<br>OpenThai / Qwen |
+### OpenThai 2.0 Legal · Ollama Q4
+
+| Dataset | Expected-citation coverage | Codex Sol AI source screening | เวลา end-to-end เฉลี่ย |
 |---|---:|---:|---:|
-| NitiBench | 100% / 100% | 4 supported + 1 partial / 5 supported | 21.73s / 10.69s |
-| NCB (รวมฉบับแก้ไข 1–6) | 100% / 100% | 3 supported + 2 partial / 5 supported | 18.85s / 7.70s |
-| Digital Fraud | 70% / 100% | 3 supported + 2 partial / 5 supported | 21.18s / 8.83s |
-| **รวม 15 ข้อ** | **90% / 100%** | **10 supported + 5 partial / 15 supported** | **20.58s / 9.07s** |
+| NitiBench | 100% | 4 supported + 1 partial | 21.73s |
+| NCB (รวมฉบับแก้ไข 1–6) | 100% | 3 supported + 2 partial | 18.85s |
+| Digital Fraud | 70% | 3 supported + 2 partial | 21.18s |
+| **รวม 15 ข้อ** | **90%** | **10 supported + 5 partial** | **20.58s** |
+
+### Qwen3.6-35B-A3B · llama.cpp Q5
+
+| Dataset | Expected-citation coverage | Codex Sol AI source screening | เวลา end-to-end เฉลี่ย |
+|---|---:|---:|---:|
+| NitiBench | 100% | 5 supported | 10.69s |
+| NCB (รวมฉบับแก้ไข 1–6) | 100% | 5 supported | 7.70s |
+| Digital Fraud | 100% | 5 supported | 8.83s |
+| **รวม 15 ข้อ** | **100%** | **15 supported** | **9.07s** |
 
 ### การให้คะแนนหลักที่ต้องใช้ผู้เชี่ยวชาญกฎหมายไทย
 
