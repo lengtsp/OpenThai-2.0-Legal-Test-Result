@@ -13,18 +13,72 @@
 > ผลทั้งหมดเป็น **preliminary / unreviewed** ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย
 > การนำไปใช้จริงต้องให้ผู้เชี่ยวชาญกฎหมายไทยตรวจตัวบทฉบับปัจจุบัน ข้อเท็จจริง และข้อยกเว้น
 
-## ชุดข้อมูล
+## Latest: official parent-explicit test — 13 August 2026
+
+รอบล่าสุดทดสอบคำถามคงที่ 10 ข้อ โดยใช้ dataset ทางการที่จัดโครงสร้างใหม่: NCB 5 ข้อ และ
+BOT Digital Fraud 5 ข้อ. ทุกคำถามใช้ final evidence packet เดียวกันจาก run Qwen/Q4 เดิม
+(4 children ต่อคำถาม) แล้ว replay request เดิมให้ OpenThai BF16 บน vLLM เพื่อแยกผลของ
+การสร้างคำตอบออกจากผล retrieval. Expected sections ใช้ **หลัง inference เท่านั้น**.
+
+| Dataset / 5 cases | Model/runtime | JSON valid | all citations grounded | expected-citation recall | citation precision | mean answer time |
+|---|---|---:|---:|---:|---:|---:|
+| NCB | OpenThai Q4 / Ollama | 5/5 | 5/5 | 1.00 | 1.00 | 3.3457 s |
+| NCB | OpenThai BF16 / vLLM | 5/5 | 5/5 | 1.00 | 1.00 | 0.9189 s |
+| NCB | Qwen3.6-35B-A3B Q5 / llama-server 8081 | 5/5 | 5/5 | 1.00 | 1.00 | 2.4168 s |
+| Digital Fraud | OpenThai Q4 / Ollama | 3/5 | 3/5 | 0.40 | 0.60 | 3.9413 s |
+| Digital Fraud | OpenThai BF16 / vLLM | 5/5 | 5/5 | 0.80 | 1.00 | 2.1100 s |
+| Digital Fraud | Qwen3.6-35B-A3B Q5 / llama-server 8081 | 5/5 | 5/5 | 0.80 | 1.00 | 2.4952 s |
+
+OpenThai BF16 was served by vLLM 0.25.1 with `dtype=bfloat16`, `max_model_len=32768`,
+Triton MoE, temperature 0.0, top_p 1.0, max_tokens 2,048, and seed 42. The runtime used
+the native sampler (`VLLM_USE_FLASHINFER_SAMPLER=0`) to avoid an environment-specific
+FlashInfer JIT path issue; this is a serving-backend setting, not a change to model weights.
+
+### Evidence-grounded answer review
+
+Codex Sol reviewed the generated answers against the **rendered evidence actually sent to the
+model**, not citation metrics alone. The new BF16 review found 5 pass, 3 partial, 0 needs
+correction, and 2 evidence-limited answers. Qwen/Q4 counts below are the original review of
+the same frozen packets; all three results remain preliminary and require legal-expert
+adjudication.
+
+| Model/runtime | pass | partial | needs correction | evidence-limited |
+|---|---:|---:|---:|---:|
+| OpenThai Q4 / Ollama | 4 | 1 | 4 | 1 |
+| OpenThai BF16 / vLLM | 5 | 3 | 0 | 2 |
+| Qwen3.6-35B-A3B Q5 / llama-server 8081 | 7 | 1 | 1 | 1 |
+
+The test verifies direct parent provenance for all 40 selected rows: every child carries
+`parent_id`, `parent_section`, `parent_heading`, and `parent_relation=child_of`; all ten
+rendered prompts expose parent section and heading. It also exposed a limitation: although
+Digital Fraud child `5.3` stores nested `5.3.1`–`5.3.6` under the single retrievable `5.3`
+child as intended, the current prompt renderer cuts that long body at approximately 5,000
+characters in four packets. Therefore details in `5.3.2`–`5.3.5` did not reach the model in
+those requests, and the scope route did not retrieve `4.1`–`4.3`. These are data-path
+limitations, not grounds to create retrievable `X.X.X` rows.
+
+The current run is retained locally as
+`user_scoped_parent_explicit_vllm_bf16_20260813_072622`; it contains the ten immutable
+case records and the evidence-grounded review. Raw benchmark packets are not republished
+here because this README reports the result summary only.
+
+## Current official datasets
 
 | Dataset | แหล่งข้อมูล | Retrieval corpus | Provenance |
 |---|---|---:|---|
-| NitiBench | [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | 3,934 legal chunks | passage embedding ใช้เฉพาะตัวบท ไม่ใส่คำตอบหรือเฉลย |
-| พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 225 units (73 parent + 152 child) | corpus ฉบับรวม 1–6; แยกมาตรา/ข้อย่อย พร้อม page index |
-| BOT Digital Fraud Management | [BOT 2568/0254](https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/ThaiPDF/25680254.pdf) | 54 units | แยกตามข้อ/ข้อย่อย พร้อมเลขหน้า |
+| พ.ร.บ. การประกอบธุรกิจข้อมูลเครดิต (NCB) | [BOT principal text Updated-2559](https://www.bot.or.th/content/dam/bot/documents/th/laws-and-rules/laws-and-regulations/legal-department/7-ncb-act/7-1-ncb-act/7.1.2-Law_TH_CreditBureau%20Updated-2559.pdf) | 9 parents + exactly 66 primary article children | official PDF pages 1–18; retrieve/cite at `มาตรา` only; 20/1 and 31/1 are incorporated into articles 20 and 31, not duplicate rows; repeating footer removed |
+| BOT Digital Fraud Management | [BOT 2568/0254](https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/ThaiPDF/25680254.pdf) | 6 parents + exactly 11 `X.X` children | official PDF pages 2–13; retrieve/cite at `X.X` only; deeper `X.X.X` content is grouped in its owning `X.X` child, never a separate retrieval/citation row |
 
 NCB และ Digital Fraud เป็นการ extract ตัวบทให้แยกข้อกำหนดและ citation ได้ ไม่ใช่ scenario Q&A
 จากเหตุการณ์จริง จึงควรวัดต่อกับโจทย์ข้อเท็จจริงที่หลากหลายก่อนใช้งานจริง
 
-## วิธีทดสอบและ leakage controls
+## Archived 15-question comparison — 12 August 2026
+
+The following published NitiBench/NCB/Digital Fraud comparison is retained as a separate
+historical run. Its corpus counts, screenshots, evidence packets, and metrics are not the
+current parent-explicit official-dataset run above.
+
+### วิธีทดสอบและ leakage controls
 
 ใช้คำถามคงที่ 15 ข้อ (3 datasets × 5) โดย Q4 และ Qwen รับ final evidence ที่ retrieve/rerank
 มาแล้วชุดเดียวกัน ส่วน BF16 reconstruct final evidence ชุดเดียวกันจากไฟล์ frozen ที่ไม่มี label
@@ -73,7 +127,7 @@ frozen evidence input หรือ generation prompt ใช้หลัง infer
 
 <img src="assets/ui-three-model-comparison-20260812/03-digital-fraud-three-model-comparison.png" alt="Digital Fraud: evidence and three model answers" width="1600">
 
-## ผลเชิงเทคนิคหลัง inference
+### ผลเชิงเทคนิคหลัง inference
 
 `Expected-citation recall` และ `citation precision` ด้านล่างคำนวณหลังโมเดลตอบแล้ว
 จึงไม่ใช่สัญญาณว่ามีเฉลยอยู่ใน RAG context; metric เหล่านี้ไม่ตัดสินความถูกต้องทางกฎหมาย
@@ -111,7 +165,7 @@ frozen evidence input หรือ generation prompt ใช้หลัง infer
 ผล BF16 รอบนี้ใช้ evidence เดิม จึงบอกได้เฉพาะความต่างของการเรียบเรียงคำตอบ/citation
 หลังรับ context เดียวกัน—not a fresh end-to-end retrieval or latency comparison
 
-## คุณภาพการเรียบเรียงภาษาไทย — Codex Sol blind review
+### คุณภาพการเรียบเรียงภาษาไทย — Codex Sol blind review
 
 Codex Sol ประเมินคำตอบ 45 ชิ้นแบบ blind: ต่อหนึ่งข้อสลับคำตอบเป็น A/B/C แบบ deterministic
 และปิดชื่อโมเดล, evidence, citation, expected/reference answer, score เดิม, เวลา และ token ก่อนตรึงคะแนน
@@ -145,7 +199,7 @@ Codex Sol ประเมินคำตอบ 45 ชิ้นแบบ blind: �
 ความเร็ว หรือความถูกต้องทางกฎหมาย และ Codex Sol ไม่ใช่ผู้เชี่ยวชาญกฎหมายไทย
 การตัดสินสาระสำคัญควรใช้ Thai legal-expert adjudication แบบปิดชื่อโมเดลร่วมกับตัวบทจริง
 
-## ไฟล์ผลลัพธ์ครบทุกข้อ ทุกโมเดล ทุก dataset
+### ไฟล์ผลลัพธ์ครบทุกข้อ ทุกโมเดล ทุก dataset
 
 ผลที่เผยแพร่ถูกย่อให้มีเฉพาะคำถาม, evidence ที่คัดเลือก, คำตอบ, citation, เวลา, metric หลัง inference
 และคะแนน blind language review ไม่มี raw prompt, reference answer หรือ expected-citation label
@@ -160,6 +214,13 @@ SHA-256 ของ source artifacts, จำนวน case และรายก�
 
 ## ข้อจำกัด
 
+- Current NCB/Digital Fraud comparison has only 10 fixed questions; it is neither a random
+  sample nor a coverage measurement of either instrument.
+- A long grouped child can be complete in the corpus yet incomplete in the model prompt. Fix
+  prompt rendering or deterministically segment a long child while preserving its single
+  `X.X` citation before treating the later nested requirements as available evidence.
+- The Digital Fraud scope question must retrieve 4.1–4.3 before a complete scope answer can
+  be evaluated.
 - เป็น fixed benchmark 15 ข้อ ไม่ใช่ตัวอย่างสุ่มหรือการวัด coverage ของกฎหมายไทยทั้งหมด
 - BF16 ใช้ frozen final evidence ชุดเดียวกับ Q4/Qwen; ยังไม่มีผลรอบ fresh retrieval ของ BF16
 - เวลาแต่ละ run อยู่คนละ runtime/cache จึงไม่ควรใช้ตัดสิน production latency หรือ concurrency
