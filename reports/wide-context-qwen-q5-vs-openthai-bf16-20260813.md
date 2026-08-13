@@ -73,8 +73,14 @@ The expected recall/precision diagnostics are post-inference only. They do not e
 - Results remain preliminary/unreviewed and require Thai legal-expert review.
 - Sequential timings are not production latency claims.
 
-## Artifacts
+## Audit artifacts
 
-- [generation_input.json](generation_input.json)
-- [generation_vllm_bf16.json](generation_vllm_bf16.json), [scored_vllm_bf16.json](scored_vllm_bf16.json)
-- [generation_qwen_q5.json](generation_qwen_q5.json), [scored_qwen_q5.json](scored_qwen_q5.json)
+The immutable label-free input, raw generation JSON, and post-inference score JSON are retained
+in the local benchmark run directory
+`runs/expanded_context_3datasets_20260813_082922/`.  They are not copied into this publication
+repository, so the public report does not create broken links or expose full prompt packets.
+The reported values above are calculated from:
+
+- `generation_input.json`
+- `generation_vllm_bf16.json` and `scored_vllm_bf16.json`
+- `generation_qwen_q5.json` and `scored_qwen_q5.json`
