@@ -1,6 +1,6 @@
 # Codex Sol evaluation — wide-context legal RAG, three datasets
 
-Status: **complete for the approved two-runtime comparison**. OpenThai vLLM BF16 and Qwen3.6-35B-A3B Q5 are complete. OpenThai Ollama Q4 was deliberately removed from Ollama and is excluded; it is not inferred from an older run.
+Status: **complete for the approved two-runtime comparison**. OpenThai vLLM BF16 and Qwen3.6-35B-A3B Q5 are complete.
 
 This is a preliminary, unreviewed review of generated text against the evidence actually supplied. It is not legal advice or Thai legal-expert adjudication.
 
