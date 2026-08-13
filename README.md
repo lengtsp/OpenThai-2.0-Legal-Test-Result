@@ -9,6 +9,11 @@ Digital Fraud อย่างละ 5 ข้อ
 | Qwen3.6-35B-A3B | llama.cpp · Q5 · port 8081 |
 | [OpenThai 2.0 Legal](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b) | vLLM 0.25.1 · BF16 |
 
+## RAG UI
+
+หน้า HTML สำหรับดูรูปแบบ RAG อยู่ที่ [web/rag_webui_8083](web/rag_webui_8083/README.md).
+เผยแพร่เฉพาะส่วนหน้าเว็บและ stylesheet; ไม่รวม corpus, ผลรัน, ฐานข้อมูล, การตั้งค่า local หรือ credential.
+
 ## ชุดข้อมูลที่นำมาลอง
 
 | Dataset | ที่มาและการจัดข้อมูล | ชุดข้อมูล |

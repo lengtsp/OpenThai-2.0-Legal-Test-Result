@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Legal RAG Lab · Hybrid + rerank</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./legal-rag.css">
+  <link rel="stylesheet" href="./professional.css">
+  <!--
+    Design note: the DOM structure, ids, and every class name the inline
+    <script> below builds via template strings or classList.toggle (message/
+    user/assistant/bubble/thinking/evidence/hit/score/metrics/metric/empty/
+    chips/scenario/corpus-item/badge/dot/ready/tab/active/loader/show/
+    result-card/cited/result-head/result-tags/pill/cited-pill/card/side/
+    inline/secondary) are unchanged from the pre-Tailwind version, so none of
+    the JS needed to change. What changed is how those classes are defined:
+    every rule below is authored with Tailwind's @apply + arbitrary-value
+    syntax instead of hand-written CSS properties. Top-level static
+    containers (header, tab bar, toolbar, composer, sidebar) additionally
+    carry Tailwind utility classes directly in the markup.
+  -->
+  <style type="text/tailwindcss">
+    @layer components {
+      .card { @apply bg-white/95 border border-[#e3e9f3] rounded-[22px] shadow-[0_14px_34px_rgba(20,37,83,.065)] backdrop-blur-sm; }
+      .workspace { @apply min-h-[650px] flex flex-col overflow-hidden; }
+      .toolbar { @apply px-5 py-4 border-b border-[#e8edf5] bg-[#fcfdff] flex flex-wrap items-center justify-between gap-3; }
+      .toggle { @apply flex items-center gap-2 text-[#40506a] text-xs font-medium; }
+      .mode-select { @apply border border-[#d7e1ef] rounded-xl px-2.5 py-2 text-[#334563] bg-white shadow-[0_1px_2px_rgba(34,56,96,.04)] focus:outline-none focus:border-brand focus:ring-4 focus:ring-[#e7edff]; font: inherit; }
+
+      .app-header { @apply relative overflow-hidden text-white px-6 py-6 sm:px-[max(22px,calc((100vw-1440px)/2))] bg-[linear-gradient(118deg,#111d42_0%,#1c357c_48%,#365ed2_100%)]; }
+      .app-header::before { content: ''; @apply absolute -top-24 right-[12%] w-80 h-80 rounded-full bg-[#8fbcff]/20 blur-3xl; }
+      .app-header::after { content: ''; @apply absolute -bottom-28 left-[25%] w-72 h-72 rounded-full bg-[#5378f5]/20 blur-3xl; }
+      .header-inner { @apply relative z-10; }
+      .brand-lockup { @apply flex items-center gap-3.5; }
+      .brand-mark { @apply grid place-items-center w-11 h-11 rounded-2xl bg-white/[.12] border border-white/20 text-[22px] shadow-[inset_0_1px_0_rgba(255,255,255,.25)]; }
+      .eyebrow { @apply uppercase tracking-[.13em] text-[10px] font-bold text-[#bdccff] mb-0.5; }
+      .badge { @apply inline-flex gap-2 items-center border border-white/[.15] rounded-full px-3 py-1.5 text-xs bg-[#081434]/25 backdrop-blur-md whitespace-nowrap; }
+      .dot { @apply w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_0_4px_rgba(255,204,87,.13)]; }
+      .badge.ready .dot { @apply bg-emerald-300 shadow-[0_0_0_4px_rgba(101,235,182,.14)]; }
+      .new-chat { @apply border border-white/20 text-white bg-white/10 rounded-xl px-3.5 py-2 cursor-pointer font-semibold text-xs hover:bg-white/20 transition-colors; }
+      .session-label { @apply text-[11px] text-[#d5e0ff] text-right mt-1; }
+
+      .tab { @apply border border-white/10 bg-white/5 text-[#d8e3ff] px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer transition-all hover:bg-white/[.12] hover:text-white; }
+      .tab.active { @apply bg-white text-[#20365f] border-white shadow-[0_5px_14px_rgba(3,14,49,.18)]; }
+
+      .usecase-trigger { @apply inline-flex items-center gap-1.5 border border-[#cddaf2] text-[#31548d] bg-[#f5f8ff] rounded-xl px-3 py-2 text-xs font-bold cursor-pointer transition-all hover:border-[#9fb7e8] hover:bg-[#eaf0ff]; }
+      .usecase-trigger:disabled { @apply opacity-60 cursor-not-allowed; }
+      .usecase-modal { @apply w-[640px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-32px)] m-auto p-0 overflow-hidden border border-[#dce5f4] rounded-[22px] bg-white text-ink shadow-[0_28px_80px_rgba(12,27,68,.32)]; }
+      .usecase-modal::backdrop { @apply bg-[#0d1c40]/45 backdrop-blur-[2px]; }
+      .usecase-modal-header { @apply flex items-start justify-between gap-4 px-6 py-5 border-b border-[#e6ecf5] bg-[linear-gradient(135deg,#f8faff,#edf3ff)]; }
+      .usecase-modal-eyebrow { @apply uppercase tracking-[.12em] text-[10px] font-bold text-[#5571b0] mb-1; }
+      .usecase-modal-title { @apply m-0 text-lg font-bold text-[#263d69]; }
+      .usecase-modal-description { @apply m-0 mt-1 text-xs leading-5 text-[#65748e]; }
+      .modal-close { @apply grid place-items-center shrink-0 w-8 h-8 rounded-lg border border-[#d7e2f2] bg-white text-[#526c9d] text-lg leading-none cursor-pointer hover:bg-[#edf3ff] hover:text-[#244b9d]; }
+      .modal-usecase-list { @apply grid gap-2 p-5 overflow-auto max-h-[460px]; }
+      .modal-usecase-empty { @apply m-0 text-sm text-muted text-center py-8; }
+
+      .empty { @apply max-w-[520px] mx-auto my-[88px] text-center; }
+      .empty h2 { @apply text-[24px] font-bold mt-4 mb-2 text-[#253957]; }
+      .empty p { @apply text-muted text-sm leading-6 mx-auto; }
+      .chips { @apply mt-6 flex gap-2 justify-center flex-wrap; }
+      .chips span { @apply bg-[#f0f4ff] text-[#526a9e] px-3 py-1.5 rounded-full text-[11px] font-semibold; }
+
+      .message { @apply mb-6 max-w-[880px]; }
+      .message.user { @apply ml-auto max-w-[78%]; }
+      .label { @apply text-[#7a8aa4] text-[10px] font-bold tracking-[.09em] uppercase mb-1.5 ml-1; }
+      .bubble { @apply p-4 rounded-[18px] whitespace-pre-wrap break-words text-[14px] leading-6; }
+      .assistant .bubble { @apply bg-white border border-[#e3eaf4] rounded-tl-md shadow-[0_5px_18px_rgba(34,58,104,.045)]; }
+      .user .bubble { @apply bg-[linear-gradient(135deg,#375ed7_0%,#2946a7_100%)] text-white rounded-tr-md shadow-[0_8px_18px_rgba(37,67,165,.22)]; }
+
+      .metrics { @apply flex gap-1.5 flex-wrap text-[#71809a] mt-2.5 ml-0.5 text-[11px]; }
+      .metric { @apply bg-[#f1f4f9] rounded-full px-2 py-1; }
+      .evidence { @apply mt-2.5 border border-[#dce6fa] bg-[#f8fbff] rounded-[10px] overflow-hidden; }
+      .evidence summary { @apply cursor-pointer px-2.5 py-2 text-[#2d57a7] font-semibold text-xs; }
+      .hit { @apply px-3 py-2.5 border-t border-[#e3ebfa]; }
+      .hit strong { @apply text-[#274d9a] text-xs; }
+      .hit p { @apply mt-1 text-[#485a76] text-xs whitespace-pre-wrap; }
+      .score { @apply float-right text-[#7083a3] text-[11px] font-medium; }
+      .thinking { @apply border-l-[3px] border-[#d5b05a] px-2.5 py-1.5 mb-2 text-[#7d6122] bg-[#fffaf0] text-xs whitespace-pre-wrap; }
+
+      textarea, input[type=text], input[type=number] { font: inherit; }
+      .composer { @apply p-4 border-t border-line; }
+      .composer textarea { @apply w-full min-h-[96px] border border-[#ccd6ea] rounded-[11px] p-[11px] resize-y text-ink outline-none focus:border-brand focus:shadow-[0_0_0_3px_#e5ecff]; }
+      .composer-bottom { @apply flex items-center justify-between gap-2.5 mt-2.5; }
+      .hint { @apply text-muted text-xs; }
+      .btn-primary { @apply border-0 rounded-xl px-4 py-2.5 bg-[linear-gradient(135deg,#3a62db,#2747ac)] text-white font-semibold cursor-pointer shadow-[0_8px_16px_rgba(48,86,211,.2)] transition-all hover:-translate-y-px hover:shadow-[0_11px_20px_rgba(48,86,211,.28)] disabled:opacity-65 disabled:cursor-wait disabled:transform-none; }
+      .btn-secondary { @apply border border-[#d4dfef] bg-white text-[#38598d] px-2.5 py-2 rounded-xl font-semibold cursor-pointer text-xs transition-colors hover:bg-[#f2f6ff] hover:border-[#b8c9ed]; }
+      .loader { @apply hidden items-center gap-2 text-xs text-[#48618c]; }
+      .loader.show { @apply flex; }
+      .spinner { @apply w-[15px] h-[15px] border-2 border-[#cbd8f5] border-t-brand rounded-full animate-spin; }
+
+      .side { @apply p-[18px]; }
+      .side h3 { @apply text-sm mb-1; }
+      .side p { @apply text-muted text-xs leading-5 mb-3.5; }
+      .side label { @apply block text-[#53627a] text-xs font-semibold mt-2.5 mb-1; }
+      .inline { @apply grid grid-cols-2 gap-2; }
+      .notice { @apply border border-[#f5dfaa] border-l-[3px] border-l-[#e7ae42] bg-[#fffaf0] text-[#76551c] p-2.5 rounded-xl text-[11px] leading-5; }
+
+      .result-card { @apply border border-[#e1e8f3] rounded-2xl px-4 py-3 mb-3 bg-white shadow-[0_3px_12px_rgba(29,55,105,.035)]; }
+      .result-card.cited { @apply border-emerald-300 bg-emerald-50/60; }
+      .result-head { @apply flex justify-between items-baseline gap-2 flex-wrap; }
+      .result-head strong { @apply text-[#274d9a] text-sm; }
+      .result-tags { @apply flex gap-1.5 flex-wrap; }
+      .pill { @apply text-[11px] px-2 py-0.5 rounded-full bg-[#f1f5ff] text-[#46609d]; }
+      .pill.cited-pill { @apply bg-emerald-100 text-emerald-800 font-semibold; }
+      .result-card p { @apply text-[#485a76] text-[12.5px] mt-1.5 whitespace-pre-wrap; }
+
+      .data-table-wrap { @apply overflow-x-auto border border-[#e0e7f1] rounded-2xl; }
+      .data-table { @apply w-full min-w-[1180px] border-collapse text-xs; }
+      .data-table th { @apply text-left uppercase tracking-[.06em] text-[#61718b] bg-[#f6f8fc] border-b border-[#e3eaf3] px-3 py-3 whitespace-nowrap; }
+      .data-table td { @apply align-top border-b border-[#edf0f5] px-3 py-3 text-[#35445e]; }
+      .data-table tr:last-child td { @apply border-b-0; }
+      .data-table tr:hover td { @apply bg-[#fbfcff]; }
+      .data-table .law-cell { @apply min-w-[190px] font-semibold text-[#274d9a]; }
+      .data-table .content-cell { @apply min-w-[330px] max-w-[460px]; }
+      .data-table details summary { @apply cursor-pointer text-[#385f9f] font-medium; }
+      .data-table details div { @apply mt-2 whitespace-pre-wrap break-words text-[#485a76]; }
+      .data-table .source-link { @apply text-[#315cb2] font-semibold hover:underline; }
+      .table-controls { @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-line; }
+      .table-summary { @apply text-xs text-muted; }
+      .page-controls { @apply flex items-center gap-2 text-xs; }
+
+      .history-list { @apply max-h-[290px] overflow-auto mt-2 grid gap-2; }
+      .history-item { @apply w-full text-left border border-[#e4eaf4] rounded-xl px-3 py-2.5 bg-white cursor-pointer transition-all hover:border-[#b6c8ed] hover:bg-[#f6f8ff]; }
+      .history-item.active { @apply border-[#7895e5] bg-[#edf3ff] shadow-[0_3px_10px_rgba(54,90,190,.09)]; }
+      .history-item b { @apply block text-xs text-[#344a70] truncate; }
+      .history-item span { @apply block text-[10px] text-muted mt-0.5 truncate; }
+      .history-empty { @apply text-xs text-muted py-2; }
+      .usecase { @apply w-full text-left border border-[#e1e8f4] bg-[#fbfcff] rounded-xl px-3 py-2.5 cursor-pointer transition-all hover:border-[#b7c9f0] hover:bg-[#f2f6ff] hover:-translate-y-px; }
+      .usecase b { @apply block text-xs text-[#31558f]; }
+      .usecase span { @apply block text-[10px] text-muted mt-0.5; }
+      .right-accordion { @apply overflow-hidden transition-shadow hover:shadow-[0_10px_24px_rgba(28,53,105,.08)]; }
+      .right-accordion summary { @apply flex items-center justify-between gap-3 px-4 py-4 cursor-pointer text-sm font-bold text-[#2b477a] select-none hover:bg-[#f8fbff]; list-style: none; }
+      .right-accordion summary::-webkit-details-marker { display: none; }
+      .right-accordion summary::after { content: '⌄'; @apply text-base text-[#6680b5] transition-transform duration-150; }
+      .right-accordion[open] summary { @apply border-b border-[#e8edf5] bg-[#f7f9fe]; }
+      .right-accordion[open] summary::after { @apply rotate-180; }
+      .accordion-body { @apply p-4 bg-white; }
+      .accordion-body > p { @apply text-muted text-xs mb-3.5; }
+      .ask-panel { @apply bg-[linear-gradient(160deg,#ffffff_0%,#f4f7ff_100%)]; }
+      .ask-panel textarea { @apply bg-white border-[#d7e1ef] text-sm leading-6 shadow-[0_2px_8px_rgba(35,59,110,.04)]; }
+      .conversation-panel #chat { @apply bg-[radial-gradient(circle_at_top_right,rgba(226,234,255,.8),transparent_36%),linear-gradient(180deg,#fcfdff_0%,#f8faff_100%)]; }
+      .conversation-panel .toolbar { @apply bg-white; }
+      .utility-rail { @apply xl:pt-1; }
+    }
+  </style>
+</head>
+<body class="m-0 text-ink bg-[radial-gradient(circle_at_top_left,#edf2ff_0%,#f8fafc_38%,#f5f7fb_100%)] font-sans text-[15px] leading-[1.55] antialiased">
+  <header class="app-header">
+    <div class="header-inner">
+    <div class="header-row flex items-center justify-between gap-4 flex-wrap">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">⚖</div>
+        <div><div class="eyebrow">Thai legal intelligence</div><h1 class="text-[23px] font-bold m-0 tracking-tight">Legal RAG Lab</h1>
+        <p class="mt-1 text-[13px] text-[#d7e3ff]">Thai legal retrieval with source-grounded answers and auditable provenance</p></div>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <div>
+          <div id="status" class="badge"><i class="dot"></i><span>กำลังตรวจสอบโมเดล</span></div>
+          <div id="sessionLabel" class="session-label mt-1">New session</div>
+        </div>
+        <button id="newChat" class="new-chat">＋ แชตใหม่</button>
+      </div>
+    </div>
+    <div class="primary-nav flex gap-2 mt-5" aria-label="ส่วนงานหลัก">
+      <button id="tabChat" class="tab active">แชต</button>
+      <button id="tabSearch" class="tab">ค้นหากฎหมาย</button>
+      <button id="tabData" class="tab">ตาราง Dataset</button>
+      <button id="tabBenchmark" class="tab">ผลทดสอบ</button>
+    </div>
+    </div>
+  </header>
+  <main id="searchView" class="view-frame max-w-[1360px] mx-auto my-6 px-5" style="display:none">
+    <section class="card workspace">
+      <div class="toolbar"><div class="toggle"><label for="searchDataset" class="!m-0">ชุดข้อมูล</label><select id="searchDataset" class="mode-select" aria-label="ชุดข้อมูลสำหรับค้นหากฎหมาย"><option>กำลังโหลดชุดข้อมูล…</option></select><span id="searchRoute" class="text-xs text-muted">เลือกชุดข้อมูลเพื่อดู retrieval route</span></div></div>
+      <div class="composer !border-t-0"><textarea id="searchQuestion" class="!min-h-[64px]" placeholder="พิมพ์คำถามกฎหมายเพื่อค้นมาตราที่เกี่ยวข้อง… (Enter เพื่อค้น)"></textarea><div class="composer-bottom"><div id="searchLoader" class="loader"><i class="spinner"></i><span id="searchLoadingText">กำลังค้นและประมวลผล…</span></div><span id="searchHint" class="hint">ค้นจากชุดข้อมูลที่เลือก โดยไม่ปน source</span><button id="searchBtn" class="btn-primary">ค้นหา</button></div></div>
+      <div id="searchAnswerBox" class="hidden px-6 pb-5"><div class="label">คำตอบสรุปจากโมเดล <span id="searchReview" class="text-amber-700"></span></div><div id="searchAnswer" class="bubble bg-white border border-line"></div><div id="searchMeta" class="metrics"></div></div>
+      <div id="searchResults" class="px-6 pb-6 overflow-auto flex-1"><div class="empty"><div class="text-[42px]">🔎</div><h2>ค้นหามาตรากฎหมายที่เกี่ยวข้อง</h2><p>พิมพ์คำถามด้านบน ระบบจะจัดอันดับมาตราที่เกี่ยวข้องและให้โมเดลสรุปคำตอบพร้อมอ้างอิง</p></div></div>
+    </section>
+  </main>
+  <main id="dataView" class="view-frame max-w-[1360px] mx-auto my-6 px-5" style="display:none">
+    <section class="card workspace !min-h-[620px]">
+      <div class="view-heading px-5 pt-5"><h2 class="text-lg font-bold m-0">ตารางรายละเอียด Dataset</h2><p class="text-xs text-muted mt-1 mb-0">เลือก NitiBench, NCB หรือรวมชุดข้อมูลเพื่อดูเฉพาะ retrieval corpus, parent/child และ provenance</p></div>
+      <div class="toolbar"><div class="toggle"><label for="dataDataset" class="!m-0">ชุดข้อมูล</label><select id="dataDataset" class="mode-select" aria-label="ชุดข้อมูลสำหรับตาราง"><option>กำลังโหลดชุดข้อมูล…</option></select><button id="dataReload" class="btn-secondary" type="button">รีเฟรชตาราง</button></div><span id="dataRoute" class="text-xs text-muted">เลือกชุดข้อมูลเพื่อดูที่มาและโครงสร้าง</span></div>
+      <div class="table-controls"><div class="flex flex-wrap gap-2 items-center"><input id="dataFilter" type="text" class="border border-[#ccd8eb] rounded-lg px-3 py-2 text-sm min-w-[280px]" placeholder="ค้นหา ชื่อกฎหมาย มาตรา topic หรือข้อความ…"><select id="dataPageSize" class="mode-select" aria-label="จำนวนแถวต่อหน้า"><option value="25">25 แถว</option><option value="50" selected>50 แถว</option><option value="100">100 แถว</option></select></div><div id="dataMeta" class="table-summary">ยังไม่ได้โหลดตาราง</div></div>
+      <div class="px-5 pt-4"><div id="dataSafety" class="notice">ตารางนี้แสดงเฉพาะ retrieval corpus และ provenance เท่านั้น</div></div>
+      <div class="p-5 pt-4 overflow-auto flex-1"><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Source</th><th>กฎหมาย / เอกสาร</th><th>ข้ออ้างอิง / มาตรา</th><th>โครงสร้าง</th><th>Parent</th><th>หน้า PDF</th><th>Topic</th><th>ข้อความ corpus</th><th>ที่มา</th></tr></thead><tbody id="dataTableBody"><tr><td colspan="9" class="text-center text-muted py-12">เปิดแท็บนี้เพื่อโหลดคลังชุดข้อมูล</td></tr></tbody></table></div></div>
+      <div class="table-controls !border-t !border-b-0"><div id="dataPageLabel" class="table-summary">หน้า –</div><div class="page-controls"><button id="dataPrev" class="btn-secondary" type="button">← ก่อนหน้า</button><button id="dataNext" class="btn-secondary" type="button">ถัดไป →</button></div></div>
+    </section>
+  </main>
+  <main id="benchmarkView" class="view-frame max-w-[1560px] mx-auto my-6 px-5" style="display:none">
+    <section class="card workspace">
+      <div class="view-heading px-5 pt-5"><h2 class="text-lg font-bold m-0">ผลเปรียบเทียบ RAG แบบควบคุม</h2><p class="text-xs text-muted mt-1 mb-0">15 คำถาม · Qwen3.6‑35B‑A3B Q5 เทียบ OpenThai 2.0 Legal BF16 · แสดงหลักฐาน top‑8 เดียวกัน ผลต่าง retrieval และผล review ของ GPT‑5.6 Sol ต่อข้อ</p></div>
+      <div class="toolbar"><div class="toggle"><label for="benchmarkDataset" class="!m-0">ชุดข้อมูล</label><select id="benchmarkDataset" class="mode-select" aria-label="ชุดข้อมูลผลทดสอบ"><option>กำลังโหลดผลทดสอบ…</option></select><button id="benchmarkReload" class="btn-secondary" type="button">โหลดผลอีกครั้ง</button></div><span id="benchmarkMeta" class="text-xs text-muted">ยังไม่ได้โหลด benchmark artifact</span></div>
+      <div class="px-5 pt-4"><div id="benchmarkNotice" class="notice">ผลเป็น preliminary / unreviewed; ให้ตรวจคำตอบเต็มและตัวบทก่อนใช้ตัดสินใจ</div></div>
+      <div class="p-5 pt-4 overflow-auto flex-1"><div id="benchmarkSummary" class="metrics mb-4"></div><div id="benchmarkCaseList" class="benchmark-case-list"><div class="text-center text-muted py-12">เปิดแท็บนี้เพื่อดูผลทดสอบ</div></div></div>
+    </section>
+  </main>
+  <main id="chatView" class="chat-workbench max-w-[1720px] mx-auto my-6 px-5 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[250px_minmax(540px,1fr)_340px] gap-[22px]">
+    <section class="card side ask-panel question-panel h-fit xl:sticky xl:top-5">
+      <h2 class="text-base font-bold m-0">ถามกฎหมาย</h2>
+      <p>พิมพ์คำถามและส่งคำตอบจะปรากฏในคอลัมน์กลาง</p>
+      <textarea id="question" class="w-full min-h-[180px] border border-[#ccd6ea] rounded-[11px] p-[11px] resize-y text-ink outline-none focus:border-brand focus:shadow-[0_0_0_3px_#e5ecff]" placeholder="พิมพ์คำถามกฎหมาย… (Enter เพื่อส่ง, Shift+Enter ขึ้นบรรทัดใหม่)"></textarea>
+      <div class="mt-3 grid gap-2"><div id="loader" class="loader"><i class="spinner"></i><span id="loadingText">กำลังค้นหลักฐาน… 0.0 วินาที</span></div><button id="send" class="btn-primary w-full" type="button">ส่งคำถาม</button></div>
+    </section>
+    <section class="card workspace conversation-panel">
+      <div class="toolbar chat-toolbar"><div class="toggle"><label for="chatDataset" class="!m-0">ชุดข้อมูล</label><select id="chatDataset" class="mode-select" aria-label="ชุดข้อมูลสำหรับแชต"><option>กำลังโหลดชุดข้อมูล…</option></select><button id="openUseCases" class="usecase-trigger" type="button" aria-haspopup="dialog" aria-controls="useCaseModal" disabled>▦ Use cases <span id="useCaseCount" aria-hidden="true"></span></button><select id="mode" class="mode-select"><option value="citation_rag">Citation RAG (JSON)</option><option value="legal_essay">Legal Essay</option><option value="legal_essay_thinking">Legal Essay (Thinking)</option><option value="general_legal_chat">General Legal Chat</option><option value="closed_book">Closed-book Control</option></select><input id="rag" type="checkbox" checked class="accent-brand w-4 h-4"><label for="rag" class="!m-0">ใช้ retrieval</label><input id="thinking" type="checkbox" disabled class="accent-brand w-4 h-4"><label for="thinking" class="!m-0">Thinking</label></div></div>
+      <div id="chat" class="flex-1 p-6 overflow-auto bg-gradient-to-b from-[#fbfcff] to-white"><div class="empty chat-empty"><div class="empty-symbol" aria-hidden="true">⚖</div><div class="empty-kicker">Citation-first legal research</div><h2>เริ่มจากคำถามของคุณ</h2><p>เลือกชุดข้อมูลและส่งคำถามจากคอลัมน์ซ้าย ระบบจะคัดเลือกหลักฐาน, สร้างคำตอบ และแสดง citation ที่ตรวจย้อนกลับได้</p><div class="quick-start" aria-label="ขั้นตอนเริ่มต้น"><div><b>1</b><span>เลือก Dataset</span></div><div><b>2</b><span>เปิด Use case</span></div><div><b>3</b><span>ตรวจ Evidence</span></div></div><div class="chips"><span>Source-grounded</span><span>Hybrid retrieval</span><span>Human review</span></div></div></div>
+    </section>
+    <aside class="utility-rail grid content-start gap-4">
+      <details class="card right-accordion" data-right-accordion open>
+        <summary>ประวัติแชต</summary>
+        <div class="accordion-body"><div class="flex items-center justify-between gap-2"><p class="!mb-0">เก็บใน browser นี้ แยกตามบทสนทนา</p><button id="historyClear" class="btn-secondary !py-1 !px-2" type="button">ล้าง</button></div><div id="historyList" class="history-list"><p class="history-empty">ยังไม่มีประวัติ</p></div></div>
+      </details>
+      <details class="card right-accordion" data-right-accordion>
+        <summary>การตั้งค่า Retrieval</summary>
+        <div class="accordion-body"><p id="datasetSummary">กำลังโหลดรายละเอียดชุดข้อมูล…</p><div class="inline"><div><label for="topK">หลักฐานหลัง rerank</label><input id="topK" type="number" min="1" max="8" value="8" class="w-full border border-[#d6deec] px-2 py-2 rounded-lg"></div><div><label for="temperature">Temperature</label><input id="temperature" type="number" min="0" max="1.5" step="0.1" value="0" readonly class="w-full border border-[#d6deec] px-2 py-2 rounded-lg"></div></div><label for="maxTokens">คำตอบสูงสุด (tokens)</label><input id="maxTokens" type="number" min="128" max="6144" value="2048" readonly class="w-full border border-[#d6deec] px-2 py-2 rounded-lg"><div id="profileHint" class="notice mt-2.5">Citation RAG ใช้ชุดข้อมูลที่เลือกและสร้างคำตอบจากหลักฐานเท่านั้น; คำตอบต้องตรวจสอบก่อนใช้</div></div>
+      </details>
+    </aside>
+  </main>
+  <dialog id="useCaseModal" class="usecase-modal" aria-labelledby="useCaseModalTitle" aria-describedby="useCaseModalDescription">
+    <div class="usecase-modal-header">
+      <div>
+        <div class="usecase-modal-eyebrow">Test prompts</div>
+        <h2 id="useCaseModalTitle" class="usecase-modal-title">Use cases สำหรับทดสอบ</h2>
+        <p id="useCaseModalDescription" class="usecase-modal-description">เลือกโจทย์ที่สอดคล้องกับชุดข้อมูลที่กำลังใช้งาน</p>
+      </div>
+      <button id="closeUseCases" class="modal-close" type="button" aria-label="ปิดหน้าต่าง Use cases">×</button>
+    </div>
+    <div id="modalUseCaseList" class="modal-usecase-list"></div>
+  </dialog>
+  <script>
+    // This port previously served a different web application.  Remove only
+    // service-worker registrations and Cache Storage entries for this exact
+    // origin so a stale "MCP" shell cannot keep serving its cached HTML.
+    // The Legal RAG UI itself does not use an offline service worker.
+    (async () => {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations
+          .filter(registration => new URL(registration.scope).origin === location.origin)
+          .map(registration => registration.unregister()));
+        if ('caches' in window) {
+          await Promise.all((await caches.keys()).map(key => caches.delete(key)));
+        }
+      } catch (_) {
+        // A private browser mode can deny Cache Storage; the page remains usable.
+      }
+    })();
+    const state = { history: [], timer: null, started: 0, modelName: 'Legal model', sessionId: null, localChats: [], currentChatId: null, datasets: [], datasetId: 'nitibench', activeTab: 'chat', table: { dataset: 'nitibench', page: 1, pageSize: 50, query: '', timer: null, loading: false }, benchmark: { dataset: 'nitibench', data: null, loading: false } };
+    const profiles = {
+      citation_rag: { temperature: 0.0, maxTokens: 2048, thinking: false, rag: true, hint: 'Citation RAG · official JSON prompt · thinking off · open-book selection สูงสุด 8 chunks' },
+      legal_essay: { temperature: 0.7, maxTokens: 4096, thinking: false, rag: true, hint: 'Legal essay · temperature 0.7 · top_p 0.9 · 4,096 tokens · thinking off' },
+      legal_essay_thinking: { temperature: 0.7, maxTokens: 6144, thinking: true, rag: true, hint: 'Legal essay experiment · 6,144 tokens · thinking on (อาจมี reasoning ภาษาอังกฤษ)' },
+      general_legal_chat: { temperature: 0.7, maxTokens: 2048, thinking: false, rag: true, hint: 'General legal chat · สนทนาต่อเนื่อง · อธิบายด้วยภาษาทั่วไปและคงหลักฐานอ้างอิง' },
+      closed_book: { temperature: 0.0, maxTokens: 2048, thinking: false, rag: false, hint: 'Closed-book control · ไม่ส่ง retrieval context · ใช้วัดความจำจาก weights เท่านั้น' }
+    };
+    const CHAT_HISTORY_STORAGE_KEY = 'openthaiLegalRagChatHistoryV1';
+    const CHAT_HISTORY_MAX_CHATS = 18;
+    const CHAT_HISTORY_MAX_MESSAGES = 32;
+    const CHAT_HISTORY_MAX_EVIDENCE = 6;
+    const CHAT_HISTORY_EVIDENCE_CHARS = 900;
+    const CHAT_HISTORY_ANSWER_CHARS = 12000;
+    const USE_CASES = [
+      { id: 'ncb-dispute', title: 'NCB · ข้อโต้แย้งข้อมูล', description: 'ทดสอบ requirement child และ page provenance', dataset: 'ncb_credit_info_act', mode: 'citation_rag', question: 'หากเจ้าของข้อมูลโต้แย้งความถูกต้องของข้อมูลเครดิตและยังหาข้อยุติไม่ได้ ต้องดำเนินการอย่างไร' },
+      { id: 'ncb-disclosure', title: 'NCB · การเปิดเผยข้อมูล', description: 'ทดสอบเงื่อนไข ผู้เปิดเผย และผู้รับข้อมูล', dataset: 'ncb_credit_info_act', mode: 'citation_rag', question: 'บริษัทข้อมูลเครดิตสามารถเปิดเผยข้อมูลเครดิตของเจ้าของข้อมูลได้ในกรณีใด' },
+      { id: 'ncb-cross-reference', title: 'NCB · อ้างอิงข้ามมาตรา', description: 'ทดสอบ parent/child และ incorporation closure', dataset: 'ncb_credit_info_act', mode: 'citation_rag', question: 'การขอตรวจสอบหรือแก้ไขข้อมูลเครดิตของเจ้าของข้อมูลมีขั้นตอนและข้อจำกัดอย่างไร' },
+      { id: 'niti-shareholder', title: 'NitiBench · บริษัทจำกัด', description: 'ทดสอบ Milvus hybrid retrieval และ citation', dataset: 'nitibench', mode: 'citation_rag', question: 'ผู้ถือหุ้นของบริษัทจำกัดต้องรับผิดในหนี้ของบริษัทเพียงใด' },
+      { id: 'niti-contract', title: 'NitiBench · สัญญา', description: 'ทดสอบคำถามกฎหมายเอกชนคนละหัวข้อ', dataset: 'nitibench', mode: 'citation_rag', question: 'สัญญาบัญชีเดินสะพัดมีลักษณะและผลทางกฎหมายอย่างไร' },
+      { id: 'bot-scope', title: 'BOT · ขอบเขตการใช้บังคับ', description: 'ทดสอบผู้ให้บริการทางการเงินที่อยู่ในขอบเขตประกาศ', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'ประกาศธนาคารแห่งประเทศไทยเรื่องการบริหารจัดการภัยทุจริตดิจิทัลใช้บังคับกับผู้ให้บริการทางการเงินประเภทใดบ้าง' },
+      { id: 'bot-governance', title: 'BOT · นโยบายและกำกับดูแล', description: 'ทดสอบบทบาทคณะกรรมการและนโยบายเป็นลายลักษณ์อักษร', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'ผู้ให้บริการทางการเงินต้องกำหนดนโยบายและการกำกับดูแลการบริหารจัดการภัยทุจริตดิจิทัลอย่างไร' },
+      { id: 'bot-monitoring', title: 'BOT · Monitoring & detection', description: 'ทดสอบการติดตามและตรวจจับธุรกรรมผิดปกติ', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'ผู้ให้บริการทางการเงินต้องมีการติดตามและตรวจจับความผิดปกติจากการทำธุรกรรมทางการเงินอย่างไร' },
+      { id: 'bot-customer-response', title: 'BOT · ดูแลลูกค้า', description: 'ทดสอบกำหนดเวลาและการดูแลลูกค้าเมื่อเกิดเหตุ', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'เมื่อเกิดภัยทุจริตดิจิทัล ผู้ให้บริการทางการเงินต้องกำหนดระยะเวลากระบวนการและดูแลลูกค้าที่ได้รับผลกระทบอย่างไร' },
+      { id: 'bot-reporting', title: 'BOT · รายงาน ธปท.', description: 'ทดสอบหน้าที่จัดทำและจัดส่งรายงาน', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'ผู้ให้บริการทางการเงินต้องรายงานข้อมูลเกี่ยวกับการบริหารจัดการภัยทุจริตดิจิทัลต่อธนาคารแห่งประเทศไทยอย่างไร' },
+      { id: 'bot-appendix', title: 'BOT · ตารางเอกสารแนบ', description: 'ทดสอบ citation ของตารางแนวทางปรับใช้ตามประเภทธุรกิจ', dataset: 'bot_digital_fraud_management', mode: 'citation_rag', question: 'เอกสารแนบท้ายประกาศระบุแนวทางการนำหลักเกณฑ์การบริหารจัดการภัยทุจริตดิจิทัลไปปรับใช้ตามประเภทผู้ให้บริการทางการเงินไว้อย่างไร' },
+      { id: 'ncsa-public-cloud-impact-classification', title: 'NCSA · จัดระดับผลกระทบ', description: 'IT Audit ธนาคารไทย · ทดสอบหลักเกณฑ์ข้อมูล/ระบบบน public cloud', dataset: 'ncsa_cloud_security_framework', mode: 'citation_rag', question: 'หน่วยงานที่ใช้บริการคลาวด์สาธารณะต้องคำนึงถึงและดำเนินการตามหลักเกณฑ์ใดเกี่ยวกับข้อมูลหรือระบบสารสนเทศ' },
+      { id: 'ncsa-personal-data-minimum-classification', title: 'NCSA · ข้อมูลส่วนบุคคล', description: 'IT Audit ธนาคารไทย · ทดสอบระดับผลกระทบขั้นต่ำ', dataset: 'ncsa_cloud_security_framework', mode: 'citation_rag', question: 'หากข้อมูลที่ใช้บนคลาวด์สาธารณะเป็นข้อมูลส่วนบุคคล ต้องจัดระดับผลกระทบด้านการรักษาความลับอย่างน้อยระดับใด' },
+      { id: 'ncsa-shared-security-responsibilities', title: 'NCSA · แบ่งหน้าที่ความปลอดภัย', description: 'IT Audit ธนาคารไทย · ทดสอบ shared responsibility', dataset: 'ncsa_cloud_security_framework', mode: 'citation_rag', question: 'ผู้ใช้บริการคลาวด์และผู้ให้บริการคลาวด์ต้องตกลงและบันทึกการแบ่งบทบาทหน้าที่และความรับผิดชอบด้านความปลอดภัยสารสนเทศอย่างไร' },
+      { id: 'ncsa-documentary-security-evidence', title: 'NCSA · หลักฐานเอกสาร', description: 'IT Audit ธนาคารไทย · ทดสอบเอกสารมาตรการควบคุม', dataset: 'ncsa_cloud_security_framework', mode: 'citation_rag', question: 'ผู้ใช้บริการคลาวด์และผู้ให้บริการคลาวด์ต้องจัดหาหรือให้หลักฐานที่เป็นเอกสารเกี่ยวกับมาตรการควบคุมความปลอดภัยสารสนเทศอย่างไร' },
+      { id: 'ncsa-technical-vulnerability-management', title: 'NCSA · จัดการช่องโหว่', description: 'IT Audit ธนาคารไทย · ทดสอบหน้าที่ด้าน technical vulnerability', dataset: 'ncsa_cloud_security_framework', mode: 'citation_rag', question: 'ผู้ใช้บริการคลาวด์และผู้ให้บริการคลาวด์มีหน้าที่ใดเกี่ยวกับการจัดการช่องโหว่ทางเทคนิคที่อาจกระทบบริการคลาวด์' },
+      { id: 'all-union', title: 'รวมชุดข้อมูล · แยก source', description: 'ทดสอบ cross-corpus rerank โดยคงป้าย source', dataset: 'all_legal', mode: 'citation_rag', question: 'บริษัทข้อมูลเครดิตสามารถเปิดเผยข้อมูลเครดิตของเจ้าของข้อมูลได้ในกรณีใด' },
+      { id: 'all-abstention', title: 'รวมชุดข้อมูล · evidence gap', description: 'ทดสอบการงดตอบเมื่อคลังไม่มีหลักฐานเพียงพอ', dataset: 'all_legal', mode: 'citation_rag', question: 'พระราชบัญญัติคุ้มครองพันธุ์พืชกำหนดเงื่อนไขการขอสิทธิในพันธุ์พืชใหม่อย่างไร' }
+    ];
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+    const elapsed = ms => ms < 1000 ? `${Math.round(ms)} ms` : `${(ms/1000).toFixed(2)} s`;
+    const clip = (value, limit) => { const text=String(value ?? ''); return text.length>limit ? `${text.slice(0, limit)}…` : text; };
+    const chatId = () => (globalThis.crypto?.randomUUID?.() || `chat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
+    const chatDate = value => { try { return new Intl.DateTimeFormat('th-TH', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)); } catch (_) { return ''; } };
+    const datasetLabel = id => state.datasets.find(item=>item.id===id)?.short_label || id || 'ไม่ระบุชุดข้อมูล';
+    function compactEvidence(data){ return (data.evidence || []).slice(0, CHAT_HISTORY_MAX_EVIDENCE).filter(item=>item && typeof item==='object').map(item=>({ citation:item.citation, id:item.id, dataset:item.dataset, dataset_label:item.dataset_label, law_name:item.law_name, section:item.section, content:clip(item.content, CHAT_HISTORY_EVIDENCE_CHARS), source_url:item.source_url, score:item.score, page_start:item.page_start, page_end:item.page_end, origins:item.origins, hybrid_rank:item.hybrid_rank, cited:item.cited })); }
+    function compactAssistantMeta(data){ return { evidence:compactEvidence(data), citations:(data.citations || []).slice(0, CHAT_HISTORY_MAX_EVIDENCE), reasoning:clip(data.reasoning, 3000), usage:data.usage && typeof data.usage==='object' ? data.usage : {}, timing:data.timing && typeof data.timing==='object' ? data.timing : {}, review_notice:clip(data.review_notice, 1000), preliminary:Boolean(data.preliminary), dataset:data.dataset, dataset_label:data.dataset_label, route:data.route, mode:data.mode, finish_reason:data.finish_reason }; }
+    function activeChat(){ return state.localChats.find(chat=>chat.id===state.currentChatId) || null; }
+    function updateSessionLabel(){ const chat=activeChat(); $('sessionLabel').textContent=chat ? `ประวัติใน browser · ${clip(chat.title, 42)}` : 'New chat · browser history'; }
+    function historyPayload(){ return { version:1, currentChatId:state.currentChatId, chats:state.localChats.slice(0, CHAT_HISTORY_MAX_CHATS) }; }
+    function saveLocalChats(){
+      state.localChats.sort((left,right)=>String(right.updatedAt).localeCompare(String(left.updatedAt)));
+      state.localChats=state.localChats.slice(0, CHAT_HISTORY_MAX_CHATS);
+      while(state.localChats.length){
+        try { localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(historyPayload())); return; }
+        catch (_) { state.localChats.pop(); }
+      }
+      try { localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY); } catch (_) {}
+    }
+    function loadLocalChats(){
+      try {
+        const raw=JSON.parse(localStorage.getItem(CHAT_HISTORY_STORAGE_KEY) || '{}');
+        const chats=Array.isArray(raw.chats) ? raw.chats : [];
+        state.localChats=chats.filter(item=>item && typeof item.id==='string' && Array.isArray(item.messages)).map(item=>({
+          id:item.id, title:clip(item.title || 'แชตไม่มีชื่อ', 160), createdAt:item.createdAt || new Date().toISOString(), updatedAt:item.updatedAt || item.createdAt || new Date().toISOString(),
+          mode:profiles[item.mode] ? item.mode : 'citation_rag', dataset:typeof item.dataset==='string' ? item.dataset : 'nitibench', useRag:item.useRag !== false, topK:Math.max(1, Math.min(+item.topK || 8, 8)), backendSessionId:typeof item.backendSessionId==='string' ? item.backendSessionId : null,
+          messages:item.messages.filter(message=>message && (message.role==='user' || message.role==='assistant') && typeof message.content==='string').slice(-CHAT_HISTORY_MAX_MESSAGES).map(message=>({ role:message.role, content:clip(message.content, CHAT_HISTORY_ANSWER_CHARS), at:message.at || item.updatedAt, meta:message.meta && typeof message.meta==='object' ? message.meta : undefined, context:message.context && typeof message.context==='object' ? message.context : undefined }))
+        })).sort((left,right)=>String(right.updatedAt).localeCompare(String(left.updatedAt))).slice(0, CHAT_HISTORY_MAX_CHATS);
+        state.currentChatId=state.localChats.some(chat=>chat.id===raw.currentChatId) ? raw.currentChatId : null;
+      } catch (_) { state.localChats=[]; state.currentChatId=null; }
+      renderHistoryPanel(); updateSessionLabel();
+    }
+    function createLocalChat(firstQuestion=''){
+      const now=new Date().toISOString();
+      const chat={ id:chatId(), title:clip(firstQuestion || 'แชตใหม่', 160), createdAt:now, updatedAt:now, mode:$('mode').value, dataset:state.datasetId, useRag:$('rag').checked, topK:+$('topK').value || 8, backendSessionId:null, messages:[] };
+      state.localChats.unshift(chat); state.currentChatId=chat.id; state.sessionId=null; return chat;
+    }
+    function persistMessage(role, content, meta={}, context={}){
+      const chat=activeChat() || createLocalChat(role==='user' ? content : 'แชตใหม่');
+      const now=new Date().toISOString();
+      if(role==='user' && !chat.messages.length) chat.title=clip(content, 160);
+      chat.mode=context.mode || chat.mode || $('mode').value;
+      chat.dataset=context.dataset || chat.dataset || state.datasetId;
+      chat.useRag=context.useRag ?? chat.useRag;
+      chat.topK=context.topK || chat.topK || (+$('topK').value || 8);
+      chat.updatedAt=now;
+      chat.messages.push({ role, content:clip(content, CHAT_HISTORY_ANSWER_CHARS), at:now, meta:role==='assistant' ? compactAssistantMeta(meta) : undefined, context });
+      chat.messages=chat.messages.slice(-CHAT_HISTORY_MAX_MESSAGES);
+      state.history=chat.messages.map(item=>({role:item.role, content:item.content}));
+      saveLocalChats(); renderHistoryPanel(); updateSessionLabel();
+    }
+    function renderHistoryPanel(){
+      const list=$('historyList');
+      if(!state.localChats.length){ list.innerHTML='<p class="history-empty">ยังไม่มีประวัติใน browser นี้</p>'; return; }
+      list.innerHTML=state.localChats.map(chat=>`<button type="button" class="history-item ${chat.id===state.currentChatId?'active':''}" data-chat-id="${escapeHtml(chat.id)}"><b>${escapeHtml(chat.title)}</b><span>${escapeHtml(datasetLabel(chat.dataset))} · ${escapeHtml(chat.mode || 'citation_rag')} · ${chat.messages.length} ข้อความ</span><span>${escapeHtml(chatDate(chat.updatedAt))}</span></button>`).join('');
+      list.querySelectorAll('[data-chat-id]').forEach(button=>button.addEventListener('click',()=>activateLocalChat(button.dataset.chatId)));
+    }
+    function activateLocalChat(id){
+      const chat=state.localChats.find(item=>item.id===id); if(!chat) return;
+      state.currentChatId=chat.id; state.sessionId=chat.backendSessionId || null; state.history=chat.messages.map(item=>({role:item.role,content:item.content}));
+      if(state.datasets.some(item=>item.id===chat.dataset)) chooseDataset(chat.dataset);
+      if(profiles[chat.mode]) { $('mode').value=chat.mode; applyMode(); }
+      if($('mode').value!=='closed_book') $('rag').checked=chat.useRag !== false;
+      $('topK').value=Math.max(1, Math.min(+chat.topK || 8, 8));
+      emptyChat(); chat.messages.forEach(item=>message(item.role,item.content,item.meta || {}));
+      saveLocalChats(); renderHistoryPanel(); updateSessionLabel(); $('question').focus();
+    }
+    function newLocalChat(){ state.currentChatId=null; state.sessionId=null; state.history=[]; emptyChat(); renderHistoryPanel(); updateSessionLabel(); $('question').focus(); }
+    function clearLocalChats(){
+      if(!state.localChats.length || !window.confirm('ลบประวัติแชตทั้งหมดที่เก็บใน browser นี้หรือไม่?')) return;
+      state.localChats=[]; state.currentChatId=null; state.sessionId=null; state.history=[];
+      try { localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY); } catch (_) {}
+      emptyChat(); renderHistoryPanel(); updateSessionLabel();
+    }
+    function applyUseCase(item){
+      if(state.datasets.some(dataset=>dataset.id===item.dataset)) chooseDataset(item.dataset);
+      $('mode').value=item.mode; applyMode(); $('rag').checked=true; $('question').value=item.question; closeUseCaseModal(); $('question').focus();
+    }
+    function useCasesForSelectedDataset(){ return USE_CASES.filter(item=>item.dataset===state.datasetId); }
+    function renderUseCases(){
+      const matching=useCasesForSelectedDataset(); const dataset=selectedDataset(); const list=$('modalUseCaseList');
+      $('useCaseCount').textContent=matching.length?`(${matching.length})`:'';
+      $('openUseCases').disabled=!matching.length;
+      $('useCaseModalTitle').textContent=`Use cases · ${dataset?.short_label || 'ชุดข้อมูล'}`;
+      $('useCaseModalDescription').textContent=dataset ? `โจทย์ Citation RAG สำหรับ ${dataset.short_label} เท่านั้น · เลือกแล้วจะนำคำถามไปใส่ในช่องแชต` : 'กำลังโหลดชุดข้อมูล…';
+      list.innerHTML=matching.length ? matching.map(item=>`<button type="button" class="usecase" data-use-case="${escapeHtml(item.id)}"><b>${escapeHtml(item.title)}</b><span>${escapeHtml(item.description)}</span></button>`).join('') : '<p class="modal-usecase-empty">ยังไม่มี Use case สำหรับชุดข้อมูลนี้</p>';
+      list.querySelectorAll('[data-use-case]').forEach(button=>button.addEventListener('click',()=>{ const item=matching.find(test=>test.id===button.dataset.useCase); if(item) applyUseCase(item); }));
+    }
+    function openUseCaseModal(){ const modal=$('useCaseModal'); renderUseCases(); if(!modal.open) modal.showModal(); }
+    function closeUseCaseModal(){ const modal=$('useCaseModal'); if(modal?.open) modal.close(); }
+    async function api(path, body, method='POST') { const res = await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body ? JSON.stringify(body):undefined}); const data=await res.json(); if(!res.ok) throw new Error(data.error || `HTTP ${res.status}`); return data; }
+    function scrollChat(){ const chat=$('chat'); chat.scrollTop=chat.scrollHeight; }
+    function message(role, content, meta={}) { const empty=$('chat').querySelector('.empty'); if(empty) empty.remove(); const el=document.createElement('article'); el.className=`message ${role}`; let extras=''; if(meta.reasoning) extras+=`<details class="thinking"><summary>Reasoning</summary>${escapeHtml(meta.reasoning)}</details>`; if(meta.review_notice) extras+=`<div class="notice mt-2.5">${escapeHtml(meta.review_notice)}</div>`; if(meta.timing){ const u=meta.usage||{}; const r=meta.timing; extras+=`<div class="metrics"><span class="metric">candidate ${r.candidate_count ?? 0} → rerank ${r.selected_count ?? 0} → answer ${r.answer_evidence_count ?? r.selected_count ?? 0}</span><span class="metric">รวม ${elapsed(r.total_ms)}</span><span class="metric">output ${u.completion_tokens ?? '–'} tok</span></div>`; } el.innerHTML=`<div class="label">${role==='user'?'คุณ':escapeHtml(state.modelName)}</div><div class="bubble">${escapeHtml(content)}</div>${extras}`; $('chat').append(el); scrollChat(); }
+    function loading(on){ $('send').disabled=on; $('loader').classList.toggle('show',on); if(on){ state.started=performance.now(); state.timer=setInterval(()=> $('loadingText').textContent=`กำลัง${$('rag').checked?'ค้นหลักฐานและ':''}ประมวลผล… ${((performance.now()-state.started)/1000).toFixed(1)} วินาที`,100); } else { clearInterval(state.timer); } }
+    function setSession(session){ state.sessionId=session?.id || null; const chat=activeChat(); if(chat){ chat.backendSessionId=state.sessionId; chat.updatedAt=new Date().toISOString(); saveLocalChats(); } updateSessionLabel(); }
+    function emptyChat(){ $('chat').innerHTML='<div class="empty"><div style="font-size:42px">⚖️</div><h2>บทสนทนา</h2><p>เลือกชุดข้อมูล แล้วส่งคำถามจากคอลัมน์ซ้าย</p><div class="chips"><span>Open-book selection</span><span>Closed-book</span><span>Legal essay</span><span>RAG evaluation</span></div></div>'; }
+    async function send(){
+      const question=$('question').value.trim(); if(!question || $('send').disabled) return;
+      const context={ dataset:state.datasetId, mode:$('mode').value, useRag:$('rag').checked, topK:+$('topK').value };
+      if(!activeChat()) createLocalChat(question);
+      $('question').value=''; message('user',question); persistMessage('user',question,{},context); loading(true);
+      try {
+        const payload={question,session_id:state.sessionId,mode:context.mode,use_rag:context.useRag,top_k:context.topK};
+        if(payload.mode==='citation_rag' && payload.use_rag) payload.dataset=context.dataset;
+        const data=await api('/api/chat',payload);
+        if(data.session) setSession(data.session);
+        const answer=data.answer || 'โมเดลไม่ส่งข้อความตอบกลับ'; message('assistant',answer,data); persistMessage('assistant',answer,data,context);
+      } catch(err){ const answer=`เกิดข้อผิดพลาด: ${err.message}`; const failure={review_notice:'บันทึกข้อความผิดพลาดไว้ในประวัติ แต่ไม่มีหลักฐานหรือผลการประมวลผล'}; message('assistant',answer); persistMessage('assistant',answer,failure,context); }
+      finally { loading(false); }
+    }
+    async function health(){ const badge=$('status'); try { const data=await api('/api/health',null,'GET'); state.modelName=data.model || data.models?.[0] || 'Legal model'; badge.classList.toggle('ready',data.ok); badge.querySelector('span').textContent=data.ok?`${state.modelName} พร้อม · ${data.vector_backend}/${data.retrieval_profile}`:`${state.modelName} ยังไม่พร้อม`; } catch(_) { badge.querySelector('span').textContent='เชื่อมโมเดลหรือคลังข้อมูลไม่ได้'; } }
+    function selectedDataset(){ return state.datasets.find(item=>item.id===state.datasetId); }
+    function selectedTableDataset(){ return state.datasets.find(item=>item.id===state.table.dataset); }
+    function refreshDatasetUI(){ const item=selectedDataset(); if(!item) return; const ncsaAuditRole=item.id==='ncsa_cloud_security_framework'?' · system prompt: IT Audit ธนาคารในประเทศไทย':''; $('searchDataset').value=item.id; $('chatDataset').value=item.id; $('searchHint').textContent=`${item.short_label} · ${item.chunk_count.toLocaleString()} chunks · ${item.page_anchored===true?'มี page index':item.page_anchored==='partial'?'page index เฉพาะ NCB':'ไม่มี page index ใน source นี้'}${ncsaAuditRole}`; $('searchRoute').textContent=item.retrieval_route; $('datasetSummary').textContent=item.description+' Route: '+item.retrieval_route; renderUseCases(); applyMode(); }
+    function refreshTableDatasetUI(){ const item=selectedTableDataset(); if(!item) return; $('dataDataset').value=item.id; $('dataRoute').textContent=item.retrieval_route; }
+    function chooseDataset(value){ if(!state.datasets.some(item=>item.id===value)) return; state.datasetId=value; refreshDatasetUI(); }
+    function chooseTableDataset(value){ if(!state.datasets.some(item=>item.id===value)) return; state.table.dataset=value; state.table.page=1; refreshTableDatasetUI(); if(state.activeTab==='data') loadDatasetTable(); }
+    async function initDatasets(){
+      try {
+        const data=await api('/api/datasets',null,'GET'); state.datasets=data.items||[];
+        state.datasetId=state.datasets.some(item=>item.id===data.default)?data.default:(state.datasets[0]?.id||'nitibench'); state.table.dataset=state.datasetId;
+        for(const id of ['searchDataset','chatDataset']){ const select=$(id); select.innerHTML=state.datasets.map(item=>`<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join(''); select.addEventListener('change',event=>chooseDataset(event.target.value)); }
+        const tableSelect=$('dataDataset'); tableSelect.innerHTML=state.datasets.map(item=>`<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join(''); tableSelect.addEventListener('change',event=>chooseTableDataset(event.target.value));
+        refreshDatasetUI(); refreshTableDatasetUI(); if(state.activeTab==='data') loadDatasetTable();
+      } catch(err) { $('searchRoute').textContent=`โหลดชุดข้อมูลไม่สำเร็จ: ${err.message}`; $('dataRoute').textContent=`โหลดชุดข้อมูลไม่สำเร็จ: ${err.message}`; }
+      loadLocalChats();
+      if(state.currentChatId) activateLocalChat(state.currentChatId);
+    }
+    function applyMode(){ const p=profiles[$('mode').value] || profiles.citation_rag; const isNcsa=selectedDataset()?.id==='ncsa_cloud_security_framework'; $('temperature').value=p.temperature; $('maxTokens').value=p.maxTokens; $('thinking').checked=p.thinking; $('rag').checked=p.rag; $('rag').disabled=$('mode').value==='closed_book'; $('profileHint').textContent=$('mode').value==='citation_rag' ? `Citation RAG ใช้ชุดข้อมูลที่เลือกและคืนหลักฐาน/แหล่งที่มา; คำตอบเป็น preliminary/unreviewed${isNcsa?' · NCSA ใช้ system prompt บทบาท IT Audit สำหรับธนาคารในประเทศไทย และจะระบุ evidence gap เมื่อหลักฐานไม่พอ':''}` : p.hint+' (ชุดข้อมูลที่เลือกจะใช้ใน Citation RAG)'; }
+    $('send').addEventListener('click',send); $('newChat').addEventListener('click',newLocalChat); $('historyClear').addEventListener('click',clearLocalChats); $('question').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+    $('mode').addEventListener('change',applyMode);
+    $('openUseCases').addEventListener('click',openUseCaseModal);
+    $('closeUseCases').addEventListener('click',closeUseCaseModal);
+    $('useCaseModal').addEventListener('click',event=>{ if(event.target===$('useCaseModal')) closeUseCaseModal(); });
+    const rightAccordions=[...document.querySelectorAll('[data-right-accordion]')];
+    rightAccordions.forEach(panel=>panel.addEventListener('toggle',()=>{ if(panel.open) rightAccordions.filter(other=>other!==panel).forEach(other=>{ other.open=false; }); }));
+    applyMode(); initDatasets(); health(); setInterval(health,30000);
+
+    function showTab(name){
+      state.activeTab=name;
+      const isSearch=name==='search', isData=name==='data', isBenchmark=name==='benchmark';
+      $('tabSearch').classList.toggle('active',isSearch);
+      $('tabData').classList.toggle('active',isData);
+      $('tabBenchmark').classList.toggle('active',isBenchmark);
+      $('tabChat').classList.toggle('active',!isSearch&&!isData&&!isBenchmark);
+      $('searchView').style.display=isSearch?'':'none';
+      $('dataView').style.display=isData?'':'none';
+      $('benchmarkView').style.display=isBenchmark?'':'none';
+      $('chatView').style.display=!isSearch&&!isData&&!isBenchmark?'':'none';
+      if(isSearch) $('searchQuestion').focus();
+      if(isData){ $('dataFilter').focus(); if(state.datasets.length) loadDatasetTable(); }
+      if(isBenchmark) loadBenchmark();
+    }
+    $('tabChat').addEventListener('click',()=>showTab('chat'));
+    $('tabSearch').addEventListener('click',()=>showTab('search'));
+    $('tabData').addEventListener('click',()=>showTab('data'));
+    $('tabBenchmark').addEventListener('click',()=>showTab('benchmark'));
+
+    function searchLoading(on){ $('searchBtn').disabled=on; $('searchLoader').classList.toggle('show',on); if(on){ const started=performance.now(); state.searchTimer=setInterval(()=> $('searchLoadingText').textContent=`กำลังค้นและประมวลผล… ${((performance.now()-started)/1000).toFixed(1)} วินาที`,100); } else { clearInterval(state.searchTimer); } }
+    function renderResults(data){
+      const box=$('searchResults');
+      if(!data.ranked_sections?.length){ box.innerHTML='<div class="empty"><p>ไม่พบมาตราที่เกี่ยวข้อง</p></div>'; return; }
+      box.innerHTML=data.ranked_sections.map(r=>{ const source=r.dataset_label||r.dataset||data.dataset_label||''; const citationLabel=r.citation_label||'มาตรา'; const pages=r.page_start?` · pp.${r.page_start}-${r.page_end}`:''; const sourceLink=/^https?:\/\//.test(r.source_url||'')?` <a href="${escapeHtml(r.source_url)}" target="_blank" rel="noopener">source ↗</a>`:''; const parent=r.parent_heading?`<div class="text-[11px] text-muted mt-1">child of ${escapeHtml(r.parent_heading)}${r.parent_section?` · ${escapeHtml(r.parent_node_type||'parent')} ${escapeHtml(r.parent_section)}`:''}</div>`:''; return `<div class="result-card ${r.cited?'cited':''}"><div class="result-head"><strong>${escapeHtml(r.law_name)} · ${escapeHtml(citationLabel)} ${escapeHtml(r.section_num)}${escapeHtml(pages)}</strong><div class="result-tags">${r.cited?'<span class="pill cited-pill">โมเดลอ้างอิง</span>':''}<span class="pill">${escapeHtml(source)}</span><span class="pill">hybrid rank ${r.hybrid_rank}</span><span class="pill">rerank score ${r.rerank_score}</span></div></div>${parent}<p>${escapeHtml(r.content.slice(0,480))}${r.content.length>480?'…':''}${sourceLink}</p></div>`; }).join('');
+      const answerBox=$('searchAnswerBox');
+      if(data.answer){ answerBox.classList.remove('hidden'); $('searchAnswer').textContent=data.answer + (data.citations?.length?`\n\nอ้างอิง: ${data.citations.map(c=>`${c.dataset?`[${c.dataset}] `:''}${c.law||'กฎหมาย'} ${c.citation_label||'มาตรา'} ${c.section}${c.pages?` หน้า ${c.pages}`:''}${c.grounded===false?' (ไม่พบในหลักฐานที่ส่งให้โมเดล)':''}`).join('; ')}`:''); $('searchReview').textContent=data.preliminary?'· preliminary / unreviewed':''; const t=data.timing||{}; const u=data.usage||{}; const retrieval=Object.entries(t).filter(([key])=>key.endsWith('_seconds')&&!['answer_seconds','total_seconds'].includes(key)).reduce((sum,[,value])=>sum+(+value||0),0); $('searchMeta').innerHTML=`<span class="metric">ค้นหลักฐาน ${elapsed(retrieval*1000)}</span><span class="metric">rerank ${elapsed(((t.cross_encoder_rerank_seconds||t.cross_corpus_rerank_seconds||0))*1000)}</span><span class="metric">คำตอบ ${elapsed((t.answer_seconds||0)*1000)}</span><span class="metric">รวม ${elapsed((t.total_seconds||0)*1000)}</span><span class="metric">JSON ${data.json_valid?'valid':'invalid'}</span><span class="metric">tokens ${u.total_tokens ?? '–'}</span>`; }
+      else { answerBox.classList.add('hidden'); }
+    }
+    async function doSearch(){ const query=$('searchQuestion').value.trim(); if(!query || $('searchBtn').disabled) return; searchLoading(true); try{ const data=await api('/api/search',{query,dataset:state.datasetId,top_k:+$('topK').value}); renderResults(data); } catch(err){ $('searchResults').innerHTML=`<div class="empty"><p>เกิดข้อผิดพลาด: ${escapeHtml(err.message)}</p></div>`; $('searchAnswerBox').classList.add('hidden'); } finally { searchLoading(false); } }
+    $('searchBtn').addEventListener('click',doSearch);
+    $('searchQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSearch();}});
+
+    function tableLoading(on){ state.table.loading=on; $('dataReload').disabled=on; if(on){ $('dataPrev').disabled=true; $('dataNext').disabled=true; $('dataMeta').textContent='กำลังโหลดแถวจาก corpus…'; } }
+    function pageText(data){ return `แสดง ${data.total ? ((data.page-1)*data.page_size)+1 : 0}–${Math.min(data.page*data.page_size,data.total)} จาก ${data.total.toLocaleString()} แถว · หน้า ${data.page}/${data.page_count}`; }
+    function dataContentCell(content){ const preview=String(content||'').replace(/\s+/g,' ').trim(); const short=preview.slice(0,220)+(preview.length>220?'…':''); return `<details><summary>${escapeHtml(short||'—')}</summary><div>${escapeHtml(content||'')}</div></details>`; }
+    function dataSourceCell(row){ const source=/^https:\/\//.test(row.source_url||'') ? `<a class="source-link" href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">เปิด source ↗</a>` : '—'; return `${source}<div class="text-[10px] text-muted mt-1">${escapeHtml(row.provenance||'')}</div>`; }
+    function renderDatasetTable(data){ const body=$('dataTableBody'); if(!data.records?.length){ body.innerHTML='<tr><td colspan="9" class="text-center text-muted py-12">ไม่พบแถวที่ตรงกับตัวกรอง</td></tr>'; } else { body.innerHTML=data.records.map(row=>{ const parent=row.parent_label||row.parent_id||'—'; const structure=[row.node_label||row.node_type||'—',row.requirement_anchor].filter(Boolean).join(' · '); const pages=row.page_start?`pp.${row.page_start}-${row.page_end}`:'—'; const source=`<span class="pill">${escapeHtml(row.dataset_label||row.dataset||'')}</span>`; const path=(row.structural_path||[]).slice(-2).join(' › '); const parentRelation=row.parent_id?`${row.parent_relation==='child_of'?'child of':'parent'} · `:''; return `<tr><td>${source}</td><td class="law-cell">${escapeHtml(row.law_name)}${path?`<div class="text-[10px] text-muted mt-1">${escapeHtml(path)}</div>`:''}</td><td><strong>${escapeHtml(row.section)}</strong></td><td>${escapeHtml(structure)}</td><td>${escapeHtml(parentRelation)}${escapeHtml(parent)}<div class="text-[10px] text-muted mt-1 break-all">${escapeHtml(row.parent_id||'')}</div></td><td class="whitespace-nowrap">${escapeHtml(pages)}</td><td>${escapeHtml(row.topic||'—')}</td><td class="content-cell">${dataContentCell(row.content)}</td><td>${dataSourceCell(row)}</td></tr>`; }).join(''); }
+      $('dataMeta').textContent=`${data.dataset_label} · ${pageText(data)}`;
+      $('dataSafety').textContent=data.safety_note;
+      $('dataPageLabel').textContent=pageText(data);
+      $('dataPrev').disabled=state.table.loading||data.page<=1;
+      $('dataNext').disabled=state.table.loading||data.page>=data.page_count;
+    }
+    async function loadDatasetTable(){ if(state.table.loading || !state.table.dataset) return; tableLoading(true); try { const params=new URLSearchParams({page:String(state.table.page),page_size:String(state.table.pageSize)}); if(state.table.query) params.set('q',state.table.query); const data=await api(`/api/datasets/${encodeURIComponent(state.table.dataset)}/records?${params.toString()}`,null,'GET'); state.table.page=data.page; renderDatasetTable(data); } catch(err) { $('dataTableBody').innerHTML=`<tr><td colspan="9" class="text-center text-red-700 py-12">โหลดตารางไม่สำเร็จ: ${escapeHtml(err.message)}</td></tr>`; $('dataMeta').textContent='เกิดข้อผิดพลาด'; } finally { tableLoading(false); } }
+    $('dataReload').addEventListener('click',()=>loadDatasetTable());
+    $('dataPageSize').addEventListener('change',event=>{ state.table.pageSize=+event.target.value||50; state.table.page=1; loadDatasetTable(); });
+    $('dataFilter').addEventListener('input',event=>{ state.table.query=event.target.value.trim(); state.table.page=1; clearTimeout(state.table.timer); state.table.timer=setTimeout(loadDatasetTable,260); });
+    $('dataFilter').addEventListener('keydown',event=>{ if(event.key==='Enter'){ event.preventDefault(); clearTimeout(state.table.timer); loadDatasetTable(); } });
+    $('dataPrev').addEventListener('click',()=>{ if(state.table.page>1){ state.table.page-=1; loadDatasetTable(); } });
+    $('dataNext').addEventListener('click',()=>{ state.table.page+=1; loadDatasetTable(); });
+
+    function benchmarkValue(value, digits=2){ const number=Number(value); return Number.isFinite(number) ? number.toFixed(digits) : '–'; }
+    function comparisonVerdict(verdict){ return ({pass:'ผ่าน',partial:'ต้องทบทวนบางส่วน',needs_correction:'ต้องแก้ไข',evidence_limited:'หลักฐานที่ retrieve ไม่พอ'}[verdict] || 'ยังไม่ตรวจ'); }
+    function comparisonCitations(model){
+      if(!model.citations?.length) return '<span class="text-muted">ไม่มี citation</span>';
+      return model.citations.map(citation=>{ const pages=citation.page_start ? `หน้า ${citation.page_start}${citation.page_end&&citation.page_end!==citation.page_start?`–${citation.page_end}`:''}`:''; return `<span class="pill ${citation.grounded?'cited-pill':''}">${escapeHtml([citation.section ? `ข้อ/มาตรา ${citation.section}`:'',pages].filter(Boolean).join(' · '))}</span>`; }).join(' ');
+    }
+    function answerPreview(answer){ const text=String(answer||'').trim(); return text.length>520 ? `${text.slice(0,520)}…` : text || '—'; }
+    function comparisonAnswerCell(model){
+      const timing=model.answer_seconds===undefined ? '–' : `${benchmarkValue(model.answer_seconds,4)} s`;
+      return `<section class="benchmark-model-cell wide-answer-cell"><div class="benchmark-model-name">${escapeHtml(model.label || 'โมเดล')}</div><div class="result-tags"><span class="pill">recall ${benchmarkValue(model.expected_citation_recall)}</span><span class="pill">precision ${benchmarkValue(model.citation_precision)}</span><span class="pill">JSON ${model.json_valid?'valid':'invalid'}</span></div><p class="benchmark-answer">${escapeHtml(answerPreview(model.answer))}</p><details><summary>คำตอบเต็ม · citation · ${escapeHtml(timing)}</summary><p class="benchmark-answer !min-h-0">${escapeHtml(model.answer || '—')}</p><div class="result-tags mt-2">${comparisonCitations(model)}</div><p class="text-[10px] text-muted mt-2 mb-0">grounded ${model.all_citations_grounded?'ครบ':'ไม่ครบ'} · ${escapeHtml(model.finish_reason || '–')}</p></details></section>`;
+    }
+    function comparisonRetrievalCell(caseItem){
+      const retrieval=caseItem.retrieval||{};
+      const review=caseItem.sol_review||{};
+      const rows=(retrieval.evidence||[]).map(item=>{ const pages=item.page_start?`หน้า ${item.page_start}${item.page_end&&item.page_end!==item.page_start?`–${item.page_end}`:''}`:'–'; return `<li><strong>#${escapeHtml(item.hybrid_rank ?? '–')} · ${escapeHtml(item.section)}</strong> · ${escapeHtml(item.parent_heading||'–')} · ${escapeHtml(pages)}</li>`; }).join('');
+      const truncated=(retrieval.truncated_sections||[]).length ? (retrieval.truncated_sections||[]).join(', ') : 'ไม่มี';
+      return `<section class="wide-difference-cell wide-retrieval-cell"><div class="benchmark-model-name">ผลต่าง retrieval</div><div class="result-tags"><span class="pill cited-pill">top‑8 เดียวกัน</span><span class="pill">ctx ${escapeHtml(retrieval.generation_evidence_chars ?? '–')} chars</span></div><p>${escapeHtml(review.retrieval_difference || 'ยังไม่มี review')}</p><details><summary>ดู top‑8 ที่ส่งให้ทั้งสองโมเดล</summary><ol class="wide-retrieval-list">${rows}</ol><p class="text-[10px] text-muted mt-2 mb-0">method: ${escapeHtml(caseItem.evidence_method||'–')} · truncated: ${escapeHtml(truncated)}</p></details></section>`;
+    }
+    function comparisonReviewCell(caseItem){
+      const review=caseItem.sol_review||{};
+      const expected=(caseItem.post_inference_scorer?.expected_sections||[]).join(', ');
+      const spotlight=caseItem.id==='ncb-unlawful-disclosure-penalty' ? '<div class="wide-review-question">ประเด็นชวนทบทวน: คำว่า “มีโทษอย่างไร” ครอบคลุมมาตรา 51 หรือไม่ ต้องเทียบข้อเท็จจริงกับองค์ประกอบของมาตรา 41 และ 51 แยกกัน</div>' : '';
+      return `<section class="wide-difference-cell wide-review-cell"><div class="benchmark-model-name">ผลต่างคำตอบ · GPT‑5.6 Sol</div><div class="result-tags"><span class="pill">Qwen: ${escapeHtml(comparisonVerdict(review.qwen_verdict))}</span><span class="pill">BF16: ${escapeHtml(comparisonVerdict(review.bf16_verdict))}</span>${expected?`<span class="pill">expected หลัง inference: ${escapeHtml(expected)}</span>`:''}</div><p>${escapeHtml(review.answer_difference || 'ยังไม่มี review')}</p>${spotlight}<p class="text-[10px] text-muted mt-2 mb-0">${escapeHtml(caseItem.post_inference_scorer?.note || '')}</p></section>`;
+    }
+    function renderBenchmark(){
+      const data=state.benchmark.data;
+      if(!data) return;
+      const select=$('benchmarkDataset');
+      const current=state.benchmark.dataset;
+      select.innerHTML=(data.datasets||[]).map(dataset=>`<option value="${escapeHtml(dataset.id)}">${escapeHtml(dataset.label)}</option>`).join('');
+      const dataset=(data.datasets||[]).find(item=>item.id===current) || data.datasets?.[0];
+      if(!dataset){ $('benchmarkCaseList').innerHTML='<div class="text-center text-muted py-12">ไม่พบผลทดสอบ</div>'; return; }
+      state.benchmark.dataset=dataset.id; select.value=dataset.id;
+      const cases=dataset.cases||[];
+      const qwenPass=cases.filter(item=>item.sol_review?.qwen_verdict==='pass').length;
+      const bf16Pass=cases.filter(item=>item.sol_review?.bf16_verdict==='pass').length;
+      const sameEvidence=cases.filter(item=>item.retrieval?.same_top8_order).length;
+      $('benchmarkSummary').innerHTML=`<span class="metric">shared top‑8 ${sameEvidence}/${cases.length}</span><span class="metric">Qwen pass ${qwenPass}/${cases.length}</span><span class="metric">BF16 pass ${bf16Pass}/${cases.length}</span><span class="metric">shared generation ${escapeHtml(data.comparison_control?.generation || '–')}</span>`;
+      $('benchmarkNotice').textContent=`ผลจาก immutable artifact ที่บันทึกไว้ ไม่ได้ rerun retrieval หรือโมเดลเมื่อเปิดหน้าเว็บ. ${data.reviewer||'GPT-5.6 Sol'} ตรวจความต่างของคำตอบตามหลักฐานที่ส่งจริง แต่ไม่ใช่ความเห็นหรือคำวินิจฉัยจากผู้เชี่ยวชาญกฎหมายไทย. ${data.review_scope||''}`;
+      $('benchmarkMeta').textContent=`${dataset.label} · ${cases.length} คำถาม · top‑k ${data.comparison_control?.top_k ?? '–'} · reviewed ${data.reviewed_at || '–'}`;
+      $('benchmarkCaseList').innerHTML=cases.map((item,index)=>`<article class="benchmark-case ${item.id==='ncb-unlawful-disclosure-penalty'?'wide-case-spotlight':''}"><header><span class="benchmark-case-number">ข้อ ${index+1}</span><h3>${escapeHtml(item.question)}</h3></header><div class="wide-comparison-grid">${comparisonAnswerCell(item.models?.qwen_q5||{})}${comparisonAnswerCell(item.models?.openthai_bf16||{})}${comparisonRetrievalCell(item)}${comparisonReviewCell(item)}</div></article>`).join('');
+    }
+    async function loadBenchmark(force=false){
+      if(state.benchmark.loading || (state.benchmark.data && !force)){ renderBenchmark(); return; }
+      state.benchmark.loading=true; $('benchmarkReload').disabled=true; $('benchmarkMeta').textContent='กำลังโหลด controlled-comparison artifact…';
+      try { state.benchmark.data=await api('/api/wide-context-comparison',null,'GET'); renderBenchmark(); }
+      catch(err) { $('benchmarkCaseList').innerHTML=`<div class="text-center text-red-700 py-12">โหลดผลทดสอบไม่สำเร็จ: ${escapeHtml(err.message)}</div>`; $('benchmarkMeta').textContent='เกิดข้อผิดพลาด'; }
+      finally { state.benchmark.loading=false; $('benchmarkReload').disabled=false; }
+    }
+    $('benchmarkDataset').addEventListener('change',event=>{ state.benchmark.dataset=event.target.value; renderBenchmark(); });
+    $('benchmarkReload').addEventListener('click',()=>loadBenchmark(true));
+  </script>
+</body>
+</html>

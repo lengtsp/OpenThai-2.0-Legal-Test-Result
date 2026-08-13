@@ -1,0 +1,18 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Runtime-only RAG material
+web/rag_webui_8083/data/
+web/rag_webui_8083/runs/
+web/rag_webui_8083/logs/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# Python cache and local editor files
+__pycache__/
+*.py[cod]
+.DS_Store
