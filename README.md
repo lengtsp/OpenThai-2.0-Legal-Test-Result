@@ -1,6 +1,6 @@
 # OpenThai 2.0 Legal × Qwen3.6: Thai RAG test
 
-นี่คือบันทึกสั้น ๆ ของการลองให้ **Qwen3.6-35B-A3B Q5** และ **OpenThai 2.0 Legal BF16**
+นี่คือบันทึกการทดลองให้ **Qwen3.6-35B-A3B Q5** และ **OpenThai 2.0 Legal BF16**
 ตอบคำถามจากหลักฐานกฎหมายภาษาไทยชุดเดียวกัน รวม 15 คำถามจาก NitiBench, NCB และ
 Digital Fraud อย่างละ 5 ข้อ
 
