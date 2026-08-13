@@ -64,11 +64,15 @@ The expected recall/precision diagnostics are post-inference only. They do not e
 
 Qwen did **not** receive additional retrieved evidence in either difference below.  For each
 case, the prompt messages and ordered top-8 rows were identical between BF16 and Qwen.
+The scorer's expected section for the penalty case is independently set to 51 after inference.
+Codex Sol's separate reading is that 51 is material to answering the word “penalty” directly,
+whereas 41 describes civil compensation; this is a preliminary model review, not legal-expert
+adjudication.
 
 | Case | Shared top-8 sections | BF16 result | Qwen result | Evidence-based conclusion |
 |---|---|---|---|---|
 | correction deadline | `26, 19, 25, 17, 48, 20, 3, 27` | “within 30 days from request” / cite 26 | company or member must notify the examination/correction result with reasons within 30 days / cite 26 | Section 26 alone supplies all material detail. Qwen retains actor, action, reason, and timing; it did not get extra context. |
-| unlawful-disclosure penalty | `41, 17, 3, 51, 61, 20, 24, 22` | civil damages / cite 41 | civil damages under 41 plus imprisonment up to 3 years, fine up to 300,000 baht, or both under 51 / cite 41, 51 | Both 41 and 51 were already supplied. Qwen is broader but grounded; BF16 omits the criminal penalty requested by the question. |
+| unlawful-disclosure penalty | `41, 17, 3, 51, 61, 20, 24, 22` | civil damages / cite 41 | civil damages under 41 plus imprisonment up to 3 years, fine up to 300,000 baht, or both under 51 / cite 41, 51 | Both 41 and 51 were already supplied. Qwen is broader but grounded; BF16 does not state the criminal sanction that the scorer expects for the wording of this test question. |
 
 ## Practical use and caution
 
