@@ -2,18 +2,99 @@
 
 การทดสอบแบบตรวจย้อนกลับได้ของ
 [OpenThai 2.0 Legal](https://huggingface.co/iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b)
-กับ RAG เอกสารภาษาไทย เปรียบเทียบผลที่บันทึกไว้ของ 3 runtime
+กับ RAG เอกสารภาษาไทย เปรียบเทียบผลที่บันทึกไว้ของ 2 runtime ในรอบล่าสุด
 
 | Model / runtime | รูปแบบรัน |
 |---|---|
-| OpenThai 2.0 Legal · Ollama Q4 | quantized Q4 ผ่าน Ollama |
 | OpenThai 2.0 Legal · vLLM BF16 | local safetensors BF16 ผ่าน vLLM 0.25.1 |
 | Qwen3.6-35B-A3B · llama.cpp Q5 | quantized Q5 ผ่าน llama.cpp |
 
 > ผลทั้งหมดเป็น **preliminary / unreviewed** ไม่ใช่คำแนะนำหรือคำวินิจฉัยทางกฎหมาย
 > การนำไปใช้จริงต้องให้ผู้เชี่ยวชาญกฎหมายไทยตรวจตัวบทฉบับปัจจุบัน ข้อเท็จจริง และข้อยกเว้น
 
-## Latest: official parent-explicit test — 13 August 2026
+## Latest: wide-context comparison — 13 August 2026
+
+รอบล่าสุดเปรียบเทียบเฉพาะ **OpenThai 2.0 Legal vLLM BF16** และ
+**Qwen3.6-35B-A3B llama.cpp Q5** บนคำถามคงที่ 15 ข้อ (NitiBench, NCB และ
+Digital Fraud อย่างละ 5 ข้อ) ด้วย input ชุดเดียวกันอย่างตรวจย้อนกลับได้
+
+- OpenThai Ollama Q4 ถูกถอดออกจาก Ollama ตามคำสั่งผู้ใช้ และ **ไม่ถูกนำมาเทียบในตารางนี้**
+  รวมทั้งไม่ใช้ผลเก่ามาปะปนกับรอบใหม่
+- ทุกคำถามได้รับ system prompt เดียวกัน (SHA-256
+  `32b66676fcb8f90dccc28152cc1424dcdbed32c0949e33751720c5fd277097a0`), evidence 8
+  แถวชุดเดียวกัน, `temperature=0`, `top_p=1`, `max_tokens=2048`, `seed=42`,
+  และปิด thinking
+- input ไม่มี answer, reference answer, expected law หรือ expected section; labels ใช้ใน
+  scorer **หลัง** generation เท่านั้น
+
+| Dataset / 5 cases | Runtime | JSON valid | all citations grounded | expected-citation recall | citation precision | mean answer time |
+|---|---|---:|---:|---:|---:|---:|
+| NitiBench | OpenThai BF16 / vLLM | 5/5 | 5/5 | 1.00 | 1.00 | 0.8820 s |
+| NitiBench | Qwen3.6 Q5 / llama.cpp | 5/5 | 5/5 | 1.00 | 1.00 | 1.3370 s |
+| NCB | OpenThai BF16 / vLLM | 5/5 | 5/5 | 0.80 | 1.00 | 1.3014 s |
+| NCB | Qwen3.6 Q5 / llama.cpp | 5/5 | 5/5 | 1.00 | 1.00 | 2.7195 s |
+| Digital Fraud | OpenThai BF16 / vLLM | 5/5 | 4/5 | 0.40 | 0.80 | 2.5440 s |
+| Digital Fraud | Qwen3.6 Q5 / llama.cpp | 5/5 | 3/5 | 0.40 | 0.60 | 3.1433 s |
+
+`expected-citation recall` และ `citation precision` เป็น diagnostic หลัง inference ไม่ใช่
+คำรับรองว่าคำตอบครบหรือเป็นบทที่ควบคุมกรณีเสมอไป. เวลาเป็น sequential observation บน host
+เดียว ไม่ใช่ production latency claim.
+
+### ข้อค้นพบเชิงเนื้อหาโดย Codex Sol
+
+| ประเด็น | OpenThai BF16 | Qwen Q5 |
+|---|---|---|
+| NitiBench | ผ่านสาระ/มาตรา 5/5 | ผ่านสาระ/มาตรา 5/5 |
+| NCB | 3 pass, 1 partial, 1 needs correction | 5 pass |
+| Digital Fraud | 2 pass, 2 partial, 1 evidence-limited | 2 pass, 2 partial, 1 evidence-limited |
+
+- BF16 เด่นเรื่องความเร็วและ NitiBench ที่ตรงครบ แต่ใน NCB มีคำตอบ “ภายใน 30 วัน”
+  ที่ตัดผู้มีหน้าที่/การกระทำออก และตอบโทษโดยอ้างมาตรา 41 (ความรับผิดทางแพ่ง) แทนมาตรา 51
+  (โทษอาญา) ในคำถามเรื่องการเปิดเผยโดยมิชอบ
+- Qwen ครอบคลุม actor/action/condition ของ NCB ได้ครบกว่าในรอบนี้ แต่ใน Digital Fraud ยังเขียน
+  citation ระดับต้องห้าม เช่น `5.3.2 (2)` และ `5.3.5`; corpus อนุญาตให้อ้างได้เฉพาะ X.X จึงต้อง
+  normalize/validate เป็น owner `5.3` ก่อนส่งคำตอบ
+- คำถาม scope ของ Digital Fraud เป็น **evidence-limited** ทั้งคู่: lexical top-8 ไม่พา 4.1–4.3
+  เข้ามาเลย จึงไม่ควรใช้ผล 0.40 เพื่อสรุปความสามารถ reasoning ของโมเดลหรือคุณภาพ hybrid retrieval
+
+### โครงสร้างข้อมูลและ context ที่ทดสอบ
+
+| Dataset | Retrieval child | Parent | สถานะที่ยืนยัน |
+|---|---|---:|---|
+| NCB | มาตรา | 9 หมวด | 66 มาตรา จาก PDF BOT หน้า 1–18; เอา footer ออกและไม่มีมาตราซ้ำ |
+| Digital Fraud | ข้อ X.X | 6 ข้อหลัก | 11 children จาก PDF BOT หน้า 2–13; X.X.X รวมในเนื้อหา X.X เจ้าของและห้ามเป็น citation/retrieval row แยก |
+
+NitiBench ใช้ frozen label-free hybrid packet ที่มีอยู่แล้ว. ส่วน NCB และ Digital Fraud ในรอบนี้ใช้
+Thai lexical + character 3/4-gram fallback เพราะ embedding service ไม่พร้อมระหว่าง BF16 ใช้ GPU;
+จึงเป็นการวัด **wide-context answer synthesis** ไม่ใช่ตัวเลขประสิทธิภาพ hybrid retrieval ใหม่.
+ทุกเคสไม่มี context truncation และ grouped child `5.3` ส่งเนื้อหา `5.3.1`–`5.3.6` ครบถึงโมเดล.
+
+### ภาพ capture ที่ตรวจแล้ว
+
+ภาพตารางด้านล่างถูกถ่ายหลัง script รอให้มีแถวข้อมูลจริง ไม่ใช่ระหว่างสถานะ loading.
+
+<img src="assets/ui-dataset-structure-20260813/ncb-66-article-table.png" alt="NCB dataset table showing 66 article children and parent provenance" width="1200">
+
+<img src="assets/ui-dataset-structure-20260813/digital-fraud-11-x-x-table.png" alt="Digital Fraud dataset table showing 11 X.X children and parent provenance" width="1200">
+
+### แนวทางปรับใช้และข้อควรระวัง
+
+1. จำกัด citation ของ Digital Fraud เป็น X.X แล้ว reject X.X.X แม้ข้อความในคำตอบจะถูกต้อง
+2. ทำ candidate-admission gate: คำถาม scope ต้องมี scope provision ใน evidence ก่อนตอบแบบ definitive;
+   หากไม่มีให้ retrieve ใหม่หรือแจ้ง evidence insufficient
+3. ก่อน final answer ใช้ checklist แบบ label-free ให้คง duty bearer/right holder, action/right,
+   condition/exception, และ deadline/written notice เพื่อกันคำตอบสั้นเกิน เช่น “30 วัน”
+4. ใช้ top-1 NCB เฉพาะเมื่อ confidence margin สูงและพิสูจน์ได้ว่าเป็นคำถามมาตราเดียว; ห้ามเปิดใช้
+   เป็น global default เพราะจะเสีย multi-provision context
+
+รายละเอียดการอ่านคำตอบรายประเด็นและ artifact contract อยู่ที่
+[Codex Sol wide-context evaluation](reports/wide-context-qwen-q5-vs-openthai-bf16-20260813.md);
+สรุปใน README นี้ไม่ใช่ legal certification.
+
+## Earlier parent-explicit three-runtime test — 13 August 2026
+
+ส่วนนี้เก็บไว้เป็นประวัติของ run ก่อนหน้าเท่านั้น ซึ่งยังมี OpenThai Q4 อยู่ในตารางเดิม;
+ไม่ใช่ผลเปรียบเทียบที่ใช้สรุปรอบล่าสุดด้านบน.
 
 รอบล่าสุดทดสอบคำถามคงที่ 10 ข้อ โดยใช้ dataset ทางการที่จัดโครงสร้างใหม่: NCB 5 ข้อ และ
 BOT Digital Fraud 5 ข้อ. ทุกคำถามใช้ final evidence packet เดียวกันจาก run Qwen/Q4 เดิม
