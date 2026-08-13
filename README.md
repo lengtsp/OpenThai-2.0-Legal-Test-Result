@@ -35,12 +35,33 @@ Digital Fraud อย่างละ 5 ข้อ
 | Parameter | Value |
 |---|---:|
 | หลักฐานต่อคำถาม | top‑8 rows, ordered packet เดียวกัน |
+| context รวม (input + output) | 32,768 tokens (`max_model_len`) |
 | temperature | 0.0 |
 | top_p | 1.0 |
-| max_tokens | 2,048 |
+| max_tokens | 2,048 (output เท่านั้น) |
 | seed | 42 |
 | thinking | off |
 | expected citation | คำนวณคะแนนหลังสร้างคำตอบแล้ว |
+
+### การตั้งค่า OpenThai BF16 บน vLLM
+
+OpenThai ใช้ `dtype: bfloat16` ตาม model config และรันด้วย vLLM 0.25.1 บน GPU เดี่ยว:
+
+```bash
+/home/indows-11/my_code/model/venvs/vllm_025/bin/vllm serve \
+  /home/indows-11/my_code/model/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b \
+  --served-model-name iapp/openthai2.0-legal-thaillm-nemotron-3-nano-30b-a3b \
+  --host 127.0.0.1 \
+  --port 3033 \
+  --tensor-parallel-size 1 \
+  --trust-remote-code \
+  --max-model-len 32768 \
+  --gpu-memory-utilization 0.90
+```
+
+เครื่องทดสอบใช้ NVIDIA RTX PRO 6000 Blackwell ที่มี VRAM 97,887 MiB (95.6 GiB).
+ค่า `gpu_memory_utilization = 0.90` จึงตั้ง budget ให้ vLLM ใช้ได้สูงสุดราว 88,098 MiB (86.0 GiB)
+สำหรับ weights และ KV cache. ตัวเลขนี้เป็นเพดานที่ตั้งให้ runtime ไม่ใช่ค่าการใช้ VRAM จริงที่คงที่ตลอดการรัน.
 
 สำหรับ NitiBench ใช้ **frozen label-free hybrid packet** ที่เตรียมไว้แล้ว หมายความว่า
 หลักฐานของแต่ละคำถามถูกจัดไว้ล่วงหน้าและล็อกไว้เหมือนกันทั้งสองโมเดล (`frozen`) โดยมาจาก
