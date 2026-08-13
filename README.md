@@ -37,7 +37,7 @@ FlashInfer JIT path issue; this is a serving-backend setting, not a change to mo
 ### Evidence-grounded answer review
 
 Codex Sol reviewed the generated answers against the **rendered evidence actually sent to the
-model**, not citation metrics alone. The new BF16 review found 5 pass, 3 partial, 0 needs
+model**, not citation metrics alone. The baseline BF16 review found 5 pass, 3 partial, 0 needs
 correction, and 2 evidence-limited answers. Qwen/Q4 counts below are the original review of
 the same frozen packets; all three results remain preliminary and require legal-expert
 adjudication.
@@ -50,17 +50,42 @@ adjudication.
 
 The test verifies direct parent provenance for all 40 selected rows: every child carries
 `parent_id`, `parent_section`, `parent_heading`, and `parent_relation=child_of`; all ten
-rendered prompts expose parent section and heading. It also exposed a limitation: although
-Digital Fraud child `5.3` stores nested `5.3.1`–`5.3.6` under the single retrievable `5.3`
-child as intended, the current prompt renderer cuts that long body at approximately 5,000
-characters in four packets. Therefore details in `5.3.2`–`5.3.5` did not reach the model in
-those requests, and the scope route did not retrieve `4.1`–`4.3`. These are data-path
-limitations, not grounds to create retrievable `X.X.X` rows.
+rendered prompts expose parent section and heading.
 
-The current run is retained locally as
-`user_scoped_parent_explicit_vllm_bf16_20260813_072622`; it contains the ten immutable
-case records and the evidence-grounded review. Raw benchmark packets are not republished
-here because this README reports the result summary only.
+### Follow-up: full grouped-child renderer validation
+
+The Digital Fraud prompt renderer has now been repaired and revalidated with OpenThai BF16.
+It uses a 30,000-character total budget, an 18,000-character per-evidence allowance, and a
+1,200-character reservation for every remaining evidence row. For all four frozen packets
+that select child `5.3`, its complete 16,830-character body—including source headings
+`5.3.1`–`5.3.6`—reached the model without truncation. It remains one retrievable/citable
+`5.3` block; no `X.X.X` evidence row or citation target was created.
+
+This follow-up is a **generation-only renderer validation**, not a fresh retrieval benchmark:
+it reuses the five question/evidence selections from the baseline, restores raw content from
+the active corpus by ID, and changes the renderer and citation instruction. It therefore does
+not replace the comparison table above or claim a latency comparison.
+
+| BOT validation / 5 cases | Result |
+|---|---:|
+| full `5.3` packets with no truncation | 4/4 |
+| valid JSON | 5/5 |
+| cited ID occurs in selected evidence | 5/5 |
+| expected-section recall (post-inference diagnostic) | 0.40 |
+| mean answer time | 2.506 s |
+| Codex Sol review: pass / partial / needs correction / evidence-limited | 1 / 1 / 2 / 1 |
+
+`cited ID occurs in selected evidence` is identifier-level grounding only. In the full-text
+validation, monitoring accurately used `5.3` content but cited `5.4`; reporting accurately
+used nested source item `5.3.5` but cited `5.2`. These are model citation-selection errors,
+not truncation. The scope packet still lacks expected `4.1`–`4.3`, so it remains
+evidence-limited and needs a separate retrieval fix.
+
+The local artifacts are
+`user_scoped_parent_explicit_vllm_bf16_20260813_072622` (baseline 10 packets) and
+`bot_parent_explicit_full_child_json_contract_vllm_bf16_20260813_074325` (the 5-packet
+renderer validation, including a Codex Sol answer review). Raw benchmark packets are not
+republished here because this README reports the result summary only.
 
 ## Current official datasets
 
