@@ -13,7 +13,7 @@ Digital Fraud อย่างละ 5 ข้อ
 
 | Dataset | ที่มาและการจัดข้อมูล | ชุดข้อมูล |
 |---|---|---|
-| NitiBench | ชุดคำถาม/ตัวบทจาก [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | frozen evidence packet |
+| NitiBench | ชุดคำถาม/ตัวบทจาก [VISAI-AI/NitiBench](https://huggingface.co/datasets/VISAI-AI/nitibench) | |
 | NCB | Codex จัดโครงสร้างจากเอกสาร BOT: 9 หมวด, 66 มาตรา, ตัด footer; มาตรา 20/1 และ 31/1 รวมในมาตราหลัก | [Hugging Face](https://huggingface.co/datasets/thodsapon/thai-ncb-digital-fraud-structural-rag) |
 | Digital Fraud | Codex จัดโครงสร้างจากประกาศ BOT 57/2568: 6 parent และ 11 child ระดับ `X.X` | [Hugging Face](https://huggingface.co/datasets/thodsapon/thai-ncb-digital-fraud-structural-rag) |
 
@@ -58,11 +58,6 @@ vllm serve \
   --max-model-len 32768 \
   --gpu-memory-utilization 0.90
 ```
-
-สำหรับ NitiBench ใช้ **frozen label-free hybrid packet** ที่เตรียมไว้แล้ว หมายความว่า
-หลักฐานของแต่ละคำถามถูกจัดไว้ล่วงหน้าและล็อกไว้เหมือนกันทั้งสองโมเดล (`frozen`) โดยมาจาก
-การค้นแบบผสมระหว่างความหมายของข้อความและคำที่ปรากฏ (`hybrid`) ใน packet ไม่มีเฉลยหรือรายชื่อ
-มาตราที่คาดหวังให้โมเดลเห็น (`label-free`) เพราะนำข้อมูลเหล่านั้นมาใช้คิดคะแนนหลังสร้างคำตอบเท่านั้น.
 
 ส่วน NCB และ Digital Fraud ใช้ **Thai lexical + character 3/4-gram** เพื่อเตรียมหลักฐานของรอบนี้:
 การค้นดูทั้งคำหรือวลีไทยที่ปรากฏจริง (`Thai lexical`) และแบ่งข้อความเป็นช่วงอักขระ 3 และ 4 ตัว
