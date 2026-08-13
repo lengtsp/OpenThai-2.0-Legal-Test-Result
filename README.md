@@ -96,7 +96,9 @@ Digital Fraud ไม่ได้เขียนเป็นมาตราแบ
 
 <img src="assets/ui-controlled-comparison-20260813/03-digital-fraud-qwen-vs-bf16.png" alt="Digital Fraud: Qwen Q5 and OpenThai BF16 controlled RAG comparison" width="1600">
 
-## หนึ่งคำถามที่ชวนคิด: มาตรา 51
+## ชวนคิดสำหรับ domain expert: กรณีที่ OpenThai ไม่ได้เลือกมาตรา 51 มาตอบ แต่ Qwen เลือกมาตอบ
+
+ตัวอย่างนี้มาจากชุด **NCB** ซึ่งจัดโครงสร้างจากพระราชบัญญัติการประกอบธุรกิจข้อมูลเครดิต พ.ศ. 2559.
 
 **คำถาม:** บริษัทข้อมูลเครดิตหรือผู้ประมวลผลข้อมูลเปิดเผยข้อมูลนอกวัตถุประสงค์ที่กฎหมายกำหนดมีโทษอย่างไร
 
