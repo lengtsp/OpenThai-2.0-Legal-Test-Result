@@ -40,7 +40,7 @@ Digital Fraud อย่างละ 5 ข้อ) ด้วย input ชุดเ
 คำรับรองว่าคำตอบครบหรือเป็นบทที่ควบคุมกรณีเสมอไป. เวลาเป็น sequential observation บน host
 เดียว ไม่ใช่ production latency claim.
 
-### ข้อค้นพบเชิงเนื้อหาโดย Codex Sol
+### ข้อค้นพบเชิงเนื้อหาโดย GPT-5.6 Sol
 
 | ประเด็น | OpenThai BF16 | Qwen Q5 |
 |---|---|---|
@@ -49,8 +49,8 @@ Digital Fraud อย่างละ 5 ข้อ) ด้วย input ชุดเ
 | Digital Fraud | 2 pass, 2 partial, 1 evidence-limited | 2 pass, 2 partial, 1 evidence-limited |
 
 - BF16 เด่นเรื่องความเร็วและ NitiBench ที่ตรงครบ แต่ใน NCB มีคำตอบ “ภายใน 30 วัน”
-  ที่ตัดผู้มีหน้าที่/การกระทำออก และตอบโทษโดยอ้างมาตรา 41 (ความรับผิดทางแพ่ง) แทนมาตรา 51
-  (โทษอาญา) ในคำถามเรื่องการเปิดเผยโดยมิชอบ
+  ที่ตัดผู้มีหน้าที่/การกระทำออก และในเคสการเปิดเผยโดยมิชอบตอบเฉพาะค่าสินไหมตามมาตรา 41
+  โดยไม่ได้กล่าวถึงมาตรา 51 ซึ่งเป็น expected scorer label ของโจทย์หลัง inference
 - Qwen ครอบคลุม actor/action/condition ของ NCB ได้ครบกว่าในรอบนี้ แต่ใน Digital Fraud ยังเขียน
   citation ระดับต้องห้าม เช่น `5.3.2 (2)` และ `5.3.5`; corpus อนุญาตให้อ้างได้เฉพาะ X.X จึงต้อง
   normalize/validate เป็น owner `5.3` ก่อนส่งคำตอบ
@@ -70,6 +70,31 @@ Digital Fraud อย่างละ 5 ข้อ) ด้วย input ชุดเ
 | เปิดเผยข้อมูลนอกวัตถุประสงค์มีโทษ | `41, 17, 3, 51, 61, 20, 24, 22` | สรุปค่าสินไหมทดแทน — cite 41 | แยกค่าสินไหมตาม 41 และโทษจำคุกไม่เกิน 3 ปี/ปรับไม่เกิน 300,000 บาท/ทั้งจำทั้งปรับตาม 51 — cite 41, 51 | scorer กำหนด expected section=51 หลัง inference. Codex Sol อ่านแยกแล้วเห็นว่า ม.51 เป็นสาระสำคัญต่อการตอบคำว่า “โทษ” โดยตรง ขณะที่ ม.41 กล่าวถึงค่าสินไหม; Qwen ตอบกว้างกว่าแต่ grounded. นี่ไม่ใช่ legal-expert adjudication |
 
 </details>
+
+### UI comparison: Qwen Q5 vs OpenThai BF16 ครบ 15 ข้อ
+
+หน้า `ผลเปรียบเทียบ RAG แบบควบคุม` แสดงคำถามละ 4 คอลัมน์: คำตอบ Qwen Q5, คำตอบ
+OpenThai BF16, ผลต่าง retrieval และผลต่างคำตอบที่ GPT-5.6 Sol review. ก่อน render ทุกแถว
+ตรวจว่า ordered top-8, จำนวน context characters และสถานะ truncation ตรงกันทั้งสอง runtime;
+จึงไม่สรุปความต่างของคำตอบว่าเกิดจาก model จนกว่าจะผ่าน gate นี้. คำตอบเต็ม, citation และ
+top-8 แต่ละข้อเปิดดูได้จาก card ใน UI.
+
+ใน NCB penalty card ที่ขีดกรอบทอง ระบบแยกให้ชัดว่า `51` เป็น expected scorer label หลัง
+inference ไม่ได้ส่งเข้า prompt/retrieval และวางประเด็นชวนทบทวนไว้ว่า คำว่า “มีโทษอย่างไร”
+ครอบคลุมมาตรา 51 หรือไม่. GPT-5.6 Sol เห็นว่าเป็นประเด็นสำคัญต่อการตอบเรื่องโทษโดยตรง
+แต่การเข้าข่ายจริงยังต้องเทียบข้อเท็จจริงกับองค์ประกอบของมาตรา 41 และ 51 โดยผู้เชี่ยวชาญกฎหมาย.
+
+#### NitiBench — 5 ข้อ
+
+<img src="assets/ui-controlled-comparison-20260813/01-nitibench-qwen-vs-bf16.png" alt="Controlled UI comparison of all five NitiBench cases: Qwen Q5, OpenThai BF16, retrieval differences, and GPT-5.6 Sol review" width="1600">
+
+#### NCB — 5 ข้อ
+
+<img src="assets/ui-controlled-comparison-20260813/02-ncb-qwen-vs-bf16.png" alt="Controlled UI comparison of all five NCB cases including the highlighted sections 41 and 51 penalty question" width="1600">
+
+#### BOT Digital Fraud — 5 ข้อ
+
+<img src="assets/ui-controlled-comparison-20260813/03-digital-fraud-qwen-vs-bf16.png" alt="Controlled UI comparison of all five Digital Fraud cases including retrieval limitations and citation-level review" width="1600">
 
 ### โครงสร้างข้อมูลและ context ที่ทดสอบ
 
